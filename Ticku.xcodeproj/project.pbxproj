@@ -6,14 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0E0E58792F8E75330052A013 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0E0E58782F8E75330052A013 /* FirebaseCore */; };
+		0E0E592F2F94FE4C0052A013 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0E0E592E2F94FE4C0052A013 /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		0E368D442F8E66F200765F5A /* firebasetrial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = firebasetrial.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0E368D462F8E66F200765F5A /* firebasetrial */ = {
+		0E368D462F8E66F200765F5A /* Ticku */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = firebasetrial;
+			path = Ticku;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -23,16 +28,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E0E58792F8E75330052A013 /* FirebaseCore in Frameworks */,
+				0E0E592F2F94FE4C0052A013 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E0E58772F8E750A0052A013 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		0E368D3B2F8E66F200765F5A = {
 			isa = PBXGroup;
 			children = (
-				0E368D462F8E66F200765F5A /* firebasetrial */,
+				0E368D462F8E66F200765F5A /* Ticku */,
+				0E0E58772F8E750A0052A013 /* Frameworks */,
 				0E368D452F8E66F200765F5A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,10 +76,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0E368D462F8E66F200765F5A /* firebasetrial */,
+				0E368D462F8E66F200765F5A /* Ticku */,
 			);
 			name = firebasetrial;
 			packageProductDependencies = (
+				0E0E58782F8E75330052A013 /* FirebaseCore */,
+				0E0E592E2F94FE4C0052A013 /* FirebaseFirestore */,
 			);
 			productName = firebasetrial;
 			productReference = 0E368D442F8E66F200765F5A /* firebasetrial.app */;
@@ -85,7 +102,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0E368D3F2F8E66F200765F5A /* Build configuration list for PBXProject "firebasetrial" */;
+			buildConfigurationList = 0E368D3F2F8E66F200765F5A /* Build configuration list for PBXProject "Ticku" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -94,6 +111,9 @@
 			);
 			mainGroup = 0E368D3B2F8E66F200765F5A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0E0E58762F8E71660052A013 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E368D452F8E66F200765F5A /* Products */;
 			projectDirPath = "";
@@ -254,6 +274,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -298,6 +319,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -332,7 +354,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0E368D3F2F8E66F200765F5A /* Build configuration list for PBXProject "firebasetrial" */ = {
+		0E368D3F2F8E66F200765F5A /* Build configuration list for PBXProject "Ticku" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0E368D4D2F8E66F300765F5A /* Debug */,
@@ -351,6 +373,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0E0E58762F8E71660052A013 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0E0E58782F8E75330052A013 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0E0E58762F8E71660052A013 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		0E0E592E2F94FE4C0052A013 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0E0E58762F8E71660052A013 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0E368D3C2F8E66F200765F5A /* Project object */;
 }

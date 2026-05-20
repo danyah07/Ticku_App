@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  Ticku
+
+  Created by danah alsadan on 02/12/1447 AH.
+  
+*/
+
+"intro_skip" = "Skip";
+"intro_start" = "Start";
+
+"intro_challenge_title" = "challenge yourself";
+"intro_challenge_desc" = "Set daily tasks, track your progress, and push past your limits — one day at a time.";
+
+"intro_friends_title" = "Compete with friends";
+"intro_friends_desc" = "Invite your crew, see who completes the most tasks, and keep each other accountable.";
+
+"intro_stay_title" = "Stay consistent";
+"intro_stay_desc" = "Build streaks, earn badges, and prove you have what it takes to finish what you start.";

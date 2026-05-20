@@ -23,6 +23,7 @@ struct firebasetrialApp: App {
     
     var body: some Scene {
         WindowGroup {
+            IntroView()
 
         }
     }

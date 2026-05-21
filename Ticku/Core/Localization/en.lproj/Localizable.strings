@@ -17,3 +17,63 @@
 
 "intro_stay_title" = "Stay consistent";
 "intro_stay_desc" = "Build streaks, earn badges, and prove you have what it takes to finish what you start.";
+
+"welcome" = "Welcome!";
+"get_started" = "Get started";
+"sign_in" = "Sign in";
+
+"ready_for_today_challenge" = "Ready for today's challenge?";
+"sign_in_with_apple" = "Sign in with Apple";
+"terms_privacy_note" = "By continuing, you agree to our Terms & Privacy.";
+
+"hello" = "Hello 👋";
+"today_tasks" = "Today's Tasks";
+
+"done" = "Done";
+"wins" = "Wins";
+
+"active_challenges" = "Active Challenges";
+"see_all" = "See all";
+
+"ready_to_complete" = "Ready to complete?";
+"create_first_challenge" = "Create your first challenge and invite your friends to stay productive together.";
+
+"create" = "+ Create";
+"join" = "Join";
+
+"view_room" = "View Room";
+"my_tasks" = "My Tasks";
+
+"participants" = "Participants";
+"days_left" = "Days left";
+"min_left" = "min left";
+
+"today_tasks_title" = "Today Tasks";
+
+"invite_code" = "Enter invite code";
+"create_challenge_title" = "Create Challenge";
+
+"challenge_name" = "Challenge name";
+"challenge_name_placeholder" = "e.g. 30-Day Grind";
+
+"duration" = "Duration";
+
+"today" = "Today";
+"three_days" = "3 Days";
+"seven_days" = "7 Days";
+"fourteen_days" = "14 Days";
+
+"enter_time" = "Enter time";
+
+"hour" = "Hour";
+"minute" = "Minute";
+
+"challenge_rule" = "Challenge rule";
+"challenge_rule_placeholder" = "e.g. Punishment or Reward";
+
+"create_challenge_button" = "Create";
+
+"add_tasks" = "Add tasks";
+"add_your_tasks" = "Add your tasks";
+
+"save" = "Save";

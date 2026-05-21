@@ -10,11 +10,56 @@ import SwiftUI
 struct IntroView: View {
     
     @StateObject private var viewModel = IntroViewModels()
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var isDark: Bool {
+        colorScheme == .dark
+    }
+    
+    private var backgroundColor: Color {
+        isDark ? .black : .white
+    }
+    
+    private var mainTextColor: Color {
+        isDark ? .white : .black
+    }
+    
+    private var descriptionTextColor: Color {
+        isDark ? .white.opacity(0.9) : .black.opacity(0.8)
+    }
+    
+    private var circleFillColor: Color {
+        isDark
+        ? Color(red: 36/255, green: 36/255, blue: 36/255)
+        : Color(red: 242/255, green: 242/255, blue: 247/255)
+    }
+    
+    private var avatarColor: Color {
+        isDark
+        ? .white.opacity(0.85)
+        : Color(red: 217/255, green: 217/255, blue: 217/255)
+    }
+    
+    private var purpleDark: Color {
+        Color(red: 52/255, green: 29/255, blue: 113/255)
+    }
+    
+    private var blueCircle: Color {
+        Color(red: 170/255, green: 209/255, blue: 252/255)
+    }
+    
+    private var purpleCircle: Color {
+        Color(red: 145/255, green: 141/255, blue: 226/255)
+    }
+    
+    private var grayCircle: Color {
+        Color(red: 219/255, green: 220/255, blue: 229/255)
+    }
     
     var body: some View {
         ZStack {
             
-            Color.white
+            backgroundColor
                 .ignoresSafeArea()
             
             TabView(selection: $viewModel.currentPage) {
@@ -44,6 +89,7 @@ extension IntroView {
                 .frame(height: 170)
             
             circlesPageOne
+                .environment(\.layoutDirection, .leftToRight)
             
             Spacer()
                 .frame(height: 70)
@@ -52,11 +98,11 @@ extension IntroView {
                 
                 Text("intro_challenge_title".localized)
                     .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(mainTextColor)
                 
                 Text("intro_challenge_desc".localized)
                     .font(.system(size: 16))
-                    .foregroundColor(.black.opacity(0.8))
+                    .foregroundColor(descriptionTextColor)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 320)
             }
@@ -72,6 +118,7 @@ extension IntroView {
                 .frame(height: 250)
             
             friendsCircles
+                .environment(\.layoutDirection, .leftToRight)
             
             Spacer()
                 .frame(height: 90)
@@ -80,11 +127,11 @@ extension IntroView {
                 
                 Text("intro_friends_title".localized)
                     .font(.system(size: 30, weight: .black, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(mainTextColor)
                 
                 Text("intro_friends_desc".localized)
                     .font(.system(size: 14))
-                    .foregroundColor(.black.opacity(0.8))
+                    .foregroundColor(descriptionTextColor)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 330)
             }
@@ -101,6 +148,7 @@ extension IntroView {
             
             streakIcons
                 .scaleEffect(0.95)
+                .environment(\.layoutDirection, .leftToRight)
             
             Spacer()
                 .frame(height: 115)
@@ -109,11 +157,11 @@ extension IntroView {
                 
                 Text("intro_stay_title".localized)
                     .font(.system(size: 30, weight: .black, design: .rounded))
-                    .foregroundColor(.black)
+                    .foregroundColor(mainTextColor)
                 
                 Text("intro_stay_desc".localized)
                     .font(.system(size: 14))
-                    .foregroundColor(.black.opacity(0.8))
+                    .foregroundColor(descriptionTextColor)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 330)
             }
@@ -131,7 +179,6 @@ extension IntroView {
         VStack {
             
             HStack {
-                
                 Spacer()
                 
                 Button {
@@ -139,7 +186,6 @@ extension IntroView {
                         viewModel.currentPage = 2
                     }
                 } label: {
-                    
                     Text("intro_skip".localized)
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.gray)
@@ -168,15 +214,12 @@ extension IntroView {
                 
                 HStack {
                     
-                    // BACK BUTTON
                     if viewModel.currentPage == 2 {
-                        
                         Button {
                             withAnimation {
                                 viewModel.currentPage -= 1
                             }
                         } label: {
-                            
                             Image(
                                 systemName:
                                     Locale.current.language.languageCode?.identifier == "ar"
@@ -184,21 +227,18 @@ extension IntroView {
                                 : "chevron.left"
                             )
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(mainTextColor)
                         }
                     }
                     
                     Spacer()
                     
-                    // NEXT BUTTON
                     if viewModel.currentPage != 2 {
-                        
                         Button {
                             withAnimation {
                                 viewModel.currentPage += 1
                             }
                         } label: {
-                            
                             Image(
                                 systemName:
                                     Locale.current.language.languageCode?.identifier == "ar"
@@ -206,31 +246,49 @@ extension IntroView {
                                 : "chevron.right"
                             )
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(mainTextColor)
                         }
+                        
+                 
                         
                     } else {
                         
-                        // START BUTTON
+         
+
                         Button {
-                            
+
                         } label: {
-                            
-                            Text("intro_start".localized)
-                                .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                                .frame(width: 125, height: 50)
-                                .background(Color(hex: "#341D71"))
-                                .clipShape(Capsule())
-                                .shadow(
-                                    color: Color(hex: "#341D71").opacity(0.35),
-                                    radius: 8,
-                                    x: 0,
-                                    y: 5
-                                )
+
+                            ZStack {
+
+                                Capsule()
+                                    .fill(isDark ? Color(red: 142/255, green: 138/255, blue: 197/255) : Color(red: 52/255, green: 29/255, blue: 113/255))
+
+             Text("intro_start".localized)
+                    .font(
+                           .system(
+                         size: 20,
+                               weight: .bold,
+                     design: .rounded
+              )
+                 )
+                     .foregroundColor(.white)
+                            }
+                .frame(
+                  width: 125,
+                                height: 50
+                            )
+                            .shadow(
+                     color: Color("Start").opacity(0.35),
+                                radius: 8,
+                                x: 0,
+                                y: 5
+                            )
                         }
+                        .buttonStyle(.plain)
                         .offset(x: 18)
                     }
+                    
                 }
                 .padding(.horizontal, 36)
             }
@@ -240,14 +298,12 @@ extension IntroView {
     
     private var pageDots: some View {
         HStack(spacing: 8) {
-            
             ForEach(0..<3) { index in
-                
                 Circle()
                     .fill(
                         viewModel.currentPage == index
-                        ? Color.black
-                        : Color.gray.opacity(0.3)
+                        ? mainTextColor
+                        : Color.gray.opacity(0.35)
                     )
                     .frame(width: 8, height: 8)
             }
@@ -282,17 +338,16 @@ extension IntroView {
     
     private var userCircleTop: some View {
         Circle()
-            .fill(Color(hex: "#F2F2F7"))
+            .fill(circleFillColor)
             .overlay(
                 Circle()
-                    .stroke(Color(hex: "#8E8AC5"), lineWidth: 5)
+                    .stroke(Color("Circle"), lineWidth: 5)
             )
             .frame(width: 122, height: 119)
             .overlay {
-                
                 Text("%100")
                     .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundColor(Color(hex: "#341D71"))
+                    .foregroundColor(isDark ? .white : purpleDark)
             }
     }
     
@@ -302,7 +357,7 @@ extension IntroView {
             Circle()
                 .trim(from: 0.0, to: 0.60)
                 .stroke(
-                    Color(hex: "#8E8AC5"),
+                    Color("Circle"),
                     style: StrokeStyle(
                         lineWidth: 12,
                         lineCap: .round
@@ -313,7 +368,7 @@ extension IntroView {
                 .offset(x: 1, y: -1)
             
             Circle()
-                .fill(Color(hex: "#F2F2F7"))
+                .fill(circleFillColor)
                 .frame(width: 119, height: 126)
                 .shadow(
                     color: .black.opacity(0.19),
@@ -324,7 +379,7 @@ extension IntroView {
             
             Text("%60")
                 .font(.system(size: 38, weight: .black, design: .rounded))
-                .foregroundColor(Color(hex: "#341D71"))
+                .foregroundColor(isDark ? .white : purpleDark)
         }
         .frame(width: 185, height: 185)
     }
@@ -332,13 +387,13 @@ extension IntroView {
     private var checkIconBig: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 58, weight: .bold))
-            .foregroundColor(Color(hex: "#341D71"))
+            .foregroundColor(Color("Check"))
     }
     
     private var checkIconSmall: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 22, weight: .bold))
-            .foregroundColor(Color(hex: "#341D71"))
+            .foregroundColor(Color("Check"))
     }
 }
 
@@ -364,23 +419,22 @@ extension IntroView {
     
     private var userAvatarCircle: some View {
         Circle()
-            .fill(Color(hex: "#F2F2F7"))
+            .fill(circleFillColor)
             .overlay(
                 Circle()
-                    .stroke(Color(hex: "#8E8AC5"), lineWidth: 6)
+                    .stroke(Color("Circle"), lineWidth: 6)
             )
             .frame(width: 128, height: 128)
             .overlay {
-                
                 Image(systemName: "person.fill")
                     .font(.system(size: 58))
-                    .foregroundColor(Color(hex: "#D9D9D9"))
+                    .foregroundColor(avatarColor)
             }
     }
     
     private var userAvatarCircleShadow: some View {
         Circle()
-            .fill(Color(hex: "#F2F2F7"))
+            .fill(circleFillColor)
             .frame(width: 128, height: 128)
             .shadow(
                 color: .black.opacity(0.28),
@@ -389,10 +443,9 @@ extension IntroView {
                 y: 4
             )
             .overlay {
-                
                 Image(systemName: "person.fill")
                     .font(.system(size: 58))
-                    .foregroundColor(Color(hex: "#D9D9D9"))
+                    .foregroundColor(avatarColor)
             }
     }
     
@@ -402,7 +455,7 @@ extension IntroView {
             Circle()
                 .trim(from: 0.0, to: 0.80)
                 .stroke(
-                    Color(hex: "#8E8AC5"),
+                    Color("Circle"),
                     style: StrokeStyle(
                         lineWidth: 8,
                         lineCap: .round
@@ -413,12 +466,12 @@ extension IntroView {
                 .offset(x: 1, y: -1)
             
             Circle()
-                .fill(Color(hex: "#F2F2F7"))
+                .fill(circleFillColor)
                 .frame(width: 120, height: 120)
             
             Image(systemName: "person.fill")
                 .font(.system(size: 58))
-                .foregroundColor(Color(hex: "#D9D9D9"))
+                .foregroundColor(avatarColor)
         }
         .frame(width: 140, height: 140)
     }
@@ -445,12 +498,11 @@ extension IntroView {
     
     private var blueBoltShape: some View {
         RoundedRectangle(cornerRadius: 52)
-            .fill(Color(hex: "#AAD1FC"))
+            .fill(blueCircle)
             .frame(width: 111, height: 96)
             .rotationEffect(.degrees(-10))
             .shadow(color: .black.opacity(0.14), radius: 4, x: 0, y: 4)
             .overlay {
-                
                 Image(systemName: "bolt.fill")
                     .font(.system(size: 58))
                     .foregroundColor(.black)
@@ -459,26 +511,24 @@ extension IntroView {
     
     private var purpleCheckShape: some View {
         RoundedRectangle(cornerRadius: 55)
-            .fill(Color(hex: "#918DE2"))
+            .fill(purpleCircle)
             .frame(width: 120, height: 110)
             .rotationEffect(.degrees(8))
             .shadow(color: .black.opacity(0.08), radius: 3, x: 0, y: 2)
             .overlay {
-                
                 Image(systemName: "checkmark")
                     .font(.system(size: 62, weight: .bold))
-                    .foregroundColor(Color(hex: "#341D71"))
+                    .foregroundColor(purpleDark)
             }
     }
     
     private var grayFireShape: some View {
         RoundedRectangle(cornerRadius: 50)
-            .fill(Color(hex: "#DBDCE5"))
+            .fill(grayCircle)
             .frame(width: 111, height: 96)
             .rotationEffect(.degrees(-4))
             .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
             .overlay {
-                
                 Image(systemName: "flame")
                     .font(.system(size: 48))
                     .foregroundColor(.black)
@@ -488,6 +538,12 @@ extension IntroView {
 
 // MARK: - PREVIEW
 
-#Preview {
+#Preview("Light") {
     IntroView()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark") {
+    IntroView()
+        .preferredColorScheme(.dark)
 }

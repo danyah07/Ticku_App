@@ -1,0 +1,19 @@
+/* 
+  Localizable.strings
+  Ticku
+
+  Created by danah alsadan on 02/12/1447 AH.
+  
+*/
+
+"intro_skip" = "تخطي";
+"intro_start" = "ابدأ";
+
+"intro_challenge_title" = "تحدّ نفسك";
+"intro_challenge_desc" = "حدد مهامك اليومية، تتبع تقدمك، وتجاوز حدودك يومًا بيوم.";
+
+"intro_friends_title" = "تنافس مع أصدقائك";
+"intro_friends_desc" = "ادعُ أصدقاءك، شوف مين يكمل أكثر المهام، وحاسبوا بعض.";
+
+"intro_stay_title" = "كن ثابتًا";
+"intro_stay_desc" = "ابنِ سلاسل إنجاز، واكسب شارات، وأثبت إنك تقدر تكمل ما تبدأه.";

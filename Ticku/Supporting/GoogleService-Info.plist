@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.Danyah.firebasetrial</string>
+	<string>com.Danyah.Ticku</string>
 	<key>PROJECT_ID</key>
 	<string>fir-trial-b1f1f</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:990019236770:ios:82b4013e418ac943a6f8fb</string>
+	<string>1:990019236770:ios:71832160a8bfce8fa6f8fb</string>
 </dict>
 </plist>

@@ -162,18 +162,27 @@ struct ChallengeDetailView: View {
             ChallengeDetailsPage(challenge: vm.challenge)
         }
         .navigationDestination(isPresented: $showMyTasks) {
-            MyTasksView(tasks: initialTasks) { completed, total in
-                if let meIndex = vm.players.firstIndex(where: { $0.isMe }) {
-                    vm.players[meIndex].completedTasks = completed
-                    vm.players[meIndex].totalTasks = total
-                }
-            }
+            MyTasksView(
+                challengeId: vm.challengeId,
+                userId: currentUserId
+            )
         }
         .alert("Give up?", isPresented: $showGiveUpAlert) {
             Button("Give up", role: .destructive) { dismiss() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to leave this challenge?")
+        }
+        .onAppear {
+            // حفظ المهام الأولية في Firebase لما يدخل أول مرة
+            if !initialTasks.isEmpty && !currentUserId.isEmpty {
+                let service = ChallengeTaskService()
+                service.saveTasks(
+                    challengeId: vm.challengeId,
+                    userId: currentUserId,
+                    titles: initialTasks
+                )
+            }
         }
     }
 

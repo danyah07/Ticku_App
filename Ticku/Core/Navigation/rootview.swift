@@ -28,10 +28,12 @@ struct RootView: View {
                 onJoinChallenge:    { navManager.navigate(to: .joinChallenge) },
                 onViewRoom:         { navManager.navigate(to: .challengeRoom($0)) },
                 onMyTasks:          { navManager.navigate(to: .myTasks($0)) },
-                onProfile:          { navManager.navigate(to: .profile) }
+                onProfile:          { navManager.navigate(to: .profile) },
+                onTodayTasks:       { navManager.navigate(to: .todayTasks($0)) }  // ← new
             )
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
+
                 case .signIn:
                     SignInView(onBack: { navManager.goBack() })
                         .environmentObject(authVM)
@@ -39,7 +41,19 @@ struct RootView: View {
                 case .profile:
                     ProfileView(
                         onBack:             { navManager.goBack() },
+                        onSettings:         { navManager.navigate(to: .settings) },
                         onSeeAllChallenges: { navManager.navigate(to: .allChallenges) }
+                    )
+                    .environmentObject(authVM)
+
+                case .settings:
+                    SettingsView(onBack: { navManager.goBack() })
+                        .environmentObject(authVM)
+
+                case .todayTasks(let challenges):   // ← new
+                    TodayTasksDetailView(
+                        activeChallenges: challenges,
+                        onBack: { navManager.goBack() }
                     )
                     .environmentObject(authVM)
 
@@ -63,7 +77,6 @@ struct RootView: View {
                 }
             }
         }
-        // ✅ iOS 17+ onChange syntax — go home on sign out
         .onChange(of: authVM.isAuthenticated) {
             if !authVM.isAuthenticated {
                 navManager.goHome()

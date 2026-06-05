@@ -18,11 +18,12 @@ struct AuthenticatedHomeView: View {
     @ObservedObject var vm: HomeViewModel
 
     var onSeeAllChallenges: () -> Void
-    var onCreateChallenge: () -> Void
-    var onJoinChallenge: () -> Void
-    var onViewRoom: (Challenge) -> Void
-    var onMyTasks: (Challenge) -> Void
-    var onProfile: () -> Void
+    var onCreateChallenge:  () -> Void
+    var onJoinChallenge:    () -> Void
+    var onViewRoom:  (Challenge) -> Void
+    var onMyTasks:   (Challenge) -> Void
+    var onProfile:           () -> Void
+    var onTodayTasks:        () -> Void
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -43,39 +44,32 @@ struct AuthenticatedHomeView: View {
                     }
                     Spacer()
                     Button(action: onProfile) {
-                        AvatarView(
-                            imageURL: vm.currentUser?.profileImageURL,
-                            size: 50
-                        )
+                        AvatarView(imageURL: vm.currentUser?.profileImageURL, size: 50)
                     }
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, TickuSpacing.lg)
-                .padding(.bottom, TickuSpacing.xl)
+                .padding(.top, 16)
+                .padding(.bottom, 20)
 
                 // ── Today's Tasks ─────────────────────────
                 Text("Today's Tasks")
                     .font(Font.ticku.sectionHeader)
                     .foregroundColor(Color.ticku.textPrimary)
                     .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, TickuSpacing.md)
+                    .padding(.bottom, 12)
 
                 HStack(spacing: 12) {
-                    RoundedRectangle(cornerRadius: TickuRadius.lg)
-                        .fill(Color.white)
-                        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
-                        .overlay(
-                            ProgressRingView(
-                                // progressPercent is 0–100 from Firestore;
-                                // ProgressRingView expects 0.0–1.0
-                                percentage: vm.progressPercent / 100
-                            )
-                        )
-                        .frame(height: 160)
+                    Button(action: onTodayTasks) {
+                        RoundedRectangle(cornerRadius: TickuRadius.lg)
+                            .fill(Color.white)
+                            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
+                            .overlay(ProgressRingView(percentage: vm.progressPercent / 100))
+                            .frame(height: 160)
+                    }
+                    .buttonStyle(.plain)
 
                     StatsSidePanelView(
                         tasksCompleted: vm.tasksCompleted,
-                        // currentStreak lives in users/{uid}.currentStreak
                         wins: vm.currentUser?.currentStreak ?? 0
                     )
                     .frame(height: 160)
@@ -95,8 +89,8 @@ struct AuthenticatedHomeView: View {
                     }
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, TickuSpacing.xl)
-                .padding(.bottom, TickuSpacing.md)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
 
                 if vm.activeChallenges.isEmpty {
                     EmptyStateView()
@@ -112,24 +106,14 @@ struct AuthenticatedHomeView: View {
 
                 // ── CTA Buttons ───────────────────────────
                 HStack(spacing: 12) {
-                    PrimaryButtonView(
-                        title: "+ Create",
-                        style: .solid,
-                        action: onCreateChallenge
-                    )
-                    PrimaryButtonView(
-                        title: "Join",
-                        style: .muted,
-                        action: onJoinChallenge
-                    )
+                    PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
+                    PrimaryButtonView(title: "Join",     style: .muted, action: onJoinChallenge)
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, TickuSpacing.lg)
-                .padding(.bottom, TickuSpacing.xxl)
+                .padding(.top, 16)
+                .padding(.bottom, 16)
             }
         }
-        // ✅ FIX: was `$vm.currentUser?.uid` — $vm gives a Binding<HomeViewModel>,
-        // you cannot optional-chain into a Binding. Read directly from vm instead.
         .refreshable {
             if let uid = vm.currentUser?.uid {
                 await vm.loadHome(for: uid)

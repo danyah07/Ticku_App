@@ -17,6 +17,10 @@
 //  ProfileView.swift
 //  firebasetrial
 
+//
+//  ProfileView.swift
+//  firebasetrial
+
 import SwiftUI
 
 struct ProfileView: View {
@@ -24,7 +28,7 @@ struct ProfileView: View {
     @StateObject private var vm = ProfileViewModel()
 
     var onBack: () -> Void = {}
-    var onEdit: () -> Void = {}
+    var onSettings: () -> Void = {}
     var onSeeAllChallenges: () -> Void = {}
 
     var body: some View {
@@ -43,55 +47,54 @@ struct ProfileView: View {
                         .font(Font.ticku.sectionHeader)
                         .foregroundColor(Color.ticku.textPrimary)
                     Spacer()
-                    Button(action: onEdit) {
-                        Text("Edit")
-                            .font(.system(size: 16, weight: .semibold))
+                    Button(action: onSettings) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 18))
                             .foregroundColor(Color.ticku.accent)
                     }
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
                 .padding(.top, 16)
-                .padding(.bottom, 24)
+                .padding(.bottom, 20)
 
                 // ── Avatar ────────────────────────────────
                 AvatarView(
-                    imageURL: vm.profile?.profileImageURL,
-                    size: 100
+                    imageURL: nil,
+                    size: 100,
+                    base64: vm.profile?.profileImageBase64
                 )
-                .padding(.bottom, 14)
+                .padding(.bottom, 12)
 
                 // ── Name + Streak ─────────────────────────
                 HStack(spacing: 6) {
-                    // ✅ Falls back to displayName if username not set yet
                     Text(vm.profile?.username ?? vm.profile?.displayName ?? "")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(Color.ticku.textPrimary)
-
                     Text("×\(vm.profile?.currentStreak ?? 0)")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(Color.ticku.textPrimary)
-
                     Text("🔥")
                         .font(.system(size: 15))
                 }
 
-                // ── Handle ────────────────────────────────
-                // ✅ Falls back to displayName if handle not set yet
-                Text("@\(vm.profile?.handle ?? vm.profile?.displayName ?? "")")
+                // ── Handle ── fixed: no double @ ─────────
+                // handle field already has @ prefix from SettingsVM
+                // displayName fallback should NOT add @
+                Text(handleText)
                     .font(.system(size: 15))
                     .foregroundColor(Color.ticku.textSecondary)
                     .padding(.top, 4)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 24)
 
                 // ── Stats Pill ────────────────────────────
                 statsPill
                     .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 24)
 
                 // ── Badges ────────────────────────────────
                 badgesSection
                     .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 24)
 
                 // ── All Challenges ────────────────────────
                 challengesSection
@@ -106,21 +109,28 @@ struct ProfileView: View {
                 await vm.load(uid: uid)
             }
         }
+        .onAppear {
+            Task {
+                if let uid = authVM.currentUserId {
+                    await vm.load(uid: uid)
+                }
+            }
+        }
+    }
+
+    // ── Handle display: strip leading @ then re-add once ──
+    private var handleText: String {
+        let raw = vm.profile?.handle ?? vm.profile?.displayName ?? ""
+        let stripped = raw.hasPrefix("@") ? String(raw.dropFirst()) : raw
+        return "@\(stripped)"
     }
 
     // MARK: - Stats Pill
     private var statsPill: some View {
         HStack(spacing: 0) {
-            // ✅ Uses exact Firestore field name
-            statCell(
-                value: "\(vm.profile?.totalChallengesCompleted ?? 0)",
-                label: "Challenges"
-            )
+            statCell(value: "\(vm.profile?.totalChallengesCompleted ?? 0)", label: "Challenges")
             Divider().frame(height: 40)
-            statCell(
-                value: "\(vm.winRate)%",
-                label: "Win Rate"
-            )
+            statCell(value: "\(vm.winRate)%", label: "Win Rate")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
@@ -146,12 +156,11 @@ struct ProfileView: View {
 
     // MARK: - Badges
     private var badgesSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Badges")
                 .font(Font.ticku.sectionHeader)
                 .foregroundColor(Color.ticku.textPrimary)
 
-            // ✅ Badges is empty by default — shows placeholder
             if let badges = vm.profile?.badges, !badges.isEmpty {
                 HStack(spacing: 16) {
                     ForEach(Array(badges.enumerated()), id: \.element.id) { index, badge in
@@ -166,14 +175,13 @@ struct ProfileView: View {
                 Text("Complete challenges to earn badges!")
                     .font(Font.ticku.caption)
                     .foregroundColor(Color.ticku.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
 
     // MARK: - Challenges
     private var challengesSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("All Challenges")
                     .font(Font.ticku.sectionHeader)
@@ -198,9 +206,7 @@ struct ProfileView: View {
                         Array(vm.challenges.prefix(3).enumerated()),
                         id: \.element.id
                     ) { index, entry in
-                        if index > 0 {
-                            Divider().padding(.horizontal, 16)
-                        }
+                        if index > 0 { Divider().padding(.horizontal, 16) }
                         ChallengeHistoryRow(entry: entry)
                     }
                 }
@@ -226,7 +232,6 @@ private struct BadgeTileView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(isFeatured ? Color.ticku.primary : Color(hex: "#F0EEF8"))
                     .frame(width: 70, height: 70)
-
                 Image(systemName: badge.iconName)
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(isFeatured ? .white : Color.ticku.primary)
@@ -244,19 +249,15 @@ private struct ChallengeHistoryRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-
-            // Duration pill
             ZStack {
                 Circle()
                     .fill(Color(hex: "#3A3A3C"))
                     .frame(width: 44, height: 44)
                 Text(entry.challenge.durationLabel)
-
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
             }
 
-            // Title + date
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.challenge.title)
                     .font(.system(size: 15, weight: .semibold))
@@ -267,7 +268,6 @@ private struct ChallengeHistoryRow: View {
             }
 
             Spacer()
-
             rankView
         }
         .padding(.horizontal, 16)
@@ -282,8 +282,7 @@ private struct ChallengeHistoryRow: View {
                 .foregroundColor(Color.ticku.doneGreen)
         } else if let rank = entry.rank {
             HStack(spacing: 4) {
-                Text(rankEmoji(rank))
-                    .font(.system(size: 14))
+                Text(rankEmoji(rank)).font(.system(size: 14))
                 Text(rankLabel(rank))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(rankColor(rank))
@@ -292,23 +291,11 @@ private struct ChallengeHistoryRow: View {
     }
 
     private func rankEmoji(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "🥇"
-        case 2: return "🥈"
-        case 3: return "🥉"
-        default: return "🏅"
-        }
+        switch rank { case 1: return "🥇"; case 2: return "🥈"; case 3: return "🥉"; default: return "🏅" }
     }
-
     private func rankLabel(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "1st"
-        case 2: return "2nd"
-        case 3: return "3rd"
-        default: return "\(rank)th"
-        }
+        switch rank { case 1: return "1st"; case 2: return "2nd"; case 3: return "3rd"; default: return "\(rank)th" }
     }
-
     private func rankColor(_ rank: Int) -> Color {
         switch rank {
         case 1: return Color.ticku.winsOrange
@@ -319,7 +306,6 @@ private struct ChallengeHistoryRow: View {
     }
 }
 
-// MARK: - Date Helper
 private extension Date {
     var monthYear: String {
         let f = DateFormatter()
@@ -328,8 +314,6 @@ private extension Date {
     }
 }
 
-// MARK: - Preview
 #Preview {
-    ProfileView()
-        .environmentObject(AuthViewModel())
+    ProfileView().environmentObject(AuthViewModel())
 }

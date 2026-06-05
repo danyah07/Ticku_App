@@ -6,21 +6,40 @@
 //
 
 
+//
+//  AvatarView.swift — part of SharedComponents.swift
+//  firebasetrial
+
 import SwiftUI
 
 struct AvatarView: View {
+    // ✅ Accepts either a URL string OR a Base64 string
     let imageURL: String?
     var size: CGFloat = 44
-    var borderColor: Color = Color(hex: "#6B5CE7")
-    var borderWidth: CGFloat = 2.5
+    // Optional Base64 override — takes priority over URL
+    var base64: String? = nil
 
     var body: some View {
         Group {
-            if let urlString = imageURL, let url = URL(string: urlString) {
+            if let base64 = base64,
+               let imageData = Data(base64Encoded: base64),
+               let uiImage = UIImage(data: imageData) {
+                // ✅ Render from Base64
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+
+            } else if let urlString = imageURL,
+                      let url = URL(string: urlString) {
+                // Render from URL (future-proof for when Storage is added)
                 AsyncImage(url: url) { phase in
                     switch phase {
-                    case .success(let image): image.resizable().scaledToFill()
-                    default: placeholder
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    case .failure, .empty:
+                        placeholder
+                    @unknown default:
+                        placeholder
                     }
                 }
             } else {
@@ -29,16 +48,18 @@ struct AvatarView: View {
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
-        .overlay(Circle().stroke(borderColor, lineWidth: borderWidth))
+        .overlay(
+            Circle()
+                .stroke(Color.ticku.accent.opacity(0.3), lineWidth: 1.5)
+        )
     }
 
     private var placeholder: some View {
-        Circle()
-            .fill(Color(hex: "#F5F4FA"))
-            .overlay(
-                Image(systemName: "person.fill")
-                    .font(.system(size: size * 0.4))
-                    .foregroundColor(Color(hex: "#8B8B9E"))
-            )
+        ZStack {
+            Circle().fill(Color.ticku.accentSoft)
+            Image(systemName: "person.fill")
+                .font(.system(size: size * 0.45))
+                .foregroundColor(Color.ticku.accent)
+        }
     }
 }

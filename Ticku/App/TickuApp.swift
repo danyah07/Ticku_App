@@ -9,14 +9,6 @@
 //  TickuApp.swift
 //  firebasetrial
 
-//
-//  TickuApp.swift
-//  firebasetrial
-
-//
-//  TickuApp.swift
-//  firebasetrial
-
 import SwiftUI
 import FirebaseCore
 
@@ -37,7 +29,7 @@ struct TickuApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            SplashView()
                 .environmentObject(authVM)
         }
     }

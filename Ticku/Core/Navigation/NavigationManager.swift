@@ -9,6 +9,9 @@
 //  NavigationManager.swift
 //  firebasetrial
 
+//
+//  NavigationManager.swift
+//  firebasetrial
 import SwiftUI
 import Combine
 
@@ -16,11 +19,13 @@ enum AppRoute: Hashable {
     case signIn
     case home
     case profile
+    case settings
     case allChallenges
     case createChallenge
     case joinChallenge
     case challengeRoom(Challenge)
     case myTasks(Challenge)
+    case todayTasks([Challenge])
 }
 
 @MainActor

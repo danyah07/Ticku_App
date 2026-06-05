@@ -44,7 +44,8 @@ struct UserProfile: Codable {
     var longestStreak: Int = 0
     var lastActiveDate: Date? = nil
     var createdAt: Date? = nil
-
+    var profileImageBase64: String? = nil  // ✅ ADD THIS
+   
     // ── Future fields — optional so decode never fails ────
     var username: String? = nil
     var handle: String? = nil

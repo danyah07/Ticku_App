@@ -15,17 +15,17 @@ struct HomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var homeVM = HomeViewModel()
 
-    var onSignIn: () -> Void = {}
-    var onSeeAllChallenges: () -> Void = {}
-    var onCreateChallenge: () -> Void = {}
-    var onJoinChallenge: () -> Void = {}
-    var onViewRoom: (Challenge) -> Void = { _ in }
-    var onMyTasks: (Challenge) -> Void = { _ in }
-    var onProfile: () -> Void = {}
+    var onSignIn:            () -> Void = {}
+    var onSeeAllChallenges:  () -> Void = {}
+    var onCreateChallenge:   () -> Void = {}
+    var onJoinChallenge:     () -> Void = {}
+    var onViewRoom:  (Challenge) -> Void = { _ in }
+    var onMyTasks:   (Challenge) -> Void = { _ in }
+    var onProfile:           () -> Void = {}
+    var onTodayTasks: ([Challenge]) -> Void = { _ in }  // ← new
 
     var body: some View {
         ZStack {
-            // Background
             LinearGradient(
                 colors: [Color.ticku.backgroundTop, Color.ticku.backgroundBottom],
                 startPoint: .top,
@@ -33,33 +33,29 @@ struct HomeView: View {
             )
             .ignoresSafeArea()
 
-            // ── Content ───────────────────────────────────
             if homeVM.isLoading {
                 loadingView
-
             } else if authVM.isAuthenticated {
                 AuthenticatedHomeView(
                     vm: homeVM,
                     onSeeAllChallenges: onSeeAllChallenges,
-                    onCreateChallenge: onCreateChallenge,
-                    onJoinChallenge: onJoinChallenge,
-                    onViewRoom: onViewRoom,
-                    onMyTasks: onMyTasks,
-                    onProfile: onProfile
+                    onCreateChallenge:  onCreateChallenge,
+                    onJoinChallenge:    onJoinChallenge,
+                    onViewRoom:         onViewRoom,
+                    onMyTasks:          onMyTasks,
+                    onProfile:          onProfile,
+                    onTodayTasks:       { onTodayTasks(homeVM.activeChallenges) }  // ← new
                 )
-                // ✅ Smooth fade when switching from guest → authenticated
                 .transition(.opacity.animation(.easeInOut(duration: 0.3)))
-
             } else {
                 GuestHomeView(
-                    onSignIn: onSignIn,
+                    onSignIn:          onSignIn,
                     onCreateChallenge: onCreateChallenge,
-                    onJoinChallenge: onJoinChallenge
+                    onJoinChallenge:   onJoinChallenge
                 )
                 .transition(.opacity.animation(.easeInOut(duration: 0.3)))
             }
 
-            // ── Error Toast ───────────────────────────────
             if let msg = homeVM.errorMessage {
                 VStack {
                     Spacer()
@@ -75,7 +71,6 @@ struct HomeView: View {
                 }
             }
         }
-        // ✅ Fires whenever uid changes (login, logout, app launch)
         .task(id: authVM.currentUserId) {
             if let uid = authVM.currentUserId {
                 await homeVM.loadHome(for: uid)
@@ -85,7 +80,6 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Loading View
     private var loadingView: some View {
         VStack(spacing: 16) {
             ProgressView()

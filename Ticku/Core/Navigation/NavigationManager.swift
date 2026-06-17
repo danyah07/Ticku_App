@@ -12,6 +12,7 @@
 //
 //  NavigationManager.swift
 //  firebasetrial
+
 import SwiftUI
 import Combine
 

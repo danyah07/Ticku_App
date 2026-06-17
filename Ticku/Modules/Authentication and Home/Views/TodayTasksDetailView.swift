@@ -15,19 +15,16 @@ struct TodayTasksDetailView: View {
     var onBack: () -> Void = {}
 
     var body: some View {
-        ZStack {
-            Color(hex: "#F5F4FA").ignoresSafeArea()
-
+        ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
 
-                // ── Nav Bar ── sits right below status bar
+                // Nav Bar
                 HStack {
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(Color.ticku.textPrimary)
                     }
-//                    Spacer()
                     Text("Today Tasks")
                         .font(Font.ticku.sectionHeader)
                         .foregroundColor(Color.ticku.textPrimary)
@@ -35,62 +32,55 @@ struct TodayTasksDetailView: View {
                     Color.clear.frame(width: 24)
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, 12)
-                .padding(.bottom, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 20)
 
                 if vm.isLoading {
-                    Spacer()
                     ProgressView().tint(Color.ticku.primary)
-                    Spacer()
+                        .padding(.top, 40)
                 } else {
-                    ScrollView(showsIndicators: false) {
+                    // Progress Ring
+                    progressRingSection
+                        .padding(.top, 20)
+                        .padding(.bottom, 20)
+
+                    if vm.taskGroups.allSatisfy({ $0.tasks.isEmpty }) {
+                        VStack(spacing: 12) {
+                            Image(systemName: "checkmark.circle")
+                                .font(.system(size: 40))
+                                .foregroundColor(Color.ticku.accent.opacity(0.4))
+                            Text("No tasks yet")
+                                .font(Font.ticku.bodyMedium)
+                                .foregroundColor(Color.ticku.textSecondary)
+                            Text("Add tasks inside a challenge to track them here.")
+                                .font(Font.ticku.caption)
+                                .foregroundColor(Color.ticku.textSecondary.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        .padding(.top, 20)
+                    } else {
                         VStack(spacing: 20) {
-
-                            // ── Progress Ring ─────────────────
-                            progressRingSection
-                                .padding(.top, 8)
-
-                            // ── Task Groups ───────────────────
                             ForEach(vm.taskGroups) { group in
                                 if !group.tasks.isEmpty {
                                     TaskGroupSection(
                                         group: group,
                                         onToggle: { task in
                                             Task {
-                                                await vm.toggleTask(
-                                                    task,
-                                                    in: group.challenge.id ?? ""
-                                                )
+                                                await vm.toggleTask(task, in: group.challenge.id ?? "")
                                             }
                                         }
                                     )
                                 }
                             }
-
-                            if vm.taskGroups.allSatisfy({ $0.tasks.isEmpty }) {
-                                emptyState
-                            }
                         }
                         .padding(.horizontal, TickuSpacing.screenH)
-                        .padding(.bottom, 32)
                     }
                 }
             }
-
-            if let msg = vm.errorMessage {
-                VStack {
-                    Spacer()
-                    Text(msg)
-                        .font(Font.ticku.caption)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(Color.ticku.errorRed.opacity(0.9))
-                        .clipShape(Capsule())
-                        .padding(.bottom, 32)
-                        .onTapGesture { vm.errorMessage = nil }
-                }
-            }
+            .padding(.bottom, 32)
         }
+        .background(Color(hex: "#F5F4FA").ignoresSafeArea())
         .navigationBarHidden(true)
         .task {
             if let uid = authVM.currentUserId {
@@ -99,47 +89,27 @@ struct TodayTasksDetailView: View {
         }
     }
 
-    // MARK: - Progress Ring
     private var progressRingSection: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             ZStack {
                 Circle()
                     .stroke(Color.ticku.accent.opacity(0.15), lineWidth: 14)
                 Circle()
                     .trim(from: 0, to: vm.overallProgress)
-                    .stroke(
-                        Color.ticku.primary,
-                        style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                    )
+                    .stroke(Color.ticku.primary, style: StrokeStyle(lineWidth: 14, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.easeOut(duration: 1.2), value: vm.overallProgress)
                 Text("\(Int(vm.overallProgress * 100))%")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
                     .foregroundColor(Color.ticku.textPrimary)
             }
-            .frame(width: 160, height: 160)
+            .frame(width: 180, height: 180)
 
             Text("\(vm.completedTasks) of \(vm.totalTasks) tasks done")
                 .font(Font.ticku.caption)
                 .foregroundColor(Color.ticku.textSecondary)
         }
-    }
-
-    // MARK: - Empty State
-    private var emptyState: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "checkmark.circle")
-                .font(.system(size: 40))
-                .foregroundColor(Color.ticku.accent.opacity(0.4))
-            Text("No tasks yet")
-                .font(Font.ticku.bodyMedium)
-                .foregroundColor(Color.ticku.textSecondary)
-            Text("Add tasks inside a challenge to track them here.")
-                .font(Font.ticku.caption)
-                .foregroundColor(Color.ticku.textSecondary.opacity(0.7))
-                .multilineTextAlignment(.center)
-        }
-        .padding(.top, 24)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -149,11 +119,12 @@ private struct TaskGroupSection: View {
     var onToggle: (TickuTask) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(group.challenge.title)
                 .font(Font.ticku.captionBold)
                 .foregroundColor(Color.ticku.textSecondary)
-                .padding(.leading, 4)
+                .padding(.leading, 8)
+                .padding(.bottom, 2)
 
             VStack(spacing: 0) {
                 ForEach(group.tasks) { task in
@@ -206,7 +177,7 @@ private struct TaskRowItem: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 16)
         .contentShape(Rectangle())
     }
 }
@@ -217,4 +188,9 @@ private extension Date {
         f.dateFormat = "MMM d"
         return f.string(from: self)
     }
+}
+
+#Preview {
+    TodayTasksDetailView(activeChallenges: [])
+        .environmentObject(AuthViewModel())
 }

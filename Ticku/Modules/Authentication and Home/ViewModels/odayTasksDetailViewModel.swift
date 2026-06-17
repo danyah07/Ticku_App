@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 import Combine
 
-// MARK: - Task Group (one per challenge)
+// MARK: - Task Group
 struct ChallengeTaskGroup: Identifiable {
     var id: String { challenge.id ?? UUID().uuidString }
     let challenge: Challenge
@@ -23,7 +23,6 @@ final class TodayTasksDetailViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
 
-    // Overall progress across ALL tasks from ALL challenges
     var totalTasks: Int { taskGroups.flatMap(\.tasks).count }
     var completedTasks: Int { taskGroups.flatMap(\.tasks).filter(\.isCompleted).count }
     var overallProgress: Double {
@@ -43,15 +42,26 @@ final class TodayTasksDetailViewModel: ObservableObject {
             for challenge in activeChallenges {
                 guard let cid = challenge.id else { continue }
 
-                // challenges/{cid}/tasks where ownerId == uid
+                // ✅ الصح: challenges/{cid}/members/{uid}/tasks
                 let snap = try await db
                     .collection("challenges").document(cid)
+                    .collection("members").document(uid)
                     .collection("tasks")
-                    .whereField("ownerId", isEqualTo: uid)
-                    .order(by: "createdAt")
                     .getDocuments()
 
-                let tasks = snap.documents.compactMap { try? $0.data(as: TickuTask.self) }
+                let tasks = snap.documents.compactMap { doc -> TickuTask? in
+                    let data = doc.data()
+                    var task = TickuTask()
+                    task.id = doc.documentID
+                    task.title = data["title"] as? String ?? ""
+                    task.isCompleted = data["isCompleted"] as? Bool ?? false
+                    task.ownerId = uid
+                    if let ts = data["createdAt"] as? Timestamp {
+                        task.createdAt = ts.dateValue()
+                    }
+                    return task
+                }
+
                 groups.append(ChallengeTaskGroup(challenge: challenge, tasks: tasks))
             }
 
@@ -66,35 +76,28 @@ final class TodayTasksDetailViewModel: ObservableObject {
         guard let taskId = task.id else { return }
 
         let newValue = !task.isCompleted
-        let now = newValue ? Date() : nil
-
-        // Optimistic update — update UI immediately
         updateLocally(taskId: taskId, challengeId: challengeId, isCompleted: newValue)
+
+        guard let group = taskGroups.first(where: { $0.challenge.id == challengeId }) else { return }
+        let uid = group.tasks.first?.ownerId ?? ""
 
         do {
             var updates: [String: Any] = ["isCompleted": newValue]
-            if let now = now {
-                updates["completedAt"] = Timestamp(date: now)
-            } else {
-                updates["completedAt"] = NSNull()
-            }
+            updates["completedAt"] = newValue ? Timestamp(date: Date()) : NSNull()
 
             try await db
                 .collection("challenges").document(challengeId)
+                .collection("members").document(uid)
                 .collection("tasks").document(taskId)
                 .updateData(updates)
 
-            // Update progress in members/{uid}
-            await updateMemberProgress(challengeId: challengeId)
+            await updateMemberProgress(challengeId: challengeId, uid: uid)
 
         } catch {
-            // Revert on failure
             updateLocally(taskId: taskId, challengeId: challengeId, isCompleted: !newValue)
             errorMessage = error.localizedDescription
         }
     }
-
-    // MARK: - Private Helpers
 
     private func updateLocally(taskId: String, challengeId: String, isCompleted: Bool) {
         for gi in taskGroups.indices {
@@ -109,9 +112,8 @@ final class TodayTasksDetailViewModel: ObservableObject {
         }
     }
 
-    private func updateMemberProgress(challengeId: String) async {
-        guard let group = taskGroups.first(where: { $0.challenge.id == challengeId }),
-              let uid = group.tasks.first?.ownerId else { return }
+    private func updateMemberProgress(challengeId: String, uid: String) async {
+        guard let group = taskGroups.first(where: { $0.challenge.id == challengeId }) else { return }
 
         let total     = group.tasks.count
         let completed = group.tasks.filter(\.isCompleted).count

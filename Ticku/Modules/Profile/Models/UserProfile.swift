@@ -17,6 +17,10 @@
 //  ProfileModels.swift
 //  firebasetrial
 
+//
+//  ProfileModels.swift
+//  firebasetrial
+
 import Foundation
 import FirebaseFirestore
 
@@ -29,14 +33,13 @@ struct Badge: Identifiable, Codable {
 }
 
 // MARK: - UserProfile
-// Mirrors EXACTLY what is stored in Firestore users/{uid}
+// Mirrors exactly what is stored in Firestore users/{uid}
 struct UserProfile: Codable {
     @DocumentID var id: String?
-
-    // ── Exact Firestore field names ───────────────────────
     var uid: String = ""
     var displayName: String = ""
     var profileImageURL: String? = nil
+    var profileImageBase64: String? = nil
     var email: String = ""
     var appleUserIdentifier: String? = nil
     var totalChallengesCompleted: Int = 0
@@ -44,9 +47,8 @@ struct UserProfile: Codable {
     var longestStreak: Int = 0
     var lastActiveDate: Date? = nil
     var createdAt: Date? = nil
-    var profileImageBase64: String? = nil  // ✅ ADD THIS
-   
-    // ── Future fields — optional so decode never fails ────
+
+    // Future fields — optional so decode never fails
     var username: String? = nil
     var handle: String? = nil
     var totalWins: Int = 0
@@ -54,6 +56,7 @@ struct UserProfile: Codable {
 }
 
 // MARK: - ChallengeHistoryEntry
+// Lightweight display model — not a direct Firestore document
 struct ChallengeHistoryEntry: Identifiable {
     var id: String { challenge.id ?? UUID().uuidString }
     let challenge: Challenge

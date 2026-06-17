@@ -5,14 +5,21 @@
 //  Created by Danyah ALbarqawi on 14/05/2026.
 //
 
+//
+//  Homeviewmodel.swift
+//  firebasetrial
+//
+//  Created by Danyah ALbarqawi on 14/05/2026.
+//
+
 import Foundation
 import FirebaseFirestore
 import Combine
 
-// ─────────────────────────────────────────
-// MODELS — paste these into their own files
-// once you confirm the project compiles
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// TickuUser — defined here because it's only used for home/profile
+// All other models (Challenge, ChallengeMember, TickuTask) live in Challenge.swift
+// ─────────────────────────────────────────────────────────
 
 struct TickuUser: Identifiable, Codable {
     @DocumentID var id: String?
@@ -28,65 +35,12 @@ struct TickuUser: Identifiable, Codable {
     var createdAt: Date = Date()
 }
 
-struct Challenge: Identifiable, Codable, Hashable {
-    @DocumentID var id: String?
-    var title: String = ""
-    var description: String = ""
-    var createdBy: String = ""
-    var startDate: Date = Date()
-    var endDate: Date = Date()
-    var status: String = "active"
-    var memberCount: Int = 0
-    var createdAt: Date = Date()
-    var memberIds: [String] = []
-    // ... rest stays the same
-
-
-    var isActive: Bool { status == "active" }
-
-    var daysLeft: Int {
-        max(0, Calendar.current.dateComponents([.day], from: Date(), to: endDate).day ?? 0)
-    }
-
-    var durationLabel: String {
-        let days  = Calendar.current.dateComponents([.day],  from: startDate, to: endDate).day  ?? 0
-        let hours = Calendar.current.dateComponents([.hour], from: startDate, to: endDate).hour ?? 0
-        return days >= 1 ? "\(days)d" : "\(hours)h"
-    }
-
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
-    static func == (lhs: Challenge, rhs: Challenge) -> Bool { lhs.id == rhs.id }
-}
-
-struct ChallengeMember: Identifiable, Codable {
-    @DocumentID var id: String?
-    var userId: String = ""
-    var displayName: String = ""
-    var profileImageURL: String? = nil
-    var progressPercent: Double = 0
-    var tasksTotal: Int = 0
-    var tasksCompleted: Int = 0
-    var joinedAt: Date = Date()
-    var role: String = "member"
-}
-
-struct TickuTask: Identifiable, Codable {
-    @DocumentID var id: String?
-    var ownerId: String
-    var title: String
-    var isCompleted: Bool
-    var completedAt: Date?
-    var dueDate: Date?
-    var createdAt: Date
-}
-
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
 // HOME VIEW MODEL
-// ─────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
 
 @MainActor
 final class HomeViewModel: ObservableObject {
-    
 
     @Published var currentUser: TickuUser? = nil
     @Published var activeChallenges: [Challenge] = []

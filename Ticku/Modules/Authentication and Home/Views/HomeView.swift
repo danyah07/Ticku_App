@@ -22,7 +22,7 @@ struct HomeView: View {
     var onViewRoom:  (Challenge) -> Void = { _ in }
     var onMyTasks:   (Challenge) -> Void = { _ in }
     var onProfile:           () -> Void = {}
-    var onTodayTasks: ([Challenge]) -> Void = { _ in }  // ← new
+    var onTodayTasks: ([Challenge]) -> Void = { _ in }
 
     var body: some View {
         ZStack {
@@ -44,7 +44,7 @@ struct HomeView: View {
                     onViewRoom:         onViewRoom,
                     onMyTasks:          onMyTasks,
                     onProfile:          onProfile,
-                    onTodayTasks:       { onTodayTasks(homeVM.activeChallenges) }  // ← new
+                    onTodayTasks:       { onTodayTasks(homeVM.activeChallenges) }
                 )
                 .transition(.opacity.animation(.easeInOut(duration: 0.3)))
             } else {

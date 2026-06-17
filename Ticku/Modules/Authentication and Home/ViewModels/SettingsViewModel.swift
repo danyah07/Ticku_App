@@ -3,19 +3,6 @@
 //  firebasetrial
 //
 //  Created by Danyah ALbarqawi on 04/06/2026.
-//
-
-//
-//  SettingsViewModel.swift
-//  firebasetrial
-
-//
-//  SettingsViewModel.swift
-//  firebasetrial
-
-//
-//  SettingsViewModel.swift
-//  firebasetrial
 
 import Foundation
 import FirebaseFirestore

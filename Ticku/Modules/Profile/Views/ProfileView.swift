@@ -5,21 +5,6 @@
 //  Created by Danyah ALbarqawi on 10/05/2026.
 //
 
-//
-//  ProfileView.swift
-//  firebasetrial
-
-//
-//  ProfileView.swift
-//  firebasetrial
-
-//
-//  ProfileView.swift
-//  firebasetrial
-
-//
-//  ProfileView.swift
-//  firebasetrial
 
 import SwiftUI
 
@@ -67,7 +52,7 @@ struct ProfileView: View {
 
                 // ── Name + Streak ─────────────────────────
                 HStack(spacing: 6) {
-                    Text(vm.profile?.username ?? vm.profile?.displayName ?? "")
+                    Text(vm.profile?.displayName ?? "")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(Color.ticku.textPrimary)
                     Text("×\(vm.profile?.currentStreak ?? 0)")

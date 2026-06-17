@@ -6,13 +6,10 @@
 //
 
 
-
-//
-//  SettingsView.swift
-//  firebasetrial
-
 import SwiftUI
 import PhotosUI
+
+@MainActor
 
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
@@ -51,7 +48,6 @@ struct SettingsView: View {
                     PhotosPicker(selection: $photosItem, matching: .images) {
                         ZStack(alignment: .bottomTrailing) {
                             if let selected = vm.selectedImage {
-                                // Preview selected image immediately
                                 Image(uiImage: selected)
                                     .resizable()
                                     .scaledToFill()
@@ -62,7 +58,6 @@ struct SettingsView: View {
                                             .stroke(Color.ticku.primary, lineWidth: 3)
                                     )
                             } else {
-                                // ✅ Show Base64 image from Firestore
                                 AvatarView(
                                     imageURL: nil,
                                     size: 100,
@@ -70,7 +65,6 @@ struct SettingsView: View {
                                 )
                             }
 
-                            // + badge
                             ZStack {
                                 Circle()
                                     .fill(Color.ticku.primary)
@@ -87,7 +81,10 @@ struct SettingsView: View {
                             if let data = try? await photosItem?
                                 .loadTransferable(type: Data.self),
                                let image = UIImage(data: data) {
-                                vm.selectedImage = image
+                                await MainActor.run {
+                                    vm.selectedImage = image
+                                    vm.profileImageBase64 = nil
+                                }
                             }
                         }
                     }
@@ -111,16 +108,8 @@ struct SettingsView: View {
 
                     // ── Edit Fields ───────────────────────
                     VStack(spacing: 12) {
-                        editField(
-                            icon: "person.fill",
-                            placeholder: "Display Name",
-                            text: $vm.displayName
-                        )
-                        editField(
-                            icon: "at",
-                            placeholder: "Handle",
-                            text: $vm.handle
-                        )
+                        editField(icon: "person.fill", placeholder: "Display Name", text: $vm.displayName)
+                        editField(icon: "at", placeholder: "Handle", text: $vm.handle)
                     }
                     .padding(.horizontal, TickuSpacing.screenH)
                     .padding(.bottom, 28)
@@ -135,12 +124,8 @@ struct SettingsView: View {
                         VStack(spacing: 0) {
                             settingsRow(icon: "globe", title: "Language") {
                                 HStack(spacing: 0) {
-                                    toggleOption("EN", isSelected: vm.language == "EN") {
-                                        vm.language = "EN"
-                                    }
-                                    toggleOption("AR", isSelected: vm.language == "AR") {
-                                        vm.language = "AR"
-                                    }
+                                    toggleOption("EN", isSelected: vm.language == "EN") { vm.language = "EN" }
+                                    toggleOption("AR", isSelected: vm.language == "AR") { vm.language = "AR" }
                                 }
                                 .background(Color(hex: "#E5E5EA"))
                                 .clipShape(Capsule())
@@ -150,12 +135,8 @@ struct SettingsView: View {
 
                             settingsRow(icon: "circle.lefthalf.filled", title: "Mode") {
                                 HStack(spacing: 0) {
-                                    toggleOption("☀️", isSelected: !vm.isDarkMode) {
-                                        vm.isDarkMode = false
-                                    }
-                                    toggleOption("🌙", isSelected: vm.isDarkMode) {
-                                        vm.isDarkMode = true
-                                    }
+                                    toggleOption("☀️", isSelected: !vm.isDarkMode) { vm.isDarkMode = false }
+                                    toggleOption("🌙", isSelected: vm.isDarkMode) { vm.isDarkMode = true }
                                 }
                                 .background(Color(hex: "#E5E5EA"))
                                 .clipShape(Capsule())
@@ -186,11 +167,7 @@ struct SettingsView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
-                        .background(
-                            vm.isSaving
-                                ? Color.ticku.primary.opacity(0.6)
-                                : Color.ticku.primary
-                        )
+                        .background(vm.isSaving ? Color.ticku.primary.opacity(0.6) : Color.ticku.primary)
                         .clipShape(Capsule())
                     }
                     .disabled(vm.isSaving)
@@ -207,15 +184,13 @@ struct SettingsView: View {
                 }
             }
 
-            // ── Success Toast ─────────────────────────────
             if let success = vm.successMessage {
                 VStack {
                     Spacer()
                     Text(success)
                         .font(Font.ticku.caption)
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16).padding(.vertical, 10)
                         .background(Color.ticku.doneGreen.opacity(0.9))
                         .clipShape(Capsule())
                         .padding(.bottom, 32)
@@ -228,15 +203,13 @@ struct SettingsView: View {
                 }
             }
 
-            // ── Error Toast ───────────────────────────────
             if let error = vm.errorMessage {
                 VStack {
                     Spacer()
                     Text(error)
                         .font(Font.ticku.caption)
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16).padding(.vertical, 10)
                         .background(Color.ticku.errorRed.opacity(0.9))
                         .clipShape(Capsule())
                         .padding(.bottom, 32)
@@ -247,9 +220,7 @@ struct SettingsView: View {
         .navigationBarHidden(true)
         .alert("Sign Out", isPresented: $showSignOutAlert) {
             Button("Cancel", role: .cancel) {}
-            Button("Sign Out", role: .destructive) {
-                authVM.signOut()
-            }
+            Button("Sign Out", role: .destructive) { authVM.signOut() }
         } message: {
             Text("Are you sure you want to sign out?")
         }
@@ -260,12 +231,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Edit Field
-    private func editField(
-        icon: String,
-        placeholder: String,
-        text: Binding<String>
-    ) -> some View {
+    private func editField(icon: String, placeholder: String, text: Binding<String>) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16))
@@ -283,24 +249,13 @@ struct SettingsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
-    // MARK: - Settings Row
-    private func settingsRow<T: View>(
-        icon: String,
-        title: String,
-        @ViewBuilder trailing: () -> T
-    ) -> some View {
+    private func settingsRow<T: View>(icon: String, title: String, @ViewBuilder trailing: () -> T) -> some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle()
-                    .fill(Color.ticku.primary)
-                    .frame(width: 36, height: 36)
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(.white)
+                Circle().fill(Color.ticku.primary).frame(width: 36, height: 36)
+                Image(systemName: icon).font(.system(size: 16)).foregroundColor(.white)
             }
-            Text(title)
-                .font(Font.ticku.bodyMedium)
-                .foregroundColor(Color.ticku.textPrimary)
+            Text(title).font(Font.ticku.bodyMedium).foregroundColor(Color.ticku.textPrimary)
             Spacer()
             trailing()
         }
@@ -308,25 +263,18 @@ struct SettingsView: View {
         .padding(.vertical, 12)
     }
 
-    // MARK: - Toggle Option
-    private func toggleOption(
-        _ label: String,
-        isSelected: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
+    private func toggleOption(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(isSelected ? .white : Color.ticku.textSecondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 14).padding(.vertical, 6)
                 .background(isSelected ? Color.ticku.primary : Color.clear)
                 .clipShape(Capsule())
         }
     }
 }
 
-// MARK: - Preview
 #Preview {
     SettingsView()
         .environmentObject(AuthViewModel())

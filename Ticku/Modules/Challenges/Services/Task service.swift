@@ -58,7 +58,13 @@ final class ChallengeTaskService: ObservableObject {
             .document(userId)
             .collection("tasks")
             .order(by: "createdAt")
-            .addSnapshotListener { [weak self] snapshot, _ in
+            .addSnapshotListener { [weak self] snapshot, error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "loading tasks")
+                    }
+                    return
+                }
                 self?.tasks = snapshot?.documents.compactMap {
                     ChallengeTask(id: $0.documentID, data: $0.data())
                 } ?? []
@@ -73,7 +79,13 @@ final class ChallengeTaskService: ObservableObject {
             .document(userId)
             .collection("tasks")
             .document(task.id)
-            .setData(task.firestoreData)
+            .setData(task.firestoreData) { error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "adding task")
+                    }
+                }
+            }
     }
 
     func toggleTask(challengeId: String, userId: String, task: ChallengeTask) {
@@ -83,7 +95,13 @@ final class ChallengeTaskService: ObservableObject {
             .document(userId)
             .collection("tasks")
             .document(task.id)
-            .updateData(["isCompleted": !task.isCompleted]) { [weak self] _ in
+            .updateData(["isCompleted": !task.isCompleted]) { [weak self] error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "updating task")
+                    }
+                    return
+                }
                 self?.updateProgress(challengeId: challengeId, userId: userId)
             }
     }
@@ -95,15 +113,28 @@ final class ChallengeTaskService: ObservableObject {
             .document(userId)
             .collection("tasks")
             .document(taskId)
-            .delete { [weak self] _ in
+            .delete { [weak self] error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "deleting task")
+                    }
+                    return
+                }
                 self?.updateProgress(challengeId: challengeId, userId: userId)
             }
     }
 
     private func updateProgress(challengeId: String, userId: String) {
-        guard !tasks.isEmpty else { return }
-        let completed = tasks.filter { $0.isCompleted }.count
-        let percent = Int((Double(completed) / Double(tasks.count)) * 100)
+        let completed: Int
+        let percent: Int
+
+        if tasks.isEmpty {
+            completed = 0
+            percent = 0
+        } else {
+            completed = tasks.filter { $0.isCompleted }.count
+            percent = Int((Double(completed) / Double(tasks.count)) * 100)
+        }
 
         db.collection("challenges")
             .document(challengeId)
@@ -113,7 +144,13 @@ final class ChallengeTaskService: ObservableObject {
                 "progressPercent": percent,
                 "tasksCompleted": completed,
                 "tasksTotal": tasks.count
-            ])
+            ]) { error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "updating progress")
+                    }
+                }
+            }
     }
 
     func saveTasks(challengeId: String, userId: String, titles: [String]) {
@@ -125,7 +162,13 @@ final class ChallengeTaskService: ObservableObject {
 
         for title in titles {
             let task = ChallengeTask(title: title)
-            ref.document(task.id).setData(task.firestoreData)
+            ref.document(task.id).setData(task.firestoreData) { error in
+                if let error {
+                    Task { @MainActor in
+                        ErrorHandler.shared.report(error, context: "saving tasks")
+                    }
+                }
+            }
         }
     }
 

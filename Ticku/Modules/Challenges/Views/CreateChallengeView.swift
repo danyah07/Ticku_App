@@ -11,13 +11,19 @@ struct CreateChallengeView: View {
 
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var vm = CreateChallengeViewModel()
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var onBack: () -> Void = {}
     var onCreated: (Challenge) -> Void = { _ in }
 
+    private var screenBackground: Color {
+        isDark ? Color(hex: "#000000") : Color(hex: "#F5F4FB")
+    }
+
     var body: some View {
         ZStack {
-            Color(hex: "#F5F4FB").ignoresSafeArea()
+            screenBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
 
@@ -25,19 +31,19 @@ struct CreateChallengeView: View {
                 ZStack {
                     Text("Create Challenge")
                         .font(Font.ticku.sectionHeader)
-                        .foregroundColor(Color.ticku.textPrimary)
+                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .center)
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color.ticku.textPrimary)
+                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 14)
                 .padding(.bottom, 20)
-                .background(Color(hex: "#F5F4FB"))
+                .background(screenBackground)
                 .zIndex(1)
 
                 // ── Scrollable Content ────────────────────
@@ -56,15 +62,15 @@ struct CreateChallengeView: View {
                                     Button(action: { vm.selectedDuration = option }) {
                                         Text(option.rawValue == "today" ? "Today" : option.rawValue)
                                             .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(vm.selectedDuration == option ? .white : Color.ticku.primary)
+                                            .foregroundColor(durationTextColor(selected: vm.selectedDuration == option))
                                             .padding(.horizontal, 22)
                                             .frame(height: 44)
                                             .fixedSize()
-                                            .background(vm.selectedDuration == option ? Color.ticku.primary : Color.white)
+                                            .background(durationBackground(selected: vm.selectedDuration == option))
                                             .clipShape(Capsule())
                                             .overlay(
                                                 Capsule().stroke(
-                                                    vm.selectedDuration == option ? Color.clear : Color(hex: "#DDDAEE"),
+                                                    vm.selectedDuration == option ? Color.clear : (isDark ? Color.white.opacity(0.2) : Color(hex: "#DDDAEE")),
                                                     lineWidth: 1.5
                                                 )
                                             )
@@ -108,18 +114,18 @@ struct CreateChallengeView: View {
                             } else {
                                 Text("Create")
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
                             }
                         }
                         .frame(width: 220, height: 44)
-                        .background(vm.isFormValid ? Color.ticku.primary : Color(hex: "#C4C4C4"))
+                        .background(createButtonBackground)
                         .clipShape(Capsule())
                     }
                     .disabled(!vm.isFormValid || vm.isLoading)
                     Spacer()
                 }
                 .padding(.vertical, 20)
-                .background(Color(hex: "#F5F4FB"))
+                .background(screenBackground)
             }
 
             if let msg = vm.errorMessage {
@@ -137,6 +143,28 @@ struct CreateChallengeView: View {
             }
         }
         .navigationBarHidden(true)
+        .withErrorHandling()
+    }
+
+    private var createButtonBackground: Color {
+        guard vm.isFormValid else {
+            return isDark ? Color.white.opacity(0.15) : Color(hex: "#C4C4C4")
+        }
+        return isDark ? Color(hex: "#B296EB") : Color.ticku.primary
+    }
+
+    private func durationTextColor(selected: Bool) -> Color {
+        if selected {
+            return isDark ? Color(hex: "#E0D6FA") : .white
+        }
+        return isDark ? .white : Color.ticku.primary
+    }
+
+    private func durationBackground(selected: Bool) -> Color {
+        if selected {
+            return isDark ? Color(hex: "#B296EB") : Color.ticku.primary
+        }
+        return isDark ? Color.white.opacity(0.05) : Color.white
     }
 
     private var purpleTimePicker: some View {
@@ -160,7 +188,7 @@ struct CreateChallengeView: View {
             .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity)
-        .background(Color(hex: "#341D71"))
+        .background(isDark ? Color(hex: "#265283") : Color(hex: "#341D71"))
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
@@ -169,12 +197,12 @@ struct CreateChallengeView: View {
         VStack(alignment: .leading, spacing: 6) {
             TextField("00", text: text)
                 .font(.system(size: 32, weight: .bold))
-                .foregroundColor(Color(hex: "#341D71"))
+                .foregroundColor(isDark ? Color(hex: "#265283") : Color(hex: "#341D71"))
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
                 .frame(maxWidth: .infinity)
                 .frame(height: 72)
-                .background(Color(hex: "#D4CCE8"))
+                .background(isDark ? Color(hex: "#E0D6FA") : Color(hex: "#D4CCE8"))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .onChange(of: text.wrappedValue) { _, val in
                     var f = val.filter { $0.isNumber }
@@ -192,7 +220,7 @@ struct CreateChallengeView: View {
     private func fieldLabel(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 13, weight: .bold))
-            .foregroundColor(Color.ticku.primary.opacity(0.65))
+            .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color.ticku.primary.opacity(0.65))
             .padding(.horizontal, 24)
             .padding(.bottom, 7)
     }
@@ -200,19 +228,32 @@ struct CreateChallengeView: View {
     private func inputField(placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text)
             .font(.system(size: 14))
-            .foregroundColor(Color.ticku.textPrimary)
+            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
             .padding(.horizontal, 16)
             .frame(height: 52)
-            .background(text.wrappedValue.isEmpty ? Color(hex: "#F0EFF7") : Color.white)
+            .background(inputFieldBackground(isEmpty: text.wrappedValue.isEmpty))
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color(hex: "#E2DDEF"), lineWidth: 1.5)
+                    .stroke(isDark ? Color.white.opacity(0.15) : Color(hex: "#E2DDEF"), lineWidth: 1.5)
             )
+    }
+
+    private func inputFieldBackground(isEmpty: Bool) -> Color {
+        if isDark {
+            return isEmpty ? Color.white.opacity(0.05) : Color.white.opacity(0.1)
+        }
+        return isEmpty ? Color(hex: "#F0EFF7") : Color.white
     }
 }
 
-#Preview {
+#Preview("Light") {
     CreateChallengeView()
         .environmentObject(AuthViewModel())
+}
+
+#Preview("Dark") {
+    CreateChallengeView()
+        .environmentObject(AuthViewModel())
+        .preferredColorScheme(.dark)
 }

@@ -15,6 +15,7 @@ struct MyTasksView: View {
     var onComplete: (() -> Void)? = nil
 
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var service = ChallengeTaskService()
     @State private var newTaskText: String = ""
     @State private var isAdding: Bool = false
@@ -24,6 +25,8 @@ struct MyTasksView: View {
 
     private let db = Firestore.firestore()
     @State private var challengeListener: ListenerRegistration? = nil
+
+    private var isDark: Bool { colorScheme == .dark }
 
     var tasks: [ChallengeTask] { service.tasks }
     var completedCount: Int { tasks.filter { $0.isCompleted }.count }
@@ -37,12 +40,12 @@ struct MyTasksView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(Color(hex: "#1A1A2E"))
+                        .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
                 }
                 Spacer()
                 Text("Your tasks")
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color(hex: "#1A1A2E"))
+                    .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
                 Spacer()
                 if isAdding {
                     Button("Save") {
@@ -52,14 +55,14 @@ struct MyTasksView: View {
                         newTaskText = ""
                     }
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color(hex: "#341D71"))
+                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                 } else if isSaved && !challengeStarted {
                     Button("Edit") {
                         withAnimation(.easeInOut) { isSaved = false; isAdding = true }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { inputFocused = true }
                     }
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color(hex: "#341D71"))
+                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                 } else {
                     Color.clear.frame(width: 40, height: 20)
                 }
@@ -70,29 +73,30 @@ struct MyTasksView: View {
 
             // MARK: - Progress Ring
             ZStack {
-                Circle().stroke(Color(hex: "#E8E5F5"), lineWidth: 12)
+                Circle().fill(isDark ? Color(hex: "#3A3550") : Color.clear)
+                Circle().stroke(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E5F5"), lineWidth: 12)
                 Circle().trim(from: 0, to: progress)
-                    .stroke(Color(hex: "#341D71"), style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                    .stroke(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"), style: StrokeStyle(lineWidth: 12, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.easeInOut(duration: 0.4), value: progress)
                 Text(tasks.isEmpty ? "%0" : "%\(Int(progress * 100))")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(Color(hex: "#341D71"))
+                    .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
             }
             .frame(width: 130, height: 130)
             .padding(.bottom, 80)
 
-            // MARK: - White Container
+            // MARK: - Tasks Container
             ZStack(alignment: .top) {
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
+                    .fill(isDark ? Color(hex: "#15111F") : Color.white)
                     .ignoresSafeArea(edges: .bottom)
 
                 VStack(spacing: 0) {
                     if tasks.isEmpty && !isAdding {
                         Text("Tap 'Add a task' below to get started!")
                             .font(.system(size: 13))
-                            .foregroundColor(Color(hex: "#341D71").opacity(0.4))
+                            .foregroundColor((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.4))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                             .padding(.top, 40)
@@ -111,11 +115,11 @@ struct MyTasksView: View {
                                     Button(action: { submitTask() }) {
                                         ZStack {
                                             RoundedRectangle(cornerRadius: 6)
-                                                .fill(newTaskText.isEmpty ? Color(hex: "#E8E5F5") : Color(hex: "#341D71"))
+                                                .fill(addButtonBackground)
                                                 .frame(width: 26, height: 26)
                                             Image(systemName: "plus")
                                                 .font(.system(size: 12, weight: .bold))
-                                                .foregroundColor(newTaskText.isEmpty ? Color(hex: "#341D71").opacity(0.4) : .white)
+                                                .foregroundColor(addButtonIconColor)
                                         }
                                         .animation(.easeInOut(duration: 0.2), value: newTaskText.isEmpty)
                                     }
@@ -123,7 +127,7 @@ struct MyTasksView: View {
 
                                     TextField("Add a task...", text: $newTaskText)
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color(hex: "#1A1A2E"))
+                                        .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
                                         .focused($inputFocused)
                                         .onSubmit { submitTask() }
                                     Spacer()
@@ -140,7 +144,7 @@ struct MyTasksView: View {
             .padding(.horizontal, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(hex: "#F5F4FB"))
+        .background(backgroundView)
         .safeAreaInset(edge: .bottom) {
             if !isAdding && !isSaved {
                 HStack {
@@ -151,11 +155,11 @@ struct MyTasksView: View {
                     }) {
                         Text("Add a task")
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
                             .frame(width: 200, height: 46)
-                            .background(Color(hex: "#341D71"))
+                            .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                             .cornerRadius(23)
-                            .shadow(color: Color(hex: "#341D71").opacity(0.3), radius: 8, x: 0, y: 4)
+                            .shadow(color: (isDark ? Color.clear : Color(hex: "#341D71")).opacity(0.3), radius: 8, x: 0, y: 4)
                     }
                     Spacer()
                 }
@@ -185,6 +189,30 @@ struct MyTasksView: View {
             service.stopListening()
             challengeListener?.remove()
         }
+        .withErrorHandling()
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            Color(hex: "#0A0814")
+        } else {
+            Color(hex: "#F5F4FB")
+        }
+    }
+
+    private var addButtonBackground: Color {
+        if newTaskText.isEmpty {
+            return isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E5F5")
+        }
+        return isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")
+    }
+
+    private var addButtonIconColor: Color {
+        if newTaskText.isEmpty {
+            return (isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.4)
+        }
+        return isDark ? Color(hex: "#E0D6FA") : .white
     }
 
     // MARK: - Listen to challenge startDate from Firebase
@@ -209,12 +237,12 @@ struct MyTasksView: View {
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(task.isCompleted ? Color(hex: "#341D71") : Color(hex: "#E8E5F5"))
+                            .fill(task.isCompleted ? (isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")) : (isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E5F5")))
                             .frame(width: 24, height: 24)
                         if task.isCompleted {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
                         }
                     }
                 }
@@ -224,7 +252,7 @@ struct MyTasksView: View {
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(hex: "#341D71").opacity(0.7))
+                            .fill((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.7))
                             .frame(width: 24, height: 24)
                         Rectangle()
                             .fill(Color.white)
@@ -236,7 +264,7 @@ struct MyTasksView: View {
 
             Text(task.title)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(task.isCompleted && isSaved ? Color(hex: "#1A1A2E").opacity(0.4) : Color(hex: "#1A1A2E"))
+                .foregroundColor(taskTextColor(isCompleted: task.isCompleted))
                 .strikethrough(task.isCompleted && isSaved)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -250,6 +278,13 @@ struct MyTasksView: View {
         }
     }
 
+    private func taskTextColor(isCompleted: Bool) -> Color {
+        if isCompleted && isSaved {
+            return (isDark ? Color.white : Color(hex: "#1A1A2E")).opacity(0.4)
+        }
+        return isDark ? .white : Color(hex: "#1A1A2E")
+    }
+
     private func submitTask() {
         let trimmed = newTaskText.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
@@ -259,4 +294,9 @@ struct MyTasksView: View {
     }
 }
 
-#Preview { MyTasksView(challengeId: "demo", userId: "user1") }
+#Preview("Light") { MyTasksView(challengeId: "demo", userId: "user1") }
+
+#Preview("Dark") {
+    MyTasksView(challengeId: "demo", userId: "user1")
+        .preferredColorScheme(.dark)
+}

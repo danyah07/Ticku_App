@@ -127,6 +127,7 @@ final class CreateChallengeViewModel: ObservableObject {
             )
         } catch {
             errorMessage = error.localizedDescription
+            ErrorHandler.shared.report(error, context: "creating challenge")
             return nil
         }
     }

@@ -67,12 +67,10 @@ final class ChallengeDetailViewModel: ObservableObject {
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let snap else { return }
                 Task { @MainActor in
-                    // endDate
                     if let endTs = snap.data()?["endDate"] as? Timestamp {
                         self.challengeEndDate = endTs.dateValue()
                         self.timeRemaining = max(0, self.challengeEndDate.timeIntervalSinceNow)
                     }
-                    // startDate
                     if let startTs = snap.data()?["startDate"] as? Timestamp {
                         let date = startTs.dateValue()
                         if date <= Date() {
@@ -81,7 +79,6 @@ final class ChallengeDetailViewModel: ObservableObject {
                     } else {
                         self.challengeStartDate = nil
                     }
-                    // inviteCode من Firebase
                     if let code = snap.data()?["inviteCode"] as? String {
                         self.inviteCode = code
                     }
@@ -129,6 +126,31 @@ final class ChallengeDetailViewModel: ObservableObject {
             .document(challengeId)
             .updateData(["startDate": Timestamp(date: now)])
         self.challengeStartDate = now
+
+        // إشعارات قرب انتهاء الوقت
+        let remaining = challengeEndDate.timeIntervalSince(now)
+        NotificationManager.shared.scheduleTimeWarnings(
+            challengeName: challenge.title,
+            secondsRemaining: remaining
+        )
+    }
+
+    func completeChallenge() async {
+        guard !challengeId.isEmpty else { return }
+        try? await db
+            .collection("challenges")
+            .document(challengeId)
+            .updateData(["status": "completed"])
+
+        // إشعار انتهاء التحدي مع الفائز
+        if let winner = members.max(by: { $0.progressPercent < $1.progressPercent }) {
+            NotificationManager.shared.sendChallengeComplete(
+                challengeName: challenge.title,
+                winnerName: winner.displayName,
+                winnerProgress: Int(winner.progressPercent)
+            )
+        }
+        NotificationManager.shared.cancelTimeWarnings(for: challenge.title)
     }
 
     var shareMessage: String {
@@ -137,7 +159,6 @@ final class ChallengeDetailViewModel: ObservableObject {
 
     func saveInviteCode() async {
         guard !challengeId.isEmpty else { return }
-        // لو ما فيه code في Firebase نحفظ واحد جديد
         let doc = try? await db.collection("challenges").document(challengeId).getDocument()
         if let existing = doc?.data()?["inviteCode"] as? String, !existing.isEmpty {
             self.inviteCode = existing

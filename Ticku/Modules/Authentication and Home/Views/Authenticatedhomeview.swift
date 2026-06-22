@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct AuthenticatedHomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
@@ -20,6 +21,9 @@ struct AuthenticatedHomeView: View {
     var onTodayTasks:        () -> Void
 
     @State private var showJoin = false
+
+    private let addTaskTip = AddTaskTip()
+    private let createChallengeTip = CreateChallengeTip()
 
     var body: some View {
         ZStack {
@@ -64,6 +68,7 @@ struct AuthenticatedHomeView: View {
                                 .frame(height: 160)
                         }
                         .buttonStyle(.plain)
+                        .popoverTip(addTaskTip, arrowEdge: .top)
 
                         StatsSidePanelView(
                             tasksCompleted: vm.tasksCompleted,
@@ -104,6 +109,7 @@ struct AuthenticatedHomeView: View {
                     // ── CTA Buttons ───────────────────────────
                     HStack(spacing: 12) {
                         PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
+                            .popoverTip(createChallengeTip, arrowEdge: .top)
                         PrimaryButtonView(title: "Join", style: .muted, action: { showJoin = true })
                     }
                     .padding(.horizontal, TickuSpacing.screenH)

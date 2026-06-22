@@ -11,6 +11,7 @@
 
 import SwiftUI
 import FirebaseCore
+import TipKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
@@ -26,6 +27,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct TickuApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var authVM = AuthViewModel()
+
+    init() {
+        try? Tips.configure([
+            .displayFrequency(.immediate),
+            .datastoreLocation(.applicationDefault)
+        ])
+        NotificationManager.shared.requestPermission()
+    }
 
     var body: some Scene {
         WindowGroup {

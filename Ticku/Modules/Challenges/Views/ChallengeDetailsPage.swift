@@ -214,10 +214,6 @@ struct ChallengeDetailsPage: View {
                                     .background((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.5))
                                     .cornerRadius(20)
                             }
-
-                            Text("\(acceptedBy.count)/\(memberCount) Accepted")
-                                .font(.system(size: 12))
-                                .foregroundColor(isDark ? .white.opacity(0.5) : .gray)
                         }
                         .padding(.horizontal, 36)
                         .padding(.vertical, 16)
@@ -233,7 +229,6 @@ struct ChallengeDetailsPage: View {
             .background(darkLightBackground.ignoresSafeArea())
             .navigationBarHidden(true)
 
-            // ── Rule Popup ────────────────────────────────
             if showRolePopup {
                 popupOverlay(
                     title: "Challenge role",
@@ -249,7 +244,6 @@ struct ChallengeDetailsPage: View {
                 )
             }
 
-            // ── Name Popup ────────────────────────────────
             if showNamePopup {
                 popupOverlay(
                     title: "Challenge name",
@@ -288,7 +282,6 @@ struct ChallengeDetailsPage: View {
         isDark ? Color(hex: "#7183B4") : Color(hex: "#5EA8FF")
     }
 
-    // MARK: - Duration — من الحين لـ endDate
     private var durationText: String {
         let remaining = challenge.endDate.timeIntervalSinceNow
         if remaining <= 0 { return "Finished" }
@@ -304,7 +297,6 @@ struct ChallengeDetailsPage: View {
         return String(format: "%02d:%02d:%02d", hours, mins, secs)
     }
 
-    // MARK: - Real-time listener
     func startListener() {
         guard let cid = challenge.id else { return }
 
@@ -332,7 +324,6 @@ struct ChallengeDetailsPage: View {
             }
     }
 
-    // MARK: - Load Member Names
     func loadMemberNames() async {
         guard let cid = challenge.id else { return }
 
@@ -348,7 +339,6 @@ struct ChallengeDetailsPage: View {
         }
     }
 
-    // MARK: - Request Rule Change
     func requestRuleChange(_ newRule: String) {
         guard let cid = challenge.id, let uid = authVM.currentUserId else { return }
 
@@ -380,7 +370,6 @@ struct ChallengeDetailsPage: View {
         )
     }
 
-    // MARK: - Accept Rule Change
     func acceptRuleChange() {
         guard let cid = challenge.id, let uid = authVM.currentUserId else { return }
 
@@ -398,7 +387,6 @@ struct ChallengeDetailsPage: View {
         }
     }
 
-    // MARK: - Update Challenge Name
     func updateChallengeName(_ name: String) {
         guard let cid = challenge.id else { return }
 

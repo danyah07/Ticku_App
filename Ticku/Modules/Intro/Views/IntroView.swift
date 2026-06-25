@@ -5,6 +5,13 @@
 //  Created by Danyah ALbarqawi on 10/05/2026.
 //
 
+//
+//  IntroView.swift
+//  firebasetrial
+//
+//  Created by Danyah ALbarqawi on 10/05/2026.
+//
+
 import SwiftUI
 
 struct IntroView: View {
@@ -15,6 +22,14 @@ struct IntroView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     private var isDark: Bool { colorScheme == .dark }
+
+    private var introActionColor: Color {
+        isDark ? Color.ticku.introActionDark : Color.ticku.introActionLight
+    }
+
+    private var introFixedPurple: Color {
+        Color.ticku.introActionLight
+    }
 
     private var backgroundColor: Color { isDark ? .black : .white }
     private var mainTextColor: Color { isDark ? .white : .black }
@@ -30,15 +45,34 @@ struct IntroView: View {
         isDark ? .white.opacity(0.85) : Color(red: 217/255, green: 217/255, blue: 217/255)
     }
 
-    private var purpleDark: Color  { Color(red: 52/255,  green: 29/255,  blue: 113/255) }
-    private var blueCircle: Color  { Color(red: 170/255, green: 209/255, blue: 252/255) }
-    private var purpleCircle: Color{ Color(red: 145/255, green: 141/255, blue: 226/255) }
-    private var grayCircle: Color  { Color(red: 219/255, green: 220/255, blue: 229/255) }
+    private var purpleDark: Color { introActionColor }
+    private var blueCircle: Color { Color(red: 170/255, green: 209/255, blue: 252/255) }
+    private var purpleCircle: Color { Color(red: 145/255, green: 141/255, blue: 226/255) }
+    private var grayCircle: Color { Color(red: 219/255, green: 220/255, blue: 229/255) }
 
     var body: some View {
-        ZStack {
-            backgroundColor.ignoresSafeArea()
+        GeometryReader { geo in
+            let baseWidth: CGFloat = 393
+            let baseHeight: CGFloat = 852
 
+            let scale = min(
+                geo.size.width / baseWidth,
+                geo.size.height / baseHeight
+            )
+
+            ZStack {
+                backgroundColor.ignoresSafeArea()
+
+                introContent
+                    .frame(width: baseWidth, height: baseHeight)
+                    .scaleEffect(min(scale, 1.35))
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
+        }
+    }
+
+    private var introContent: some View {
+        ZStack {
             TabView(selection: $viewModel.currentPage) {
                 pageOne.tag(0)
                 pageTwo.tag(1)
@@ -154,7 +188,9 @@ extension IntroView {
                                 .foregroundColor(mainTextColor)
                         }
                     }
+
                     Spacer()
+
                     if viewModel.currentPage != 2 {
                         Button {
                             withAnimation { viewModel.currentPage += 1 }
@@ -165,21 +201,18 @@ extension IntroView {
                                 .foregroundColor(mainTextColor)
                         }
                     } else {
-                        // ✅ Get Started — marks intro as seen and transitions to app
                         Button {
                             onFinish()
                         } label: {
                             ZStack {
                                 Capsule()
-                                    .fill(isDark
-                                          ? Color(red: 142/255, green: 138/255, blue: 197/255)
-                                          : Color(red: 52/255,  green: 29/255,  blue: 113/255))
+                                    .fill(introActionColor)
                                 Text("intro_start".localized)
                                     .font(.system(size: 20, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
                             }
                             .frame(width: 125, height: 50)
-                            .shadow(color: Color("Start").opacity(0.35), radius: 8, x: 0, y: 5)
+                            .shadow(color: introActionColor.opacity(0.35), radius: 8, x: 0, y: 5)
                         }
                         .buttonStyle(.plain)
                         .offset(x: 18)
@@ -196,7 +229,8 @@ extension IntroView {
             ForEach(0..<3) { index in
                 Circle()
                     .fill(viewModel.currentPage == index
-                          ? mainTextColor : Color.gray.opacity(0.35))
+                          ? mainTextColor
+                          : Color.gray.opacity(0.35))
                     .frame(width: 8, height: 8)
             }
         }
@@ -220,7 +254,7 @@ extension IntroView {
     private var userCircleTop: some View {
         Circle()
             .fill(circleFillColor)
-            .overlay(Circle().stroke(Color("Circle"), lineWidth: 5))
+            .overlay(Circle().stroke(introActionColor, lineWidth: 5))
             .frame(width: 122, height: 119)
             .overlay {
                 Text("%100")
@@ -233,7 +267,7 @@ extension IntroView {
         ZStack {
             Circle()
                 .trim(from: 0.0, to: 0.60)
-                .stroke(Color("Circle"), style: StrokeStyle(lineWidth: 12, lineCap: .round))
+                .stroke(introActionColor, style: StrokeStyle(lineWidth: 12, lineCap: .round))
                 .frame(width: 122, height: 119)
                 .rotationEffect(.degrees(260))
                 .offset(x: 1, y: -1)
@@ -251,13 +285,13 @@ extension IntroView {
     private var checkIconBig: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 58, weight: .bold))
-            .foregroundColor(Color("Check"))
+            .foregroundColor(introActionColor)
     }
 
     private var checkIconSmall: some View {
         Image(systemName: "checkmark")
             .font(.system(size: 22, weight: .bold))
-            .foregroundColor(Color("Check"))
+            .foregroundColor(introActionColor)
     }
 }
 
@@ -277,7 +311,7 @@ extension IntroView {
     private var userAvatarCircle: some View {
         Circle()
             .fill(circleFillColor)
-            .overlay(Circle().stroke(Color("Circle"), lineWidth: 6))
+            .overlay(Circle().stroke(introActionColor, lineWidth: 6))
             .frame(width: 128, height: 128)
             .overlay {
                 Image(systemName: "person.fill")
@@ -302,7 +336,7 @@ extension IntroView {
         ZStack {
             Circle()
                 .trim(from: 0.0, to: 0.80)
-                .stroke(Color("Circle"), style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                .stroke(introActionColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .frame(width: 128, height: 128)
                 .rotationEffect(.degrees(260))
                 .offset(x: 1, y: -1)
@@ -333,7 +367,11 @@ extension IntroView {
             .frame(width: 111, height: 96)
             .rotationEffect(.degrees(-10))
             .shadow(color: .black.opacity(0.14), radius: 4, x: 0, y: 4)
-            .overlay { Image(systemName: "bolt.fill").font(.system(size: 58)).foregroundColor(.black) }
+            .overlay {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 58))
+                    .foregroundColor(.black)
+            }
     }
 
     private var purpleCheckShape: some View {
@@ -345,7 +383,7 @@ extension IntroView {
             .overlay {
                 Image(systemName: "checkmark")
                     .font(.system(size: 62, weight: .bold))
-                    .foregroundColor(purpleDark)
+                    .foregroundColor(introFixedPurple)
             }
     }
 
@@ -355,10 +393,21 @@ extension IntroView {
             .frame(width: 111, height: 96)
             .rotationEffect(.degrees(-4))
             .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
-            .overlay { Image(systemName: "flame").font(.system(size: 48)).foregroundColor(.black) }
+            .overlay {
+                Image(systemName: "flame")
+                    .font(.system(size: 48))
+                    .foregroundColor(.black)
+            }
     }
 }
 
 // MARK: - PREVIEW
-#Preview("Light") { IntroView().preferredColorScheme(.light) }
-#Preview("Dark")  { IntroView().preferredColorScheme(.dark) }
+#Preview("iPhone Light") {
+    IntroView()
+        .preferredColorScheme(.light)
+}
+
+#Preview("iPhone Dark") {
+    IntroView()
+        .preferredColorScheme(.dark)
+}

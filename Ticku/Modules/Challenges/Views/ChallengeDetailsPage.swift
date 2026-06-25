@@ -33,15 +33,15 @@ struct ChallengeDetailsPage: View {
     private let db = Firestore.firestore()
 
     init(challenge: Challenge) {
-        self.challenge  = challenge
-        _challengeName  = State(initialValue: challenge.title)
-        _challengeRule  = State(initialValue: challenge.description.isEmpty ? "No rule set" : challenge.description)
+        self.challenge = challenge
+        _challengeName = State(initialValue: challenge.title)
+        _challengeRule = State(initialValue: challenge.description.isEmpty ? "No rule set" : challenge.description)
     }
 
     var body: some View {
         ZStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 0) {
 
                     // ── Pending Change Banner (top) ───────
                     if let pending = pendingRule, let requester = requestedBy {
@@ -56,20 +56,23 @@ struct ChallengeDetailsPage: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(isDark ? .white : .black)
                             }
+
                             Group {
-                                Text(isRequester ? "You" : requesterName)
-                                    .fontWeight(.bold)
+                                Text(isRequester ? "You" : requesterName).fontWeight(.bold)
                                 + Text(" requested a change")
                             }
                             .font(.system(size: 14))
                             .foregroundColor(isDark ? .white : .black)
+
                             Spacer()
+
                             if !alreadyAccepted && !isRequester {
                                 Button(action: { acceptRuleChange() }) {
                                     Text("Accepted")
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                        .padding(.horizontal, 18).padding(.vertical, 8)
+                                        .padding(.horizontal, 18)
+                                        .padding(.vertical, 8)
                                         .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                                         .cornerRadius(20)
                                 }
@@ -77,7 +80,8 @@ struct ChallengeDetailsPage: View {
                                 Text("Accepted")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                    .padding(.horizontal, 18).padding(.vertical, 8)
+                                    .padding(.horizontal, 18)
+                                    .padding(.vertical, 8)
                                     .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                                     .cornerRadius(20)
                             }
@@ -94,66 +98,80 @@ struct ChallengeDetailsPage: View {
                     HStack {
                         Button(action: { dismiss() }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(isDark ? .white : .black)
                         }
+
                         Spacer()
+
                         Text("Details")
-                            .font(.system(size: 18, weight: .bold))
+                            .font(.system(size: 24, weight: .bold))
                             .foregroundColor(isDark ? .white : .black)
+
                         Spacer()
-                        Color.clear.frame(width: 18)
+
+                        Color.clear.frame(width: 28)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 16)
+                    .padding(.horizontal, 36)
+                    .padding(.top, 5)
+                    .padding(.bottom, 50)
 
                     // ── Challenge Name ────────────────────
                     detailSection(label: "Challenge name") {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 18) {
                             Text(challengeName)
-                                .font(.system(size: 22, weight: .bold))
-                                .foregroundColor(isDark ? .white : .black)
+                                .font(.system(size: 24, weight: .black))
+                                .foregroundColor(isDark ? Color(hex: "#C9C9C9") : Color(hex: "#55555A"))
+
                             Button {
                                 newName = challengeName
                                 showNamePopup = true
                             } label: {
                                 Image(systemName: "pencil")
-                                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                                    .font(.system(size: 22, weight: .bold))
+                                    .foregroundColor(isDark ? .white : .black)
                             }
                         }
                     }
 
                     // ── Duration ──────────────────────────
                     detailSection(label: "Duration") {
-                        HStack(spacing: 8) {
-                            Image(systemName: "clock")
-                                .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71").opacity(0.6))
+                        HStack(spacing: 10) {
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(isDark ? Color(hex: "#C9C9C9").opacity(0.68) : Color(hex: "#6B6B72"))
+
                             Text(durationText)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(isDark ? .white : .black)
+                                .font(.system(size: 20, weight: .black))
+                                .foregroundColor(isDark ? Color(hex: "#C9C9C9").opacity(0.68) : Color(hex: "#6B6B72"))
                         }
-                        .padding(.horizontal, 14).padding(.vertical, 10)
-                        .background(isDark ? Color.white.opacity(0.06) : Color(hex: "#F0EDF8"))
-                        .cornerRadius(16)
+                        .padding(.horizontal, 14)
+                        .frame(height: 47)
+                        .background(isDark ? Color(hex: "#3A3944") : Color(hex: "#F0EDF8"))
+                        .cornerRadius(24)
                     }
 
                     // ── Challenge Rule ────────────────────
                     detailSection(label: "Challenge role") {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 2) {
                             if pendingRule != nil {
-                                Circle().fill(Color.red).frame(width: 8, height: 8)
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 8, height: 8)
                             }
+
                             Text(challengeRule)
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.system(size: 24, weight: .black))
                                 .foregroundColor(challengeRuleColor)
-                                .lineLimit(2)
+                                .lineLimit(1)
+
                             Button {
                                 newRole = challengeRule
                                 showRolePopup = true
                             } label: {
                                 Image(systemName: "pencil")
-                                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                                    .font(.system(size: 22, weight: .bold))
+                                    .foregroundColor(isDark ? .white : .black)
                             }
                         }
                     }
@@ -198,11 +216,10 @@ struct ChallengeDetailsPage: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(isDark ? .white.opacity(0.5) : .gray)
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 36)
                         .padding(.vertical, 16)
                         .background(isDark ? Color.white.opacity(0.05) : Color.clear)
                         .cornerRadius(20)
-                        .padding(.horizontal, isDark ? 24 : 0)
                         .padding(.top, 8)
                     }
 
@@ -258,17 +275,14 @@ struct ChallengeDetailsPage: View {
     @ViewBuilder
     private var darkLightBackground: some View {
         if isDark {
-            Color(hex: "#0A0814")
+            Color.black
         } else {
             Color.white
         }
     }
 
     private var challengeRuleColor: Color {
-        if pendingRule != nil {
-            return isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")
-        }
-        return isDark ? .white : .black
+        isDark ? Color(hex: "#7183B4") : Color(hex: "#5EA8FF")
     }
 
     // MARK: - Duration — من الحين لـ endDate
@@ -277,10 +291,10 @@ struct ChallengeDetailsPage: View {
         if remaining <= 0 { return "Finished" }
 
         let total = Int(remaining)
-        let days  = total / 86400
+        let days = total / 86400
         let hours = (total % 86400) / 3600
-        let mins  = (total % 3600) / 60
-        let secs  = total % 60
+        let mins = (total % 3600) / 60
+        let secs = total % 60
 
         if days > 1 { return "\(days) Days left" }
         if days == 1 { return "1 Day left" }
@@ -290,21 +304,25 @@ struct ChallengeDetailsPage: View {
     // MARK: - Real-time listener
     func startListener() {
         guard let cid = challenge.id else { return }
+
         listener = db.collection("challenges").document(cid)
             .addSnapshotListener { snap, _ in
                 guard let data = snap?.data() else { return }
+
                 if let pending = data["pendingRuleChange"] as? [String: Any] {
-                    pendingRule  = pending["newRule"] as? String
-                    requestedBy  = pending["requestedBy"] as? String
-                    acceptedBy   = pending["acceptedBy"] as? [String] ?? []
+                    pendingRule = pending["newRule"] as? String
+                    requestedBy = pending["requestedBy"] as? String
+                    acceptedBy = pending["acceptedBy"] as? [String] ?? []
                 } else {
-                    pendingRule  = nil
-                    requestedBy  = nil
-                    acceptedBy   = []
+                    pendingRule = nil
+                    requestedBy = nil
+                    acceptedBy = []
                 }
+
                 if let rule = data["description"] as? String {
                     challengeRule = rule
                 }
+
                 if let title = data["title"] as? String {
                     challengeName = title
                 }
@@ -314,7 +332,12 @@ struct ChallengeDetailsPage: View {
     // MARK: - Load Member Names
     func loadMemberNames() async {
         guard let cid = challenge.id else { return }
-        let snap = try? await db.collection("challenges").document(cid).collection("members").getDocuments()
+
+        let snap = try? await db.collection("challenges")
+            .document(cid)
+            .collection("members")
+            .getDocuments()
+
         snap?.documents.forEach { doc in
             if let name = doc.data()["displayName"] as? String {
                 memberNames[doc.documentID] = name
@@ -325,14 +348,19 @@ struct ChallengeDetailsPage: View {
     // MARK: - Request Rule Change
     func requestRuleChange(_ newRule: String) {
         guard let cid = challenge.id, let uid = authVM.currentUserId else { return }
+
         let pendingData: [String: Any] = [
             "newRule": newRule,
             "requestedBy": uid,
             "acceptedBy": [uid]
         ]
-        db.collection("challenges").document(cid).updateData(["pendingRuleChange": pendingData])
+
+        db.collection("challenges").document(cid).updateData([
+            "pendingRuleChange": pendingData
+        ])
 
         let requesterName = memberNames[uid] ?? "Someone"
+
         NotificationManager.shared.sendRuleChangeRequest(
             requesterName: requesterName,
             newRule: newRule,
@@ -349,6 +377,7 @@ struct ChallengeDetailsPage: View {
         ])
 
         let newAccepted = acceptedBy + [uid]
+
         if newAccepted.count >= memberCount, let pending = pendingRule {
             db.collection("challenges").document(cid).updateData([
                 "description": pending,
@@ -360,67 +389,106 @@ struct ChallengeDetailsPage: View {
     // MARK: - Update Challenge Name
     func updateChallengeName(_ name: String) {
         guard let cid = challenge.id else { return }
+
         challengeName = name
-        db.collection("challenges").document(cid).updateData(["title": name])
+        db.collection("challenges").document(cid).updateData([
+            "title": name
+        ])
     }
 
     // MARK: - Section helper
-    private func detailSection<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
+    private func detailSection<Content: View>(
+        label: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                .font(.system(size: 20, weight: .black))
+                .foregroundColor(isDark ? Color(hex: "#7F71A6") : Color(hex: "#8E78B4"))
+
             content()
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 8)
+        .padding(.horizontal, 36)
+        .padding(.bottom, 30)
     }
 
     // MARK: - Popup
-    private func popupOverlay(title: String, text: Binding<String>, buttonLabel: String, onCancel: @escaping () -> Void, onSave: @escaping () -> Void) -> some View {
+    private func popupOverlay(
+        title: String,
+        text: Binding<String>,
+        buttonLabel: String,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping () -> Void
+    ) -> some View {
         ZStack {
-            Color.black.opacity(0.3).ignoresSafeArea().onTapGesture { onCancel() }
+            Color.black.opacity(0.1)
+                .ignoresSafeArea()
+                .onTapGesture { onCancel() }
+
             VStack(alignment: .leading, spacing: 0) {
                 Text(title)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 20, weight: .black))
                     .foregroundColor(isDark ? .white : .black)
-                    .padding(.top, 20).padding(.horizontal, 24).padding(.bottom, 14)
-                TextField(title, text: text)
-                    .font(.system(size: 15))
-                    .foregroundColor(isDark ? .white : .black)
-                    .padding()
-                    .background(isDark ? Color.white.opacity(0.1) : Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 24)
+                    .padding(.top, 39)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 29)
+
+                HStack {
+                    TextField(title, text: text)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.black)
+
+                    Image(systemName: "pencil")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.black)
+                }
+                .padding(.horizontal, 22)
+                .frame(height: 49)
+                .background(isDark ? Color(hex: "#BEBEBE") : Color.white)
+                .cornerRadius(27)
+                .padding(.horizontal, 28)
+
                 HStack {
                     Spacer()
+
                     Text("\(text.wrappedValue.count)/40")
-                        .font(.system(size: 12)).foregroundColor(isDark ? .white.opacity(0.5) : .gray)
+                        .font(.system(size: 16))
+                        .foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#55555A"))
                 }
-                .padding(.horizontal, 24).padding(.top, 6).padding(.bottom, 24)
+                .padding(.horizontal, 32)
+                .padding(.top, 6)
+                .padding(.bottom, 24)
+
                 HStack(spacing: 12) {
                     Button(action: onCancel) {
                         Text("Cancel")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 20, weight: .bold))
                             .foregroundColor(isDark ? .white : .black)
-                            .frame(maxWidth: .infinity, minHeight: 52)
-                            .background(isDark ? Color.white.opacity(0.1) : Color(.systemGray5))
-                            .cornerRadius(26)
+                            .frame(maxWidth: .infinity, minHeight: 46)
+                            .background(isDark ? Color.white.opacity(0.12) : Color(hex: "#EDEDED"))
+                            .cornerRadius(30)
                     }
+
                     Button(action: onSave) {
                         Text(buttonLabel)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                            .frame(maxWidth: .infinity, minHeight: 52)
-                            .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                            .cornerRadius(26)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, minHeight: 46)
+                            .background(isDark ? Color(hex: "#341D71").opacity(0.34) : Color(hex: "#341D71"))
+                            .cornerRadius(30)
                     }
                 }
-                .padding(.horizontal, 24).padding(.bottom, 20)
+                .padding(.horizontal, 28)
+                .padding(.bottom, 24)
             }
-            .background(.ultraThinMaterial)
+            .frame(maxWidth: 363)
+            .background(isDark ? Color(hex: "#1C1C1E") : Color(hex: "#D9D9D9"))
             .cornerRadius(24)
-            .shadow(color: .black.opacity(0.12), radius: 16, x: 0, y: 6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(isDark ? Color.white.opacity(0.12) : Color(hex: "#CBCBCB"), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.18), radius: 12, x: 0, y: 6)
             .padding(.horizontal, 24)
         }
     }
@@ -430,11 +498,16 @@ struct ChallengeDetailsPage: View {
     NavigationStack {
         ChallengeDetailsPage(
             challenge: Challenge(
-                id: "preview", title: "let's do it",
+                id: "preview",
+                title: "let's do it",
                 description: "Buy dinner for the group",
-                createdBy: "uid", startDate: Date(),
+                createdBy: "uid",
+                startDate: Date(),
                 endDate: Calendar.current.date(byAdding: .day, value: 3, to: Date())!,
-                status: "active", memberCount: 2, createdAt: Date(), memberIds: ["uid"]
+                status: "active",
+                memberCount: 2,
+                createdAt: Date(),
+                memberIds: ["uid"]
             )
         )
         .environmentObject(AuthViewModel())
@@ -445,11 +518,16 @@ struct ChallengeDetailsPage: View {
     NavigationStack {
         ChallengeDetailsPage(
             challenge: Challenge(
-                id: "preview", title: "let's do it",
+                id: "preview",
+                title: "let's do it",
                 description: "Buy dinner for the group",
-                createdBy: "uid", startDate: Date(),
+                createdBy: "uid",
+                startDate: Date(),
                 endDate: Calendar.current.date(byAdding: .day, value: 3, to: Date())!,
-                status: "active", memberCount: 2, createdAt: Date(), memberIds: ["uid"]
+                status: "active",
+                memberCount: 2,
+                createdAt: Date(),
+                memberIds: ["uid"]
             )
         )
         .environmentObject(AuthViewModel())

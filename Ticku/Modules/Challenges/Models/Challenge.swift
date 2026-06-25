@@ -49,6 +49,7 @@ struct ChallengeMember: Identifiable, Codable, Equatable {
     var userId: String = ""
     var displayName: String = ""
     var profileImageURL: String? = nil
+    var profileImageBase64: String? = nil
     var progressPercent: Double = 0
     var tasksTotal: Int = 0
     var tasksCompleted: Int = 0

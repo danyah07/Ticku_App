@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct GuestHomeView: View {
     var onSignIn: () -> Void
@@ -13,6 +14,9 @@ struct GuestHomeView: View {
     var onJoinChallenge: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
+
+    private let addTaskTip = AddTaskTip()
+    private let createChallengeTip = CreateChallengeTip()
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -57,6 +61,7 @@ struct GuestHomeView: View {
                         .shadow(color: .black.opacity(isDark ? 0 : 0.05), radius: 10, x: 0, y: 4)
                         .overlay(ProgressRingView(percentage: 0))
                         .frame(height: 160)
+                        .popoverTip(addTaskTip, arrowEdge: .top)
 
                     StatsSidePanelView(tasksCompleted: 0, wins: 0)
                         .frame(height: 160)
@@ -85,6 +90,7 @@ struct GuestHomeView: View {
                 // مربوطة فعلياً بـ onSignIn للضيف (راجع HomeView.swift) — مايصل لصفحة حقيقية بدون حساب
                 HStack(spacing: 12) {
                     PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
+                        .popoverTip(createChallengeTip, arrowEdge: .top)
                     PrimaryButtonView(title: "Join", style: .muted, action: onJoinChallenge)
                 }
                 .padding(.horizontal, 20)
@@ -93,6 +99,14 @@ struct GuestHomeView: View {
             }
         }
         .background(backgroundView)
+        .onAppear {
+            // ✅ تب كيت الدائرة أول شي يطلع للضيف غير المسجل
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                AddTaskTip.hasOpenedHomeBefore = true
+            }
+            // ✅ ما فيه تحديات أصلاً للضيف — التب الثاني يطلع تلقائياً بعد إقفال الأول
+            CreateChallengeTip.hasNoActiveChallenges = true
+        }
     }
 
     @ViewBuilder

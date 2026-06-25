@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct CreateChallengeView: View {
 
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var vm = CreateChallengeViewModel()
+    private let enterTimeTip = EnterTimeTip()
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
 
@@ -114,6 +116,12 @@ struct CreateChallengeView: View {
                             purpleTimePicker
                                 .padding(.horizontal, 24)
                                 .padding(.bottom, 20)
+                                .popoverTip(enterTimeTip, arrowEdge: .top)
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                        EnterTimeTip.hasSeenTimePickerBefore = true
+                                    }
+                                }
                         }
 
                         fieldLabel("Challenge rule")

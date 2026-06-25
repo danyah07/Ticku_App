@@ -443,7 +443,14 @@ private struct MemberCard: View {
                         .animation(.easeInOut(duration: 0.4), value: progress)
                 }
                 Circle().fill(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E4F0")).frame(width: 74, height: 74)
-                if let url = member.profileImageURL, !url.isEmpty {
+                if let base64 = member.profileImageBase64, !base64.isEmpty,
+                   let data = Data(base64Encoded: base64), let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 70, height: 70)
+                        .clipShape(Circle())
+                } else if let url = member.profileImageURL, !url.isEmpty {
                     AsyncImage(url: URL(string: url)) { image in
                         image.resizable().scaledToFill()
                     } placeholder: {

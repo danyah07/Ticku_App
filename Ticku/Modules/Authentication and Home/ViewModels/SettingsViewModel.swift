@@ -68,6 +68,8 @@ final class SettingsViewModel: ObservableObject {
                 "handle":      trimmedHandle
             ]
 
+            var newImageBase64: String? = nil
+
             // ✅ Convert selected image to Base64 and save to Firestore
             if let image = selectedImage {
                 guard let base64 = imageToBase64(image) else {
@@ -76,6 +78,7 @@ final class SettingsViewModel: ObservableObject {
                 }
                 updates["profileImageBase64"] = base64
                 profileImageBase64 = base64
+                newImageBase64 = base64
                 selectedImage = nil
             }
 
@@ -84,8 +87,8 @@ final class SettingsViewModel: ObservableObject {
                 .document(uid)
                 .updateData(updates)
 
-            // ✅ تحديث الاسم في كل عضويات التحديات النشطة الحالية
-            await syncDisplayNameToActiveChallenges(uid: uid, newName: trimmedName)
+            // ✅ تحديث الاسم والصورة في كل عضويات التحديات النشطة الحالية
+            await syncProfileToActiveChallenges(uid: uid, newName: trimmedName, newImageBase64: newImageBase64)
 
             successMessage = "Profile updated!"
 
@@ -94,8 +97,8 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Sync displayName across active challenge memberships
-    private func syncDisplayNameToActiveChallenges(uid: String, newName: String) async {
+    // MARK: - Sync displayName + photo across active challenge memberships
+    private func syncProfileToActiveChallenges(uid: String, newName: String, newImageBase64: String?) async {
         do {
             let snap = try await db
                 .collection("challenges")
@@ -103,13 +106,18 @@ final class SettingsViewModel: ObservableObject {
                 .getDocuments()
 
             for doc in snap.documents {
+                var memberUpdates: [String: Any] = ["displayName": newName]
+                // الصورة تتحدث فقط لو المستخدم غيّرها فعلياً هذي المرة
+                if let newImageBase64 {
+                    memberUpdates["profileImageBase64"] = newImageBase64
+                }
                 try? await doc.reference
                     .collection("members")
                     .document(uid)
-                    .updateData(["displayName": newName])
+                    .updateData(memberUpdates)
             }
         } catch {
-            print("⚠️ Failed to sync displayName to challenges: \(error.localizedDescription)")
+            print("⚠️ Failed to sync profile to challenges: \(error.localizedDescription)")
         }
     }
 

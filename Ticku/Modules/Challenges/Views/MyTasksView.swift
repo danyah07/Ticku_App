@@ -155,9 +155,9 @@ struct MyTasksView: View {
                     }) {
                         Text("Add a task")
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
+                            .foregroundColor(.white)
                             .frame(width: 200, height: 46)
-                            .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                            .background(Color(hex: "#341D71"))
                             .cornerRadius(23)
                             .shadow(color: (isDark ? Color.clear : Color(hex: "#341D71")).opacity(0.3), radius: 8, x: 0, y: 4)
                     }

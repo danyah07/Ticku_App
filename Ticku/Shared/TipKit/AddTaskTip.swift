@@ -8,8 +8,6 @@
 import SwiftUI
 import TipKit
 
-// يطلع على دائرة "Today's Tasks" في الهوم
-// يشرح للمستخدم إنه يقدر يضغط الدائرة عشان يشوف قائمة مهامه
 struct AddTaskTip: Tip {
 
     var title: Text {

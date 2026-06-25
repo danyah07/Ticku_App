@@ -11,6 +11,9 @@ struct AllChallengesView: View {
 
     @ObservedObject var vm: HomeViewModel
     @EnvironmentObject var authVM: AuthViewModel
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
+
     var onBack: () -> Void = {}
     var onViewRoom: (Challenge) -> Void = { _ in }
     var onMyTasks: (Challenge) -> Void = { _ in }
@@ -24,12 +27,12 @@ struct AllChallengesView: View {
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color.ticku.textPrimary)
+                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     }
                     Spacer()
                     Text("Active Challenges")
                         .font(Font.ticku.sectionHeader)
-                        .foregroundColor(Color.ticku.textPrimary)
+                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     Spacer()
                     Color.clear.frame(width: 24)
                 }
@@ -55,12 +58,21 @@ struct AllChallengesView: View {
                 }
             }
         }
-        .background(Color(hex: "#F5F4FA").ignoresSafeArea())
+        .background(backgroundView)
         .navigationBarHidden(true)
         .task {
             if let uid = authVM.currentUserId {
                 await vm.loadHome(for: uid)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            Color(hex: "#0A0814").ignoresSafeArea()
+        } else {
+            Color(hex: "#F5F4FA").ignoresSafeArea()
         }
     }
 }
@@ -70,6 +82,8 @@ private struct ChallengeCard: View {
     let challenge: Challenge
     var onViewRoom: () -> Void
     var onMyTasks: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -79,7 +93,7 @@ private struct ChallengeCard: View {
                     Text(challenge.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
-                    Text("\(challenge.durationLabel) left")
+                    Text("\(challenge.memberCount) Paticipants  |  \(challenge.durationLabel) left")
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.7))
                 }
@@ -90,7 +104,7 @@ private struct ChallengeCard: View {
             }
 
             HStack(spacing: -8) {
-                ForEach(0..<3) { _ in
+                ForEach(0..<max(challenge.memberCount, 0), id: \.self) { _ in
                     Circle()
                         .fill(Color.white.opacity(0.3))
                         .frame(width: 32, height: 32)
@@ -125,12 +139,22 @@ private struct ChallengeCard: View {
             }
         }
         .padding(20)
-        .background(Color(hex: "#341D71"))
+        .background(isDark ? Color(hex: "#2A2150") : Color(hex: "#341D71"))
         .cornerRadius(20)
     }
 }
 
-#Preview {
-    AllChallengesView(vm: HomeViewModel())
-        .environmentObject(AuthViewModel())
+#Preview("Light") {
+    NavigationStack {
+        AllChallengesView(vm: HomeViewModel())
+            .environmentObject(AuthViewModel())
+    }
+}
+
+#Preview("Dark") {
+    NavigationStack {
+        AllChallengesView(vm: HomeViewModel())
+            .environmentObject(AuthViewModel())
+    }
+    .preferredColorScheme(.dark)
 }

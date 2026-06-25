@@ -9,7 +9,6 @@ import SwiftUI
 
 struct IntroView: View {
 
-    // ← Called when user taps "Get Started" on last page
     var onFinish: () -> Void = {}
 
     @StateObject private var viewModel = IntroViewModels()

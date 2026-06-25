@@ -35,8 +35,10 @@ struct ChallengeCompleteView: View {
                 continueButton
             }
         }
+        
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        
     }
 
     @ViewBuilder

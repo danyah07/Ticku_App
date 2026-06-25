@@ -10,6 +10,8 @@ import SwiftUI
 struct TodayTasksDetailView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var vm = TodayTasksDetailViewModel()
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     let activeChallenges: [Challenge]
     var onBack: () -> Void = {}
@@ -23,11 +25,11 @@ struct TodayTasksDetailView: View {
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color.ticku.textPrimary)
+                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     }
                     Text("Today Tasks")
                         .font(Font.ticku.sectionHeader)
-                        .foregroundColor(Color.ticku.textPrimary)
+                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     Spacer()
                     Color.clear.frame(width: 24)
                 }
@@ -36,7 +38,7 @@ struct TodayTasksDetailView: View {
                 .padding(.bottom, 20)
 
                 if vm.isLoading {
-                    ProgressView().tint(Color.ticku.primary)
+                    ProgressView().tint(isDark ? Color(hex: "#B296EB") : Color.ticku.primary)
                         .padding(.top, 40)
                 } else {
                     // Progress Ring
@@ -48,13 +50,13 @@ struct TodayTasksDetailView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "checkmark.circle")
                                 .font(.system(size: 40))
-                                .foregroundColor(Color.ticku.accent.opacity(0.4))
+                                .foregroundColor((isDark ? Color(hex: "#B296EB") : Color.ticku.accent).opacity(0.4))
                             Text("No tasks yet")
                                 .font(Font.ticku.bodyMedium)
-                                .foregroundColor(Color.ticku.textSecondary)
+                                .foregroundColor(isDark ? .white.opacity(0.7) : Color.ticku.textSecondary)
                             Text("Add tasks inside a challenge to track them here.")
                                 .font(Font.ticku.caption)
-                                .foregroundColor(Color.ticku.textSecondary.opacity(0.7))
+                                .foregroundColor(isDark ? .white.opacity(0.4) : Color.ticku.textSecondary.opacity(0.7))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 40)
                         }
@@ -80,7 +82,7 @@ struct TodayTasksDetailView: View {
             }
             .padding(.bottom, 32)
         }
-        .background(Color(hex: "#F5F4FA").ignoresSafeArea())
+        .background(backgroundView)
         .navigationBarHidden(true)
         .task {
             if let uid = authVM.currentUserId {
@@ -89,25 +91,34 @@ struct TodayTasksDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            Color(hex: "#0A0814").ignoresSafeArea()
+        } else {
+            Color(hex: "#F5F4FA").ignoresSafeArea()
+        }
+    }
+
     private var progressRingSection: some View {
         VStack(spacing: 8) {
             ZStack {
                 Circle()
-                    .stroke(Color.ticku.accent.opacity(0.15), lineWidth: 14)
+                    .stroke((isDark ? Color(hex: "#B296EB") : Color.ticku.accent).opacity(0.15), lineWidth: 14)
                 Circle()
                     .trim(from: 0, to: vm.overallProgress)
-                    .stroke(Color.ticku.primary, style: StrokeStyle(lineWidth: 14, lineCap: .round))
+                    .stroke(isDark ? Color(hex: "#B296EB") : Color.ticku.primary, style: StrokeStyle(lineWidth: 14, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.easeOut(duration: 1.2), value: vm.overallProgress)
                 Text("\(Int(vm.overallProgress * 100))%")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.ticku.textPrimary)
+                    .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
             }
             .frame(width: 180, height: 180)
 
             Text("\(vm.completedTasks) of \(vm.totalTasks) tasks done")
                 .font(Font.ticku.caption)
-                .foregroundColor(Color.ticku.textSecondary)
+                .foregroundColor(isDark ? .white.opacity(0.6) : Color.ticku.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -117,12 +128,14 @@ struct TodayTasksDetailView: View {
 private struct TaskGroupSection: View {
     let group: ChallengeTaskGroup
     var onToggle: (TickuTask) -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(group.challenge.title)
                 .font(Font.ticku.captionBold)
-                .foregroundColor(Color.ticku.textSecondary)
+                .foregroundColor(isDark ? .white.opacity(0.6) : Color.ticku.textSecondary)
                 .padding(.leading, 8)
                 .padding(.bottom, 2)
 
@@ -134,9 +147,13 @@ private struct TaskGroupSection: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(isDark ? Color.white.opacity(0.04) : Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: TickuRadius.lg)
+                    .stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color.clear, lineWidth: 1)
+            )
             .clipShape(RoundedRectangle(cornerRadius: TickuRadius.lg))
-            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+            .shadow(color: .black.opacity(isDark ? 0 : 0.04), radius: 8, x: 0, y: 2)
         }
     }
 }
@@ -145,13 +162,15 @@ private struct TaskGroupSection: View {
 private struct TaskRowItem: View {
     let task: TickuTask
     var onToggle: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         HStack(spacing: 14) {
             Button(action: onToggle) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(task.isCompleted ? Color.ticku.primary : Color(hex: "#E5E5EA"))
+                        .fill(task.isCompleted ? (isDark ? Color(hex: "#B296EB") : Color.ticku.primary) : (isDark ? Color.white.opacity(0.1) : Color(hex: "#E5E5EA")))
                         .frame(width: 26, height: 26)
                     if task.isCompleted {
                         Image(systemName: "checkmark")
@@ -164,8 +183,8 @@ private struct TaskRowItem: View {
 
             Text(task.title)
                 .font(Font.ticku.body)
-                .foregroundColor(task.isCompleted ? Color.ticku.textSecondary : Color.ticku.textPrimary)
-                .strikethrough(task.isCompleted, color: Color.ticku.textSecondary)
+                .foregroundColor(taskTextColor)
+                .strikethrough(task.isCompleted, color: isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
                 .animation(.easeInOut(duration: 0.15), value: task.isCompleted)
 
             Spacer()
@@ -173,12 +192,19 @@ private struct TaskRowItem: View {
             if let due = task.dueDate {
                 Text(due.shortDate)
                     .font(Font.ticku.caption)
-                    .foregroundColor(Color.ticku.textSecondary)
+                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
         .contentShape(Rectangle())
+    }
+
+    private var taskTextColor: Color {
+        if task.isCompleted {
+            return isDark ? .white.opacity(0.5) : Color.ticku.textSecondary
+        }
+        return isDark ? .white : Color.ticku.textPrimary
     }
 }
 
@@ -190,7 +216,13 @@ private extension Date {
     }
 }
 
-#Preview {
+#Preview("Light") {
     TodayTasksDetailView(activeChallenges: [])
         .environmentObject(AuthViewModel())
+}
+
+#Preview("Dark") {
+    TodayTasksDetailView(activeChallenges: [])
+        .environmentObject(AuthViewModel())
+        .preferredColorScheme(.dark)
 }

@@ -79,12 +79,12 @@ final class ProfileViewModel: ObservableObject {
         }
     }
 
+    // ✅ يجيب كل التحديات (نشطة + مكتملة) بدون أي حد أقصى — تاريخ كامل بالبروفايل
     private func fetchChallengeHistory(uid: String) async throws -> [ChallengeHistoryEntry] {
         let snap = try await db
             .collection("challenges")
             .whereField("memberIds", arrayContains: uid)
             .order(by: "endDate", descending: true)
-            .limit(to: 20)
             .getDocuments()
 
         return snap.documents.compactMap { doc -> ChallengeHistoryEntry? in

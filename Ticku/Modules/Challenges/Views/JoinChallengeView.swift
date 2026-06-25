@@ -11,6 +11,8 @@ import SwiftUI
 struct JoinChallengeView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var vm = JoinChallengeViewModel()
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var onDismiss: () -> Void = {}
     var onJoined: (Challenge) -> Void = { _ in }
@@ -25,11 +27,15 @@ struct JoinChallengeView: View {
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
-                .foregroundColor(Color.ticku.primary)
+                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.primary)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)
-                .background(Color(hex: "#F5F4FB"))
+                .background(isDark ? Color.white.opacity(0.05) : Color(hex: "#F5F4FB"))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(isDark ? Color(hex: "#B296EB").opacity(0.2) : Color.clear, lineWidth: 1)
+                )
                 .onChange(of: vm.inviteCode) {
                     vm.inviteCode = String(
                         vm.inviteCode
@@ -62,11 +68,7 @@ struct JoinChallengeView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(
-                    vm.isCodeValid
-                        ? Color.ticku.primary
-                        : Color.ticku.primary.opacity(0.4)
-                )
+                .background(joinButtonBackground)
                 .clipShape(Capsule())
             }
             .disabled(!vm.isCodeValid || vm.isLoading)
@@ -78,9 +80,14 @@ struct JoinChallengeView: View {
             }
         }
     }
+
+    private var joinButtonBackground: Color {
+        let base = isDark ? Color(hex: "#B296EB") : Color.ticku.primary
+        return vm.isCodeValid ? base : base.opacity(0.4)
+    }
 }
 
-#Preview {
+#Preview("Light") {
     ZStack {
         Color.gray.opacity(0.3).ignoresSafeArea()
         VStack(spacing: 16) {
@@ -94,4 +101,26 @@ struct JoinChallengeView: View {
         .cornerRadius(24)
         .padding(.horizontal, 24)
     }
+}
+
+#Preview("Dark") {
+    ZStack {
+        Color.black.ignoresSafeArea()
+        VStack(spacing: 16) {
+            Text("Enter invite code")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
+            JoinChallengeView()
+                .environmentObject(AuthViewModel())
+        }
+        .padding(24)
+        .background(Color(hex: "#1A1530"))
+        .cornerRadius(24)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color(hex: "#B296EB").opacity(0.25), lineWidth: 1)
+        )
+        .padding(.horizontal, 24)
+    }
+    .preferredColorScheme(.dark)
 }

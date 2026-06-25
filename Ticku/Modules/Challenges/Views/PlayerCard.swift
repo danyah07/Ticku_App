@@ -17,7 +17,9 @@ struct PlayerCard: View {
 
         VStack(spacing: 8) {
 
+
             // MARK: - Progress Circle
+            
             ZStack {
 
                 Circle()

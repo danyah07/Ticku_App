@@ -11,6 +11,8 @@ import TipKit
 struct AuthenticatedHomeView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @ObservedObject var vm: HomeViewModel
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var onSeeAllChallenges: () -> Void
     var onCreateChallenge:  () -> Void
@@ -27,6 +29,8 @@ struct AuthenticatedHomeView: View {
 
     var body: some View {
         ZStack {
+            backgroundView
+
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
 
@@ -36,12 +40,12 @@ struct AuthenticatedHomeView: View {
                             HStack(spacing: 5) {
                                 Text("Hello")
                                     .font(Font.ticku.bodyMedium)
-                                    .foregroundColor(Color.ticku.textSecondary)
+                                    .foregroundColor(isDark ? .white.opacity(0.6) : Color.ticku.textSecondary)
                                 Text("👋")
                             }
                             Text(vm.currentUser?.displayName ?? "")
                                 .font(Font.ticku.largeTitle)
-                                .foregroundColor(Color.ticku.textPrimary)
+                                .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                         }
                         Spacer()
                         Button(action: onProfile) {
@@ -55,15 +59,19 @@ struct AuthenticatedHomeView: View {
                     // ── Today's Tasks ─────────────────────────
                     Text("Today's Tasks")
                         .font(Font.ticku.sectionHeader)
-                        .foregroundColor(Color.ticku.textPrimary)
+                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                         .padding(.horizontal, TickuSpacing.screenH)
                         .padding(.bottom, 12)
 
                     HStack(spacing: 12) {
                         Button(action: onTodayTasks) {
                             RoundedRectangle(cornerRadius: TickuRadius.lg)
-                                .fill(Color.white)
-                                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
+                                .fill(isDark ? Color.white.opacity(0.04) : Color.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: TickuRadius.lg)
+                                        .stroke(isDark ? Color(hex: "#B296EB").opacity(0.2) : Color.clear, lineWidth: 1)
+                                )
+                                .shadow(color: .black.opacity(isDark ? 0 : 0.05), radius: 10, x: 0, y: 4)
                                 .overlay(ProgressRingView(percentage: vm.progressPercent / 100))
                                 .frame(height: 160)
                         }
@@ -72,7 +80,7 @@ struct AuthenticatedHomeView: View {
 
                         StatsSidePanelView(
                             tasksCompleted: vm.tasksCompleted,
-                            wins: vm.currentUser?.currentStreak ?? 0
+                            wins: vm.currentUser?.totalWins ?? 0
                         )
                         .frame(height: 160)
                     }
@@ -82,12 +90,12 @@ struct AuthenticatedHomeView: View {
                     HStack {
                         Text("Active Challenge")
                             .font(Font.ticku.sectionHeader)
-                            .foregroundColor(Color.ticku.textPrimary)
+                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                         Spacer()
                         Button(action: onSeeAllChallenges) {
                             Text("See all")
                                 .font(Font.ticku.smallButton)
-                                .foregroundColor(Color.ticku.accent)
+                                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.accent)
                         }
                     }
                     .padding(.horizontal, TickuSpacing.screenH)
@@ -125,14 +133,14 @@ struct AuthenticatedHomeView: View {
 
             // ── Join Popup ────────────────────────────────
             if showJoin {
-                Color.black.opacity(0.3)
+                Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .onTapGesture { showJoin = false }
 
                 VStack(spacing: 16) {
                     Text("Enter invite code")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color.ticku.textPrimary)
+                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
 
                     JoinChallengeView(
                         onDismiss: { showJoin = false },
@@ -145,13 +153,64 @@ struct AuthenticatedHomeView: View {
                     .environmentObject(authVM)
                 }
                 .padding(24)
-                .background(Color.white)
+                .background(isDark ? Color(hex: "#1A1530") : Color.white)
                 .cornerRadius(24)
-                .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(isDark ? Color(hex: "#B296EB").opacity(0.25) : Color.clear, lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(isDark ? 0 : 0.15), radius: 20, x: 0, y: 8)
                 .padding(.horizontal, 24)
                 .transition(.scale.combined(with: .opacity))
                 .animation(.spring(response: 0.3), value: showJoin)
             }
         }
     }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            LinearGradient(
+                colors: [
+                    Color(hex: "#0A0814"),
+                    Color(hex: "#0A0814"),
+                    Color(hex: "#1A1530")
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        } else {
+            Color.clear
+        }
+    }
+}
+
+#Preview("Light") {
+    AuthenticatedHomeView(
+        vm: HomeViewModel(),
+        onSeeAllChallenges: {},
+        onCreateChallenge: {},
+        onJoinChallenge: {},
+        onViewRoom: { _ in },
+        onMyTasks: { _ in },
+        onProfile: {},
+        onTodayTasks: {}
+    )
+    .environmentObject(AuthViewModel())
+}
+
+#Preview("Dark") {
+    AuthenticatedHomeView(
+        vm: HomeViewModel(),
+        onSeeAllChallenges: {},
+        onCreateChallenge: {},
+        onJoinChallenge: {},
+        onViewRoom: { _ in },
+        onMyTasks: { _ in },
+        onProfile: {},
+        onTodayTasks: {}
+    )
+    .environmentObject(AuthViewModel())
+    .preferredColorScheme(.dark)
 }

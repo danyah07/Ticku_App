@@ -48,12 +48,23 @@ enum DurationOption: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// MARK: - ChallengeType
+enum ChallengeType: String, CaseIterable, Identifiable {
+    case solo  = "solo"
+    case group = "group"
+
+    var id: String { rawValue }
+    var label: String { self == .solo ? "solo" : "Group" }
+    var icon: String { self == .solo ? "person.fill" : "person.2.fill" }
+}
+
 // MARK: - CreateChallengeViewModel
 @MainActor
 final class CreateChallengeViewModel: ObservableObject {
 
     @Published var challengeName: String = ""
     @Published var selectedDuration: DurationOption = .days7
+    @Published var selectedType: ChallengeType = .group
     @Published var challengeRule: String = ""
     @Published var hourText: String = ""
     @Published var minuteText: String = ""
@@ -82,18 +93,23 @@ final class CreateChallengeViewModel: ObservableObject {
         let end    = selectedDuration.endDate(from: now, hour: hour, minute: minute)
         let code   = Self.generateCode()
 
-        let data: [String: Any] = [
-            "title":        challengeName.trimmingCharacters(in: .whitespaces),
-            "description":  challengeRule.trimmingCharacters(in: .whitespaces),
-            "createdBy":    creatorId,
-            "startDate":    NSNull(),  // ← null حتى يضغط START
-            "endDate":      Timestamp(date: end),
-            "status":       "active",
-            "memberCount":  1,
-            "memberIds":    [creatorId],
-            "inviteCode":   code,
-            "createdAt":    Timestamp(date: now)
+        var data: [String: Any] = [
+            "title":         challengeName.trimmingCharacters(in: .whitespaces),
+            "description":   challengeRule.trimmingCharacters(in: .whitespaces),
+            "createdBy":     creatorId,
+            "startDate":     NSNull(),  // ← null حتى يضغط START
+            "endDate":       Timestamp(date: end),
+            "status":        "active",
+            "memberCount":   1,
+            "memberIds":     [creatorId],
+            "createdAt":     Timestamp(date: now),
+            "challengeType": selectedType.rawValue
         ]
+
+        // لو Solo ما نضيف inviteCode أصلاً — ما يقدر أحد ينضم
+        if selectedType == .group {
+            data["inviteCode"] = code
+        }
 
         do {
             let ref = try await db.collection("challenges").addDocument(data: data)
@@ -123,7 +139,8 @@ final class CreateChallengeViewModel: ObservableObject {
                 status: "active",
                 memberCount: 1,
                 createdAt: now,
-                memberIds: [creatorId]
+                memberIds: [creatorId],
+                challengeType: selectedType.rawValue
             )
         } catch {
             errorMessage = error.localizedDescription

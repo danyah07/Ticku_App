@@ -29,6 +29,7 @@ struct TickuUser: Identifiable, Codable {
     var email: String = ""
     var appleUserIdentifier: String? = nil
     var totalChallengesCompleted: Int = 0
+    var totalWins: Int = 0
     var currentStreak: Int = 0
     var longestStreak: Int = 0
     var lastActiveDate: Date? = nil
@@ -52,22 +53,23 @@ final class HomeViewModel: ObservableObject {
     @Published var tasksTotal: Int = 0
 
     private let db = Firestore.firestore()
+    private var userListener: ListenerRegistration?
 
     func loadHome(for uid: String) async {
         isLoading = true
         defer { isLoading = false }
         do {
-            currentUser      = try await fetchUser(uid: uid)
+            startUserListener(uid: uid)
             activeChallenges = try await fetchActiveChallenges(uid: uid)
-            if let first = activeChallenges.first, let cid = first.id {
-                try await fetchMyProgress(challengeId: cid, uid: uid)
-            }
+            try await fetchMyOverallProgress(uid: uid)
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
     func reset() {
+        userListener?.remove()
+        userListener = nil
         currentUser      = nil
         activeChallenges = []
         progressPercent  = 0
@@ -75,9 +77,19 @@ final class HomeViewModel: ObservableObject {
         tasksTotal       = 0
     }
 
-    private func fetchUser(uid: String) async throws -> TickuUser {
-        let doc = try await db.collection("users").document(uid).getDocument()
-        return try doc.data(as: TickuUser.self)
+    // ✅ Listener حي — يحدث currentUser تلقائياً فور أي تغيير بـ Firestore
+    // (مثلاً تعديل الاسم من صفحة Settings ينعكس مباشرة بالهوم بدون إعادة تحميل)
+    private func startUserListener(uid: String) {
+        userListener?.remove()
+        userListener = db
+            .collection("users")
+            .document(uid)
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap, snap.exists else { return }
+                Task { @MainActor in
+                    self.currentUser = try? snap.data(as: TickuUser.self)
+                }
+            }
     }
 
     private func fetchActiveChallenges(uid: String) async throws -> [Challenge] {
@@ -85,20 +97,38 @@ final class HomeViewModel: ObservableObject {
             .collection("challenges")
             .whereField("status", isEqualTo: "active")
             .whereField("memberIds", arrayContains: uid)
-            .order(by: "endDate")
-            .limit(to: 5)
+            .order(by: "createdAt", descending: true)
             .getDocuments()
         return snap.documents.compactMap { try? $0.data(as: Challenge.self) }
     }
 
-    private func fetchMyProgress(challengeId: String, uid: String) async throws {
-        let doc = try await db
-            .collection("challenges").document(challengeId)
-            .collection("members").document(uid)
-            .getDocument()
-        let member = try doc.data(as: ChallengeMember.self)
-        progressPercent = member.progressPercent
-        tasksCompleted  = member.tasksCompleted
-        tasksTotal      = member.tasksTotal
+    // ✅ يجمع تقدمك من كل التحديات النشطة مع بعض — مو بس أول واحد
+    // النسبة الكلية = (كل المهام المكتملة عبر كل التحديات) ÷ (كل المهام الكلية عبر كل التحديات)
+    private func fetchMyOverallProgress(uid: String) async throws {
+        guard !activeChallenges.isEmpty else {
+            progressPercent = 0
+            tasksCompleted  = 0
+            tasksTotal      = 0
+            return
+        }
+
+        var totalCompleted = 0
+        var totalTasks     = 0
+
+        for challenge in activeChallenges {
+            guard let cid = challenge.id else { continue }
+            let doc = try? await db
+                .collection("challenges").document(cid)
+                .collection("members").document(uid)
+                .getDocument()
+
+            guard let member = try? doc?.data(as: ChallengeMember.self) else { continue }
+            totalCompleted += member.tasksCompleted
+            totalTasks     += member.tasksTotal
+        }
+
+        tasksCompleted  = totalCompleted
+        tasksTotal      = totalTasks
+        progressPercent = totalTasks > 0 ? (Double(totalCompleted) / Double(totalTasks)) * 100 : 0
     }
 }

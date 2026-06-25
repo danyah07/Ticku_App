@@ -84,10 +84,32 @@ final class SettingsViewModel: ObservableObject {
                 .document(uid)
                 .updateData(updates)
 
+            // ✅ تحديث الاسم في كل عضويات التحديات النشطة الحالية
+            await syncDisplayNameToActiveChallenges(uid: uid, newName: trimmedName)
+
             successMessage = "Profile updated!"
 
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    // MARK: - Sync displayName across active challenge memberships
+    private func syncDisplayNameToActiveChallenges(uid: String, newName: String) async {
+        do {
+            let snap = try await db
+                .collection("challenges")
+                .whereField("memberIds", arrayContains: uid)
+                .getDocuments()
+
+            for doc in snap.documents {
+                try? await doc.reference
+                    .collection("members")
+                    .document(uid)
+                    .updateData(["displayName": newName])
+            }
+        } catch {
+            print("⚠️ Failed to sync displayName to challenges: \(error.localizedDescription)")
         }
     }
 

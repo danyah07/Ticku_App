@@ -18,6 +18,8 @@ struct AvatarView: View {
     var size: CGFloat = 44
     // Optional Base64 override — takes priority over URL
     var base64: String? = nil
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         Group {
@@ -50,7 +52,7 @@ struct AvatarView: View {
         .clipShape(Circle())
         .overlay(
             Circle()
-                .stroke(Color.ticku.accent.opacity(0.3), lineWidth: 1.5)
+                .stroke(isDark ? Color(hex: "#B296EB") : Color.ticku.primary, lineWidth: size * 0.077)
         )
     }
 

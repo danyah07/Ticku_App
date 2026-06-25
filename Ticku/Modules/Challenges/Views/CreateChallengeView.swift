@@ -18,7 +18,7 @@ struct CreateChallengeView: View {
     var onCreated: (Challenge) -> Void = { _ in }
 
     private var screenBackground: Color {
-        isDark ? Color(hex: "#000000") : Color(hex: "#F5F4FB")
+        isDark ? Color(hex: "#0A0814") : Color(hex: "#F5F4FB")
     }
 
     var body: some View {
@@ -54,6 +54,33 @@ struct CreateChallengeView: View {
                         inputField(placeholder: "e.g. 30-Day Grind", text: $vm.challengeName)
                             .padding(.horizontal, 24)
                             .padding(.bottom, 28)
+
+                        fieldLabel("Challenge type")
+                        HStack(spacing: 10) {
+                            ForEach(ChallengeType.allCases) { type in
+                                Button(action: { vm.selectedType = type }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: type.icon)
+                                            .font(.system(size: 16, weight: .semibold))
+                                        Text(type.label)
+                                            .font(.system(size: 15, weight: .semibold))
+                                    }
+                                    .foregroundColor(typeTextColor(selected: vm.selectedType == type))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .background(typeBackground(selected: vm.selectedType == type))
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule().stroke(
+                                            vm.selectedType == type ? Color.clear : (isDark ? Color.white.opacity(0.2) : Color(hex: "#DDDAEE")),
+                                            lineWidth: 1.5
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
 
                         fieldLabel("Duration")
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -114,7 +141,7 @@ struct CreateChallengeView: View {
                             } else {
                                 Text("Create")
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
+                                    .foregroundColor(.white)
                             }
                         }
                         .frame(width: 220, height: 44)
@@ -146,27 +173,33 @@ struct CreateChallengeView: View {
         .withErrorHandling()
     }
 
+    // ── أزرار ثابتة بنفس اللون بكل الأوضاع ──
     private var createButtonBackground: Color {
         guard vm.isFormValid else {
             return isDark ? Color.white.opacity(0.15) : Color(hex: "#C4C4C4")
         }
-        return isDark ? Color(hex: "#B296EB") : Color.ticku.primary
+        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
+    }
+
+    private func typeTextColor(selected: Bool) -> Color {
+        selected ? .white : Color(hex: "#341D71")
+    }
+
+    private func typeBackground(selected: Bool) -> Color {
+        guard selected else { return isDark ? Color.white.opacity(0.05) : Color.white }
+        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
     }
 
     private func durationTextColor(selected: Bool) -> Color {
-        if selected {
-            return isDark ? Color(hex: "#E0D6FA") : .white
-        }
-        return isDark ? .white : Color.ticku.primary
+        selected ? .white : Color(hex: "#341D71")
     }
 
     private func durationBackground(selected: Bool) -> Color {
-        if selected {
-            return isDark ? Color(hex: "#B296EB") : Color.ticku.primary
-        }
-        return isDark ? Color.white.opacity(0.05) : Color.white
+        guard selected else { return isDark ? Color.white.opacity(0.05) : Color.white }
+        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
     }
 
+    // ── تايمر الوقت ثابت اللون بكل الأوضاع ──
     private var purpleTimePicker: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Enter time")
@@ -188,7 +221,7 @@ struct CreateChallengeView: View {
             .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity)
-        .background(isDark ? Color(hex: "#265283") : Color(hex: "#341D71"))
+        .background(isDark ? Color(hex: "#2A1F5C") : Color(hex: "#341D71"))
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
@@ -197,7 +230,7 @@ struct CreateChallengeView: View {
         VStack(alignment: .leading, spacing: 6) {
             TextField("00", text: text)
                 .font(.system(size: 32, weight: .bold))
-                .foregroundColor(isDark ? Color(hex: "#265283") : Color(hex: "#341D71"))
+                .foregroundColor(Color(hex: "#341D71"))
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
                 .frame(maxWidth: .infinity)

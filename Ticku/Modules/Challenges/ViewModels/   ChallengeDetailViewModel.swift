@@ -118,8 +118,20 @@ final class ChallengeDetailViewModel: ObservableObject {
         return String(format: "%02d:%02d:%02d", hours, mins, secs)
     }
 
-    func startChallenge() async {
-        guard !challengeId.isEmpty else { return }
+    // ✅ يرجع false ولا يبدأ التحدي لو فيه عضو بدون تاسكات
+    @discardableResult
+    func startChallenge() async -> Bool {
+        guard !challengeId.isEmpty else { return false }
+
+        // شرط: كل الأعضاء لازم يكتبوا تاسك واحد على الأقل قبل البدء
+        if let memberWithoutTasks = members.first(where: { $0.tasksTotal == 0 }) {
+            errorMessage = "\(memberWithoutTasks.displayName) hasn't added any tasks yet."
+            ErrorHandler.shared.report(
+                AppError.invalidInput("\(memberWithoutTasks.displayName) hasn't added any tasks yet.")
+            )
+            return false
+        }
+
         let now = Date()
         try? await db
             .collection("challenges")
@@ -133,6 +145,7 @@ final class ChallengeDetailViewModel: ObservableObject {
             challengeName: challenge.title,
             secondsRemaining: remaining
         )
+        return true
     }
 
     func completeChallenge() async {
@@ -149,7 +162,18 @@ final class ChallengeDetailViewModel: ObservableObject {
                 winnerName: winner.displayName,
                 winnerProgress: Int(winner.progressPercent)
             )
+
+            // ✅ نزيد totalWins للفائز فعلياً بـ Firestore (المركز الأول)
+            try? await db.collection("users").document(winner.userId)
+                .updateData(["totalWins": FieldValue.increment(Int64(1))])
         }
+
+        // ✅ نزيد totalChallengesCompleted لكل الأعضاء (شاركوا بتحدي خلص)
+        for member in members {
+            try? await db.collection("users").document(member.userId)
+                .updateData(["totalChallengesCompleted": FieldValue.increment(Int64(1))])
+        }
+
         NotificationManager.shared.cancelTimeWarnings(for: challenge.title)
     }
 

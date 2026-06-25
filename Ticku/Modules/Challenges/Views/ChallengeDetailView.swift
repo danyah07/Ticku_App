@@ -4,7 +4,6 @@
 //
 //  Created by Danyah ALbarqawi on 10/05/2026.
 //
-
 //
 //  ChallengeDetailView.swift
 //  firebasetrial
@@ -50,23 +49,27 @@ struct ChallengeDetailView: View {
         ZStack {
             backgroundView
 
-            VStack(spacing: 0) {
+            if vm.challenge.isSolo {
+                soloLayout
+            } else {
+                VStack(spacing: 0) {
 
-                // ── Nav Bar ───────────────────────────────
-                navBarSection
+                    // ── Nav Bar ───────────────────────────────
+                    navBarSection
 
-                Spacer().frame(height: 36)
+                    Spacer().frame(height: 36)
 
-                // ── Title ─────────────────────────────────
-                titleSection
+                    // ── Title ─────────────────────────────────
+                    titleSection
 
-                Spacer().frame(height: 8)
+                    Spacer().frame(height: 8)
 
-                timerSection
+                    timerSection
 
-                Spacer().frame(height: 24)
+                    Spacer().frame(height: 24)
 
-                membersGridSection
+                    membersGridSection
+                }
             }
         }
         .navigationBarHidden(true)
@@ -125,6 +128,81 @@ struct ChallengeDetailView: View {
             }
         }
         .withErrorHandling()
+    }
+
+    // MARK: - Solo Layout
+    @ViewBuilder
+    private var soloLayout: some View {
+        VStack(spacing: 0) {
+            // Nav bar بدون زر مشاركة — فقط back و menu (لو بدأ)
+            HStack {
+                Button(action: onBack) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(isDark ? .white : .black)
+                }
+                Spacer()
+                if vm.timerDisplay != "START" {
+                    menuButton
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+
+            Spacer().frame(height: 36)
+
+            titleSection
+
+            Spacer().frame(height: 8)
+
+            timerSection
+
+            Spacer().frame(height: 30)
+
+            if let me = vm.members.first(where: { $0.userId == authVM.currentUserId }) {
+                Button(action: { onMyTasks(vm.challenge) }) {
+                    soloCard(member: me)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 16)
+                .popoverTip(streakTip, arrowEdge: .top)
+            }
+
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private func soloCard(member: ChallengeMember) -> some View {
+        VStack(spacing: 10) {
+            Circle()
+                .fill(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E4F0"))
+                .frame(width: 64, height: 64)
+                .overlay(
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#341D71"))
+                )
+
+            Text("\(Int(member.progressPercent))%")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(isDark ? .white.opacity(0.6) : Color(hex: "#9E9E9E"))
+
+            Text("ME")
+                .font(.system(size: 16, weight: .black))
+                .foregroundColor(isDark ? .white : .black)
+
+            Text("View tasks »")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#5B6AD4"))
+        }
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(isDark ? Color.white.opacity(0.04) : Color.white.opacity(0.6))
+                .overlay(RoundedRectangle(cornerRadius: 24).stroke(isDark ? Color(hex: "#B296EB").opacity(0.2) : Color(hex: "#E2DDEF"), lineWidth: 1))
+        )
     }
 
     // MARK: - Background (Light / Dark)

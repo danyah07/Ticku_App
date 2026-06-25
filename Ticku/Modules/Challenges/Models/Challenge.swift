@@ -24,8 +24,10 @@ struct Challenge: Identifiable, Codable, Hashable {
     var memberCount: Int = 0
     var createdAt: Date = Date()
     var memberIds: [String] = []
+    var challengeType: String = "group"   // "solo" أو "group"
 
     var isActive: Bool { status == "active" }
+    var isSolo: Bool { challengeType == "solo" }
 
     var daysLeft: Int {
         max(0, Calendar.current.dateComponents([.day], from: Date(), to: endDate).day ?? 0)

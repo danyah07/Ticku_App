@@ -81,6 +81,8 @@ struct GuestHomeView: View {
                     .padding(.horizontal, 20)
 
                 // ── CTA Buttons ────────────────────────────
+                // ✅ تستدعي onCreateChallenge/onJoinChallenge اللي تجي من HomeView
+                // مربوطة فعلياً بـ onSignIn للضيف (راجع HomeView.swift) — مايصل لصفحة حقيقية بدون حساب
                 HStack(spacing: 12) {
                     PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
                     PrimaryButtonView(title: "Join", style: .muted, action: onJoinChallenge)
@@ -90,7 +92,16 @@ struct GuestHomeView: View {
                 .padding(.bottom, 32)
             }
         }
-        .background(isDark ? Color(hex: "#0A0814").ignoresSafeArea() as! Color : Color.clear)
+        .background(backgroundView)
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            Color(hex: "#0A0814").ignoresSafeArea()
+        } else {
+            Color.clear
+        }
     }
 }
 

@@ -119,16 +119,27 @@ final class ChallengeDetailViewModel: ObservableObject {
     }
 
     // ✅ يرجع false ولا يبدأ التحدي لو فيه عضو بدون تاسكات
+    // نقرأ مباشرة من Firestore (مش من vm.members المحلي) عشان نتجنب تأخير الـ listener
     @discardableResult
     func startChallenge() async -> Bool {
         guard !challengeId.isEmpty else { return false }
 
-        // شرط: كل الأعضاء لازم يكتبوا تاسك واحد على الأقل قبل البدء
-        if let memberWithoutTasks = members.first(where: { $0.tasksTotal == 0 }) {
-            errorMessage = "\(memberWithoutTasks.displayName) hasn't added any tasks yet."
-            ErrorHandler.shared.report(
-                AppError.invalidInput("\(memberWithoutTasks.displayName) hasn't added any tasks yet.")
-            )
+        do {
+            let snap = try await db
+                .collection("challenges").document(challengeId)
+                .collection("members")
+                .getDocuments()
+
+            let freshMembers = snap.documents.compactMap { try? $0.data(as: ChallengeMember.self) }
+
+            if let memberWithoutTasks = freshMembers.first(where: { $0.tasksTotal == 0 }) {
+                let message = "\(memberWithoutTasks.displayName) hasn't added any tasks yet."
+                errorMessage = message
+                ErrorHandler.shared.report(AppError.invalidInput(message))
+                return false
+            }
+        } catch {
+            ErrorHandler.shared.report(error, context: "checking members before start")
             return false
         }
 

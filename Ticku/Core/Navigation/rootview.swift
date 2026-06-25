@@ -55,16 +55,23 @@ struct RootView: View {
                     .toolbar(.hidden, for: .navigationBar)
 
                 case .createChallenge:
-                    CreateChallengeView(
-                        onBack: { navManager.goBack() },
-                        onCreated: { challenge in
-                            navManager.goHome()
-                            navManager.navigate(to: .challengeRoom(challenge))
-                        }
-                    )
-                    .environmentObject(authVM)
-                    .navigationBarHidden(true)
-                    .toolbar(.hidden, for: .navigationBar)
+                    if authVM.isAuthenticated {
+                        CreateChallengeView(
+                            onBack: { navManager.goBack() },
+                            onCreated: { challenge in
+                                navManager.goHome()
+                                navManager.navigate(to: .challengeRoom(challenge))
+                            }
+                        )
+                        .environmentObject(authVM)
+                        .navigationBarHidden(true)
+                        .toolbar(.hidden, for: .navigationBar)
+                    } else {
+                        SignInView(onBack: { navManager.goBack() })
+                            .environmentObject(authVM)
+                            .navigationBarHidden(true)
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
 
                 case .challengeRoom(let challenge):
                     ChallengeDetailView(
@@ -98,17 +105,24 @@ struct RootView: View {
                     .toolbar(.hidden, for: .navigationBar)
 
                 case .joinChallenge:
-                    JoinChallengeView(
-                        onDismiss: { navManager.goBack() },
-                        onJoined: { challenge in
-                            navManager.goBack()
-                            navManager.navigate(to: .challengeRoom(challenge))
-                        },
-                        displayName: ""
-                    )
-                    .environmentObject(authVM)
-                    .navigationBarHidden(true)
-                    .toolbar(.hidden, for: .navigationBar)
+                    if authVM.isAuthenticated {
+                        JoinChallengeView(
+                            onDismiss: { navManager.goBack() },
+                            onJoined: { challenge in
+                                navManager.goBack()
+                                navManager.navigate(to: .challengeRoom(challenge))
+                            },
+                            displayName: ""
+                        )
+                        .environmentObject(authVM)
+                        .navigationBarHidden(true)
+                        .toolbar(.hidden, for: .navigationBar)
+                    } else {
+                        SignInView(onBack: { navManager.goBack() })
+                            .environmentObject(authVM)
+                            .navigationBarHidden(true)
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
 
                 case .home:
                     EmptyView()

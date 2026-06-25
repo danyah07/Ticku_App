@@ -25,9 +25,9 @@ struct StatsSidePanelView: View {
                 color: Color(hex: "#6B5CE7")
             )
             statCard(
-                icon: "flame.fill",
+                icon: "trophy.fill",
                 value: "\(wins)",
-                label: "Streak",
+                label: "Wins",
                 color: Color(hex: "#FF6B6B")
             )
         }
@@ -131,4 +131,3 @@ struct ActiveChallengeCardView: View {
             .frame(height: 165)
     }
 }
-

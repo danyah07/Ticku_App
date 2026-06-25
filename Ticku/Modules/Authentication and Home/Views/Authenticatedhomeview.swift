@@ -130,6 +130,16 @@ struct AuthenticatedHomeView: View {
                     await vm.loadHome(for: uid)
                 }
             }
+            .onAppear {
+                // ✅ نأخر التسجيل قليلاً عشان TipKit يقدر يعرض الـ tip أول مرة قبل ما نقفله
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    AddTaskTip.hasOpenedHomeBefore = true
+                }
+                CreateChallengeTip.hasNoActiveChallenges = vm.activeChallenges.isEmpty
+            }
+            .onChange(of: vm.activeChallenges) {
+                CreateChallengeTip.hasNoActiveChallenges = vm.activeChallenges.isEmpty
+            }
 
             // ── Join Popup ────────────────────────────────
             if showJoin {

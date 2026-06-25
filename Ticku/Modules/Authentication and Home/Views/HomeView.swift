@@ -48,10 +48,12 @@ struct HomeView: View {
                 )
                 .transition(.opacity.animation(.easeInOut(duration: 0.3)))
             } else {
+                // ✅ زر Create/Join للضيف (غير المسجل) يحوّل لتسجيل الدخول أول
+                // مايقدر يصل لصفحة Create/Join الحقيقية بدون حساب
                 GuestHomeView(
                     onSignIn:          onSignIn,
-                    onCreateChallenge: onCreateChallenge,
-                    onJoinChallenge:   onJoinChallenge
+                    onCreateChallenge: onSignIn,
+                    onJoinChallenge:   onSignIn
                 )
                 .transition(.opacity.animation(.easeInOut(duration: 0.3)))
             }

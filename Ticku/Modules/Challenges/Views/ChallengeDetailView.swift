@@ -108,8 +108,10 @@ struct ChallengeDetailView: View {
             startPendingListener()
         }
         .onChange(of: vm.timerDisplay) {
-            if vm.timerDisplay == "START" {
-                streakTip.invalidate(reason: .tipClosed)
+            if vm.timerDisplay != "START" {
+                // ✅ بعد START، التب لازم يختفي ولا يطلع مرة ثانية لهذا المستخدم
+                StreakTip.hasStartedChallengeBefore = true
+                streakTip.invalidate(reason: .actionPerformed)
             }
         }
         .onDisappear {

@@ -109,7 +109,7 @@ struct ProfileView: View {
     // MARK: - Stats Pill
     private var statsPill: some View {
         HStack(spacing: 0) {
-            statCell(value: "\(vm.profile?.totalChallengesCompleted ?? 0)", label: "Challenges")
+            statCell(value: "\(vm.challenges.count)", label: "Challenges")
             Divider().frame(height: 40)
             statCell(value: "\(vm.winRate)%", label: "Win Rate")
         }

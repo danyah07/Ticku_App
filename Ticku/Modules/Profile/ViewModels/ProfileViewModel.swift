@@ -28,13 +28,14 @@ import Combine
 final class ProfileViewModel: ObservableObject {
 
     @Published var profile: UserProfile? = nil
-    @Published var challenges: [ChallengeHistoryEntry] = []
+    @Published var challenges: [ChallengeHistoryEntry] = []   // فقط المكتملة — تُعرض بـ "All Challenges" و"Challenges" و Win Rate
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
 
     private let db = Firestore.firestore()
 
     // MARK: - Computed
+    // ✅ Win Rate من المكتملة بس (النشطة مالها فوز/خسارة بعد)
     var winRate: Int {
         guard !challenges.isEmpty else { return 0 }
         let wins = challenges.filter { $0.rank == 1 }.count
@@ -45,20 +46,21 @@ final class ProfileViewModel: ObservableObject {
     func load(uid: String) async {
         isLoading = true
         defer { isLoading = false }
-        do {
-            async let profileFetch    = fetchProfile(uid: uid)
-            async let challengesFetch = fetchChallengeHistory(uid: uid)
-            let (p, c) = try await (profileFetch, challengesFetch)
-            profile    = p
-            challenges = c
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+
+        // ✅ كل عملية مستقلة — لو وحدة فشلت ما توقف الباقي
+        async let profileFetch   = fetchProfile(uid: uid)
+        async let completedFetch = fetchCompletedChallenges(uid: uid)
+
+        let p = (try? await profileFetch) ?? UserProfile(uid: uid, displayName: "Ticku User")
+        let completed = (try? await completedFetch) ?? []
+
+        profile    = p
+        challenges = completed
     }
 
     // MARK: - Private
     // ✅ نقرأ الحقول يدوياً (مش عبر Codable) عشان أي حقل غير متوقع
-    // بالمستند ما يفشّل الـ decode كامل بصمت ويمسح كل البيانات (نفس مشكلة TickuUser/ChallengeMember)
+    // بالمستند ما يفشّل الـ decode كامل بصمت ويمسح كل البيانات
     private func fetchProfile(uid: String) async throws -> UserProfile {
         let doc = try await db
             .collection("users")
@@ -92,9 +94,9 @@ final class ProfileViewModel: ObservableObject {
         return profile
     }
 
-    // ✅ يجيب فقط التحديات المكتملة (status == "completed")
-    // النشطة تطلع بالهوم بس، مش بالبروفايل — حسب الاتفاق
-    private func fetchChallengeHistory(uid: String) async throws -> [ChallengeHistoryEntry] {
+    // ✅ فقط المكتملة (status == "completed")
+    // النشطة تطلع بالهوم بس، مش بالبروفايل
+    private func fetchCompletedChallenges(uid: String) async throws -> [ChallengeHistoryEntry] {
         let snap = try await db
             .collection("challenges")
             .whereField("memberIds", arrayContains: uid)

@@ -26,6 +26,7 @@ struct TickuUser: Identifiable, Codable {
     var uid: String = ""
     var displayName: String = ""
     var profileImageURL: String? = nil
+    var profileImageBase64: String? = nil
     var email: String = ""
     var appleUserIdentifier: String? = nil
     var totalChallengesCompleted: Int = 0
@@ -78,16 +79,34 @@ final class HomeViewModel: ObservableObject {
     }
 
     // ✅ Listener حي — يحدث currentUser تلقائياً فور أي تغيير بـ Firestore
-    // (مثلاً تعديل الاسم من صفحة Settings ينعكس مباشرة بالهوم بدون إعادة تحميل)
+    // نقرأ الحقول يدوياً (مش عبر Codable) عشان أي حقل غير متوقع بالمستند
+    // ما يفشّل decode كامل بصمت ويأثر على باقي الحقول (زي الاسم)
     private func startUserListener(uid: String) {
         userListener?.remove()
         userListener = db
             .collection("users")
             .document(uid)
             .addSnapshotListener { [weak self] snap, _ in
-                guard let self, let snap, snap.exists else { return }
+                guard let self, let snap, snap.exists, let data = snap.data() else { return }
                 Task { @MainActor in
-                    self.currentUser = try? snap.data(as: TickuUser.self)
+                    var user = TickuUser()
+                    user.uid = uid
+                    user.displayName = data["displayName"] as? String ?? ""
+                    user.profileImageURL = data["profileImageURL"] as? String
+                    user.profileImageBase64 = data["profileImageBase64"] as? String
+                    user.email = data["email"] as? String ?? ""
+                    user.appleUserIdentifier = data["appleUserIdentifier"] as? String
+                    user.totalChallengesCompleted = data["totalChallengesCompleted"] as? Int ?? 0
+                    user.totalWins = data["totalWins"] as? Int ?? 0
+                    user.currentStreak = data["currentStreak"] as? Int ?? 0
+                    user.longestStreak = data["longestStreak"] as? Int ?? 0
+                    if let ts = data["lastActiveDate"] as? Timestamp {
+                        user.lastActiveDate = ts.dateValue()
+                    }
+                    if let ts = data["createdAt"] as? Timestamp {
+                        user.createdAt = ts.dateValue()
+                    }
+                    self.currentUser = user
                 }
             }
     }

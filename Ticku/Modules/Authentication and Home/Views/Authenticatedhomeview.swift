@@ -49,7 +49,11 @@ struct AuthenticatedHomeView: View {
                         }
                         Spacer()
                         Button(action: onProfile) {
-                            AvatarView(imageURL: vm.currentUser?.profileImageURL, size: 50)
+                            AvatarView(
+                                imageURL: vm.currentUser?.profileImageURL,
+                                size: 50,
+                                base64: vm.currentUser?.profileImageBase64
+                            )
                         }
                     }
                     .padding(.horizontal, TickuSpacing.screenH)

@@ -58,25 +58,39 @@ final class ProfileViewModel: ObservableObject {
     }
 
     // MARK: - Private
+    // ✅ نقرأ الحقول يدوياً (مش عبر Codable) عشان أي حقل غير متوقع
+    // بالمستند ما يفشّل الـ decode كامل بصمت ويمسح كل البيانات (نفس مشكلة TickuUser/ChallengeMember)
     private func fetchProfile(uid: String) async throws -> UserProfile {
         let doc = try await db
             .collection("users")
             .document(uid)
             .getDocument()
 
-        guard doc.exists else {
+        guard doc.exists, let data = doc.data() else {
             print("⚠️ No user document found for uid: \(uid)")
             return UserProfile(uid: uid, displayName: "Ticku User")
         }
 
-        do {
-            return try doc.data(as: UserProfile.self)
-        } catch {
-            print("⚠️ UserProfile decode failed: \(error.localizedDescription)")
-            var fallback = UserProfile()
-            fallback.uid = uid
-            return fallback
+        var profile = UserProfile()
+        profile.uid = uid
+        profile.displayName = data["displayName"] as? String ?? ""
+        profile.profileImageURL = data["profileImageURL"] as? String
+        profile.profileImageBase64 = data["profileImageBase64"] as? String
+        profile.email = data["email"] as? String ?? ""
+        profile.appleUserIdentifier = data["appleUserIdentifier"] as? String
+        profile.totalChallengesCompleted = data["totalChallengesCompleted"] as? Int ?? 0
+        profile.currentStreak = data["currentStreak"] as? Int ?? 0
+        profile.longestStreak = data["longestStreak"] as? Int ?? 0
+        profile.username = data["username"] as? String
+        profile.handle = data["handle"] as? String
+        profile.totalWins = data["totalWins"] as? Int ?? 0
+        if let ts = data["lastActiveDate"] as? Timestamp {
+            profile.lastActiveDate = ts.dateValue()
         }
+        if let ts = data["createdAt"] as? Timestamp {
+            profile.createdAt = ts.dateValue()
+        }
+        return profile
     }
 
     // ✅ يجيب كل التحديات (نشطة + مكتملة) بدون أي حد أقصى — تاريخ كامل بالبروفايل

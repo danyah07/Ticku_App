@@ -79,12 +79,15 @@ final class ChallengeTaskService: ObservableObject {
             .document(userId)
             .collection("tasks")
             .document(task.id)
-            .setData(task.firestoreData) { error in
+            .setData(task.firestoreData) { [weak self] error in
                 if let error {
                     Task { @MainActor in
                         ErrorHandler.shared.report(error, context: "adding task")
                     }
+                    return
                 }
+                // ✅ يحدّث tasksTotal فوراً وقت إضافة التاسك — مايستنى أول تشيك أو حذف
+                self?.updateProgressAfterAdd(challengeId: challengeId, userId: userId)
             }
     }
 
@@ -121,6 +124,33 @@ final class ChallengeTaskService: ObservableObject {
                     return
                 }
                 self?.updateProgress(challengeId: challengeId, userId: userId)
+            }
+    }
+
+    // ✅ تُستخدم بعد addTask — تقرأ العدد الفعلي مباشرة من Firestore
+    // بدل الاعتماد على self.tasks المحلي اللي ممكن يتأخر تحديثه عبر الـ listener
+    private func updateProgressAfterAdd(challengeId: String, userId: String) {
+        db.collection("challenges")
+            .document(challengeId)
+            .collection("members")
+            .document(userId)
+            .collection("tasks")
+            .getDocuments { [weak self] snap, error in
+                guard let self, error == nil else { return }
+                let docs = snap?.documents ?? []
+                let total = docs.count
+                let completed = docs.filter { ($0.data()["isCompleted"] as? Bool) == true }.count
+                let percent = total > 0 ? Int((Double(completed) / Double(total)) * 100) : 0
+
+                self.db.collection("challenges")
+                    .document(challengeId)
+                    .collection("members")
+                    .document(userId)
+                    .updateData([
+                        "progressPercent": percent,
+                        "tasksCompleted": completed,
+                        "tasksTotal": total
+                    ])
             }
     }
 

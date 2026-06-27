@@ -32,12 +32,9 @@ enum DurationOption: String, CaseIterable, Identifiable, Codable {
         cal.timeZone = TimeZone.current
         switch self {
         case .today:
-            return cal.date(
-                bySettingHour: hour,
-                minute: minute,
-                second: 0,
-                of: start
-            ) ?? start.addingTimeInterval(3600)
+            // ✅ hour/minute هنا تمثل "مدة" (كم ساعة ودقيقة من الآن) 
+            let seconds = TimeInterval(hour * 3600 + minute * 60)
+            return start.addingTimeInterval(max(seconds, 60)) // حد أدنى دقيقة عشان ما يطلع وقت فات
         case .days3:
             return cal.date(byAdding: .day, value: 3,  to: start) ?? start
         case .days7:

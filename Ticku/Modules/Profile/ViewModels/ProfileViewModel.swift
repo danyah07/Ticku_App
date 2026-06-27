@@ -36,10 +36,9 @@ final class ProfileViewModel: ObservableObject {
 
     // MARK: - Computed
     var winRate: Int {
-        let completed = challenges.filter { $0.challenge.status != "active" }
-        guard !completed.isEmpty else { return 0 }
-        let wins = completed.filter { $0.rank == 1 }.count
-        return Int(Double(wins) / Double(completed.count) * 100)
+        guard !challenges.isEmpty else { return 0 }
+        let wins = challenges.filter { $0.rank == 1 }.count
+        return Int(Double(wins) / Double(challenges.count) * 100)
     }
 
     // MARK: - Load
@@ -93,11 +92,13 @@ final class ProfileViewModel: ObservableObject {
         return profile
     }
 
-    // ✅ يجيب كل التحديات (نشطة + مكتملة) بدون أي حد أقصى — تاريخ كامل بالبروفايل
+    // ✅ يجيب فقط التحديات المكتملة (status == "completed")
+    // النشطة تطلع بالهوم بس، مش بالبروفايل — حسب الاتفاق
     private func fetchChallengeHistory(uid: String) async throws -> [ChallengeHistoryEntry] {
         let snap = try await db
             .collection("challenges")
             .whereField("memberIds", arrayContains: uid)
+            .whereField("status", isEqualTo: "completed")
             .order(by: "endDate", descending: true)
             .getDocuments()
 

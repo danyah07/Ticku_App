@@ -41,7 +41,8 @@ struct RootView: View {
                     .toolbar(.hidden, for: .navigationBar)
 
                 // ✅ صفحة "See all" الخاصة بالبروفايل — تعرض كل التحديات المكتملة
-                // مستقلة تماماً عن .allChallenges (اللي تعرض النشطة فقط بالهوم)
+                // ✅ التعديل الوحيد: profileVM.challenges تتعبأ من homeVM.completedChallenges
+                // (نفس الـ listener المضمون اللي يشتغل بالهوم فعلياً) بدل query منفصل كان يفشل
                 case .completedChallenges:
                     CompletedChallengesView(
                         challenges: profileVM.challenges,
@@ -49,9 +50,9 @@ struct RootView: View {
                     )
                     .navigationBarHidden(true)
                     .toolbar(.hidden, for: .navigationBar)
-                    .task {
-                        if let uid = authVM.currentUserId {
-                            await profileVM.load(uid: uid)
+                    .onAppear {
+                        profileVM.challenges = homeVM.completedChallenges.map {
+                            ChallengeHistoryEntry(challenge: $0, rank: nil)
                         }
                     }
 

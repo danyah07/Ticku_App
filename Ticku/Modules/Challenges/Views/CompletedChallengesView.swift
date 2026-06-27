@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-// صفحة منفصلة تعرض كل التحديات المكتملة بالكامل (مش بس أول 3)
-// يفتحها زر "See all" بصفحة البروفايل
 struct CompletedChallengesView: View {
 
     let challenges: [ChallengeHistoryEntry]

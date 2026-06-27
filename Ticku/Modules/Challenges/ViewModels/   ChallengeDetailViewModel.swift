@@ -184,6 +184,16 @@ final class ChallengeDetailViewModel: ObservableObject {
             .document(challengeId)
             .updateData(["status": "completed"])
 
+        // ✅ نحفظ ترتيب (rank) كل عضو حسب نسبة تقدمه — يُستخدم لاحقاً بحساب Win Rate بالبروفايل
+        let sortedMembers = members.sorted { $0.progressPercent > $1.progressPercent }
+        var rankUpdates: [String: Any] = [:]
+        for (index, member) in sortedMembers.enumerated() {
+            rankUpdates["rank_\(member.userId)"] = index + 1
+        }
+        if !rankUpdates.isEmpty {
+            try? await db.collection("challenges").document(challengeId).updateData(rankUpdates)
+        }
+
         // إشعار انتهاء التحدي مع الفائز
         if let winner = members.max(by: { $0.progressPercent < $1.progressPercent }) {
             NotificationManager.shared.sendChallengeComplete(

@@ -82,11 +82,20 @@ struct ProfileView: View {
         }
         .background(isDark ? Color(hex: "#0A0814").ignoresSafeArea() : Color.white.ignoresSafeArea())
         .navigationBarHidden(true)
-        // ✅ نستخدم .task(id:) — يعيد التحميل تلقائياً لو currentUserId تغيّر
-        // (مثلاً كان nil وقت أول ظهور للصفحة، وبعدها صار له قيمة فعلية)
+        // ✅ .task(id:) يحمّل أول ما تفتح الصفحة أو لو currentUserId تغيّر
         .task(id: authVM.currentUserId) {
             if let uid = authVM.currentUserId {
                 await vm.load(uid: uid)
+            }
+        }
+        // ✅ .onAppear يعيد التحميل كل مرة الصفحة "تظهر" من جديد —
+        // زي لما ترجعين من Settings بعد تعديل الاسم/الصورة، لأن currentUserId
+        // ما يتغير بهذي الحالة (.task ما تتفعل من جديد لحالها)
+        .onAppear {
+            Task {
+                if let uid = authVM.currentUserId {
+                    await vm.load(uid: uid)
+                }
             }
         }
     }

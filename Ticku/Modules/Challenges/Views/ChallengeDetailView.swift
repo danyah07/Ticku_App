@@ -93,15 +93,18 @@ struct ChallengeDetailView: View {
             }
         }
         .onChange(of: vm.members) {
+            print("🟡 onChange(vm.members) FIRED — count: \(vm.members.count), startDate: \(String(describing: vm.challengeStartDate))")
+            for m in vm.members {
+                print("🟡   member \(m.userId): progress=\(m.progressPercent) tasksTotal=\(m.tasksTotal)")
+            }
             // ✅ نتأكد التحدي بدأ فعلياً (مايكون فقط challengeStartDate موجود من بيانات قديمة)
             // ونتأكد فيه عضو واحد على الأقل عنده تاسكات (مايكون 100% من تاسكات = 0)
-            if vm.challengeStartDate != nil &&
-               vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 }) {
+            let shouldComplete = vm.challengeStartDate != nil &&
+               vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 })
+            print("🟡 shouldComplete = \(shouldComplete)")
+            if shouldComplete {
+                print("🟡 Calling completeChallenge now...")
                 Task {
-                    // ✅ ننتظر completeChallenge() تخلص بالكامل قبل ما نسوي showComplete = true
-                    // قبل: showComplete كانت تتفعل فوراً بنفس اللحظة، فالـ View تنسحب من الذاكرة
-                    // والـ Task تنقطع بمنتصف الطريق — فـ rank_{uid} و totalChallengesCompleted
-                    // ما كانت تكتب لأنها آخر أسطر بالدالة (أبطأ تنفيذ، تنقطع أول).
                     await vm.completeChallenge()
                     showComplete = true
                 }
@@ -420,23 +423,7 @@ private struct MemberCard: View {
                         .animation(.easeInOut(duration: 0.4), value: progress)
                 }
                 Circle().fill(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E4F0")).frame(width: 74, height: 74)
-                if let base64 = member.profileImageBase64, !base64.isEmpty,
-                   let data = Data(base64Encoded: base64), let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 70, height: 70)
-                        .clipShape(Circle())
-                } else if let url = member.profileImageURL, !url.isEmpty {
-                    AsyncImage(url: URL(string: url)) { image in
-                        image.resizable().scaledToFill()
-                    } placeholder: {
-                        Image(systemName: "person.fill").font(.system(size: 30)).foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#341D71"))
-                    }
-                    .frame(width: 70, height: 70).clipShape(Circle())
-                } else {
-                    Image(systemName: "person.fill").font(.system(size: 34)).foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#341D71"))
-                }
+                Image(systemName: "person.fill").font(.system(size: 34)).foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#341D71"))
             }
             .frame(width: 100, height: 100).padding(.top, 16)
 

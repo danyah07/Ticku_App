@@ -233,6 +233,8 @@ struct MyTasksView: View {
         HStack(spacing: 10) {
             if isSaved {
                 Button(action: {
+                    // ✅ ما يقدر يسوي تشيك إلا بعد ما يبدأ التحدي (START)
+                    guard challengeStarted else { return }
                     service.completeTask(challengeId: challengeId, userId: userId, task: task)
                 }) {
                     ZStack {
@@ -246,7 +248,7 @@ struct MyTasksView: View {
                         }
                     }
                 }
-                .disabled(task.isCompleted) // ✅ بعد ما تكتمل، الزر يصير معطل ما يقدر يتراجع
+                .disabled(task.isCompleted || !challengeStarted) // ✅ معطل لو خلصت التاسك، أو التحدي لسا ما بدأ
             } else {
                 Button(action: {
                     service.deleteTask(challengeId: challengeId, userId: userId, taskId: task.id)

@@ -178,11 +178,21 @@ final class ChallengeDetailViewModel: ObservableObject {
     }
 
     func completeChallenge() async {
-        guard !challengeId.isEmpty else { return }
+        guard !challengeId.isEmpty else {
+            print("🔴 completeChallenge: challengeId EMPTY — aborting")
+            return
+        }
+        print("🟢 completeChallenge CALLED for challengeId: \(challengeId)")
+        print("🟢 members count at completion time: \(members.count)")
+        for m in members {
+            print("🟢   member: \(m.userId) progress=\(m.progressPercent) tasksTotal=\(m.tasksTotal)")
+        }
+
         try? await db
             .collection("challenges")
             .document(challengeId)
             .updateData(["status": "completed"])
+        print("🟢 status updated to completed")
 
         // ✅ نحفظ ترتيب (rank) كل عضو حسب نسبة تقدمه — يُستخدم لاحقاً بحساب Win Rate بالبروفايل
         let sortedMembers = members.sorted { $0.progressPercent > $1.progressPercent }
@@ -190,8 +200,12 @@ final class ChallengeDetailViewModel: ObservableObject {
         for (index, member) in sortedMembers.enumerated() {
             rankUpdates["rank_\(member.userId)"] = index + 1
         }
+        print("🟢 rankUpdates to write: \(rankUpdates)")
         if !rankUpdates.isEmpty {
             try? await db.collection("challenges").document(challengeId).updateData(rankUpdates)
+            print("🟢 rankUpdates WRITTEN successfully")
+        } else {
+            print("🔴 rankUpdates EMPTY — members array was empty at completion time!")
         }
 
         // إشعار انتهاء التحدي مع الفائز
@@ -205,6 +219,9 @@ final class ChallengeDetailViewModel: ObservableObject {
             // ✅ نزيد totalWins للفائز فعلياً بـ Firestore (المركز الأول)
             try? await db.collection("users").document(winner.userId)
                 .updateData(["totalWins": FieldValue.increment(Int64(1))])
+            print("🟢 totalWins incremented for winner: \(winner.userId)")
+        } else {
+            print("🔴 No winner found — members array might be empty")
         }
 
         // ✅ نزيد totalChallengesCompleted لكل الأعضاء (شاركوا بتحدي خلص)
@@ -212,6 +229,7 @@ final class ChallengeDetailViewModel: ObservableObject {
             try? await db.collection("users").document(member.userId)
                 .updateData(["totalChallengesCompleted": FieldValue.increment(Int64(1))])
         }
+        print("🟢 completeChallenge FINISHED")
 
         NotificationManager.shared.cancelTimeWarnings(for: challenge.title)
     }

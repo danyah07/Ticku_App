@@ -86,8 +86,10 @@ struct ChallengeDetailView: View {
         }
         .onChange(of: vm.timerDisplay) {
             if vm.timerDisplay == "00:00:00" && vm.challengeStartDate != nil {
-                Task { await vm.completeChallenge() }
-                showComplete = true
+                Task {
+                    await vm.completeChallenge()
+                    showComplete = true
+                }
             }
         }
         .onChange(of: vm.members) {
@@ -95,8 +97,14 @@ struct ChallengeDetailView: View {
             // ونتأكد فيه عضو واحد على الأقل عنده تاسكات (مايكون 100% من تاسكات = 0)
             if vm.challengeStartDate != nil &&
                vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 }) {
-                Task { await vm.completeChallenge() }
-                showComplete = true
+                Task {
+                    // ✅ ننتظر completeChallenge() تخلص بالكامل قبل ما نسوي showComplete = true
+                    // قبل: showComplete كانت تتفعل فوراً بنفس اللحظة، فالـ View تنسحب من الذاكرة
+                    // والـ Task تنقطع بمنتصف الطريق — فـ rank_{uid} و totalChallengesCompleted
+                    // ما كانت تكتب لأنها آخر أسطر بالدالة (أبطأ تنفيذ، تنقطع أول).
+                    await vm.completeChallenge()
+                    showComplete = true
+                }
             }
         }
         .alert("Give up?", isPresented: $showGiveUpAlert) {

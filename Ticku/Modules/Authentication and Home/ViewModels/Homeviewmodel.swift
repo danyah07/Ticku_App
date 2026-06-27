@@ -45,7 +45,20 @@ struct TickuUser: Identifiable, Codable {
 final class HomeViewModel: ObservableObject {
 
     @Published var currentUser: TickuUser? = nil
-    @Published var activeChallenges: [Challenge] = []
+
+    // ✅ كل التحديات اللي إنتِ عضو فيها — listener حي واحد، يتحدث تلقائياً
+    @Published var allMyChallenges: [Challenge] = []
+
+    // ✅ مفلترة محلياً من allMyChallenges — بدون أي query إضافي لـ Firestore
+    var activeChallenges: [Challenge] {
+        allMyChallenges.filter { $0.status == "active" }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+    var completedChallenges: [Challenge] {
+        allMyChallenges.filter { $0.status == "completed" }
+            .sorted { $0.endDate > $1.endDate }
+    }
+
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
 
@@ -55,24 +68,23 @@ final class HomeViewModel: ObservableObject {
 
     private let db = Firestore.firestore()
     private var userListener: ListenerRegistration?
+    private var challengesListener: ListenerRegistration?
 
     func loadHome(for uid: String) async {
         isLoading = true
         defer { isLoading = false }
-        do {
-            startUserListener(uid: uid)
-            activeChallenges = try await fetchActiveChallenges(uid: uid)
-            try await fetchMyOverallProgress(uid: uid)
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        startUserListener(uid: uid)
+        startChallengesListener(uid: uid)
+        try? await fetchMyOverallProgress(uid: uid)
     }
 
     func reset() {
         userListener?.remove()
         userListener = nil
+        challengesListener?.remove()
+        challengesListener = nil
         currentUser      = nil
-        activeChallenges = []
+        allMyChallenges  = []
         progressPercent  = 0
         tasksCompleted   = 0
         tasksTotal       = 0
@@ -111,14 +123,41 @@ final class HomeViewModel: ObservableObject {
             }
     }
 
-    private func fetchActiveChallenges(uid: String) async throws -> [Challenge] {
-        let snap = try await db
+    // ✅ Listener حي واحد يجيب كل التحديات (active + completed) بدون فلتر status
+    // — الفلترة تصير محلياً عبر activeChallenges/completedChallenges (computed properties)
+    // هذا يحل مشاكل الـ index والـ Codable الفاشل بصمت لأنه نفس الكود المستخدم بالهوم فعلياً
+    private func startChallengesListener(uid: String) {
+        challengesListener?.remove()
+        challengesListener = db
             .collection("challenges")
-            .whereField("status", isEqualTo: "active")
             .whereField("memberIds", arrayContains: uid)
-            .order(by: "createdAt", descending: true)
-            .getDocuments()
-        return snap.documents.compactMap { try? $0.data(as: Challenge.self) }
+            .addSnapshotListener { [weak self] snap, _ in
+                guard let self, let snap else { return }
+                Task { @MainActor in
+                    self.allMyChallenges = snap.documents.compactMap { doc -> Challenge? in
+                        let data = doc.data()
+                        var challenge = Challenge()
+                        challenge.id = doc.documentID
+                        challenge.title = data["title"] as? String ?? ""
+                        challenge.description = data["description"] as? String ?? ""
+                        challenge.createdBy = data["createdBy"] as? String ?? ""
+                        challenge.status = data["status"] as? String ?? "active"
+                        challenge.memberCount = data["memberCount"] as? Int ?? 0
+                        challenge.memberIds = data["memberIds"] as? [String] ?? []
+                        challenge.challengeType = data["challengeType"] as? String ?? "group"
+                        if let ts = data["startDate"] as? Timestamp {
+                            challenge.startDate = ts.dateValue()
+                        }
+                        if let ts = data["endDate"] as? Timestamp {
+                            challenge.endDate = ts.dateValue()
+                        }
+                        if let ts = data["createdAt"] as? Timestamp {
+                            challenge.createdAt = ts.dateValue()
+                        }
+                        return challenge
+                    }
+                }
+            }
     }
 
     // ✅ يجمع تقدمك من كل التحديات النشطة مع بعض — مو بس أول واحد
@@ -141,9 +180,9 @@ final class HomeViewModel: ObservableObject {
                 .collection("members").document(uid)
                 .getDocument()
 
-            guard let member = try? doc?.data(as: ChallengeMember.self) else { continue }
-            totalCompleted += member.tasksCompleted
-            totalTasks     += member.tasksTotal
+            guard let data = doc?.data() else { continue }
+            totalCompleted += data["tasksCompleted"] as? Int ?? 0
+            totalTasks     += data["tasksTotal"] as? Int ?? 0
         }
 
         tasksCompleted  = totalCompleted

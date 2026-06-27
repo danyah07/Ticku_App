@@ -436,10 +436,11 @@ private struct MemberCard: View {
                 .font(.system(size: 14, weight: .black)).foregroundColor(isDark ? .white : Color(hex: "#341D71")).lineLimit(1)
             Text("\(Int(member.progressPercent))%")
                 .font(.system(size: 13, weight: .semibold)).foregroundColor(isDark ? .white.opacity(0.5) : Color(hex: "#9E9E9E"))
-            Text("#\(rank)")
-                .font(.system(size: 12, weight: .black)).foregroundColor(isDark ? .black : .black)
-                .padding(.horizontal, 14).padding(.vertical, 4)
-                .background(isDark ? Color.white.opacity(0.9) : Color.white).cornerRadius(30)
+            if isMe {
+                Text("View tasks »")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#5B6AD4"))
+            }
             Spacer(minLength: 4)
         }
         .frame(height: 210).frame(maxWidth: .infinity)

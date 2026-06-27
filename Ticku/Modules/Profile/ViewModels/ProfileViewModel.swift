@@ -96,6 +96,8 @@ final class ProfileViewModel: ObservableObject {
 
     // ✅ فقط المكتملة (status == "completed")
     // النشطة تطلع بالهوم بس، مش بالبروفايل
+    // ✅ نقرأ Challenge يدوياً (مش try? doc.data(as: Challenge.self)) عشان أي حقل
+    // غير متوقع بمستند التحدي ما يفشّل decode كامل بصمت ويحذف التحدي من القائمة
     private func fetchCompletedChallenges(uid: String) async throws -> [ChallengeHistoryEntry] {
         let snap = try await db
             .collection("challenges")
@@ -105,8 +107,28 @@ final class ProfileViewModel: ObservableObject {
             .getDocuments()
 
         return snap.documents.compactMap { doc -> ChallengeHistoryEntry? in
-            guard let challenge = try? doc.data(as: Challenge.self) else { return nil }
-            let rank = doc.data()["rank_\(uid)"] as? Int
+            let data = doc.data()
+
+            var challenge = Challenge()
+            challenge.id = doc.documentID
+            challenge.title = data["title"] as? String ?? ""
+            challenge.description = data["description"] as? String ?? ""
+            challenge.createdBy = data["createdBy"] as? String ?? ""
+            challenge.status = data["status"] as? String ?? "completed"
+            challenge.memberCount = data["memberCount"] as? Int ?? 0
+            challenge.memberIds = data["memberIds"] as? [String] ?? []
+            challenge.challengeType = data["challengeType"] as? String ?? "group"
+            if let ts = data["startDate"] as? Timestamp {
+                challenge.startDate = ts.dateValue()
+            }
+            if let ts = data["endDate"] as? Timestamp {
+                challenge.endDate = ts.dateValue()
+            }
+            if let ts = data["createdAt"] as? Timestamp {
+                challenge.createdAt = ts.dateValue()
+            }
+
+            let rank = data["rank_\(uid)"] as? Int
             return ChallengeHistoryEntry(challenge: challenge, rank: rank)
         }
     }

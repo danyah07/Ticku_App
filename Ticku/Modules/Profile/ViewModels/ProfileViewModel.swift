@@ -35,11 +35,11 @@ final class ProfileViewModel: ObservableObject {
     private let db = Firestore.firestore()
 
     // MARK: - Computed
-    // ✅ Win Rate من المكتملة بس (النشطة مالها فوز/خسارة بعد)
+    // ✅ Win Rate من العدادين المباشرين بـ Firestore (نفس طريقة الهوم) — أبسط وأوثق
+    // من حساب rank_{uid} عبر قائمة challenges
     var winRate: Int {
-        guard !challenges.isEmpty else { return 0 }
-        let wins = challenges.filter { $0.rank == 1 }.count
-        return Int(Double(wins) / Double(challenges.count) * 100)
+        guard let p = profile, p.totalChallengesCompleted > 0 else { return 0 }
+        return Int((Double(p.totalWins) / Double(p.totalChallengesCompleted)) * 100)
     }
 
     // MARK: - Load

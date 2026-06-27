@@ -34,7 +34,7 @@ struct RootView: View {
                     ProfileView(
                         onBack:             { navManager.goBack() },
                         onSettings:         { navManager.navigate(to: .settings) },
-                        onSeeAllChallenges: { navManager.navigate(to: .completedChallenges) }
+                        onSeeAllChallenges: { _ in navManager.navigate(to: .completedChallenges) }
                     )
                     .environmentObject(authVM)
                     .navigationBarHidden(true)

@@ -15,7 +15,7 @@ struct ProfileView: View {
 
     var onBack: () -> Void = {}
     var onSettings: () -> Void = {}
-    var onSeeAllChallenges: () -> Void = {}
+    var onSeeAllChallenges: ([ChallengeHistoryEntry]) -> Void = { _ in }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -109,7 +109,7 @@ struct ProfileView: View {
     // MARK: - Stats Pill
     private var statsPill: some View {
         HStack(spacing: 0) {
-            statCell(value: "\(vm.challenges.count)", label: "Challenges")
+            statCell(value: "\(vm.profile?.totalChallengesCompleted ?? 0)", label: "Challenges")
             Divider().frame(height: 40)
             statCell(value: "\(vm.winRate)%", label: "Win Rate")
         }
@@ -144,7 +144,7 @@ struct ProfileView: View {
                     .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                 Spacer()
                 // ✅ يفتح صفحة مستقلة بكل التحديات المكتملة — مايخفي شي بمكانه
-                Button(action: onSeeAllChallenges) {
+                Button(action: { onSeeAllChallenges(vm.challenges) }) {
                     Text("See all")
                         .font(Font.ticku.smallButton)
                         .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.accent)

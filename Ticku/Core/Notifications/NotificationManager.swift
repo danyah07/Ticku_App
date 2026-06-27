@@ -54,6 +54,16 @@ final class NotificationManager {
                 after: secondsRemaining - 300
             )
         }
+        // ✅ تحديات قصيرة المدى (أقل من 5 دقائق) — تنبيه واحد عند نص الوقت المتبقي
+        // عشان حتى التحديات القصيرة جداً تذكّر المستخدم قبل الانتهاء
+        else if secondsRemaining > 10 {
+            schedule(
+                id: NotificationIdentifier.timeWarning5m + challengeName,
+                title: NotificationTitle.fiveMin,
+                body: NotificationBody.fiveMin(challenge: challengeName),
+                after: secondsRemaining / 2
+            )
+        }
     }
 
     // MARK: - 2. انتهى التحدي

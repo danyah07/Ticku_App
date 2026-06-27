@@ -28,6 +28,9 @@ struct TickuApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var authVM = AuthViewModel()
 
+    // ✅ يقرأ نفس المفتاح اللي يحفظه زر الدارك مود بصفحة Settings
+    @AppStorage("isDarkMode") private var isDarkMode = false
+
     init() {
         try? Tips.configure([
             .displayFrequency(.immediate),
@@ -40,6 +43,8 @@ struct TickuApp: App {
         WindowGroup {
             SplashView()
                 .environmentObject(authVM)
+                // ✅ يطبّق الوضع على كل التطبيق فوراً لحظة الضغط على الزر
+                .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }

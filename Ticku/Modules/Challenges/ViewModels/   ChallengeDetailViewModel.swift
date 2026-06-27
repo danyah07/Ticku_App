@@ -55,8 +55,22 @@ final class ChallengeDetailViewModel: ObservableObject {
             .addSnapshotListener { [weak self] snap, _ in
                 guard let self, let snap else { return }
                 Task { @MainActor in
-                    self.members = snap.documents.compactMap {
-                        try? $0.data(as: ChallengeMember.self)
+                    self.members = snap.documents.compactMap { doc -> ChallengeMember? in
+                        let data = doc.data()
+                        var member = ChallengeMember()
+                        member.id = doc.documentID
+                        member.userId = data["userId"] as? String ?? doc.documentID
+                        member.displayName = data["displayName"] as? String ?? ""
+                        member.profileImageURL = data["profileImageURL"] as? String
+                        member.profileImageBase64 = data["profileImageBase64"] as? String
+                        member.progressPercent = data["progressPercent"] as? Double ?? 0
+                        member.tasksTotal = data["tasksTotal"] as? Int ?? 0
+                        member.tasksCompleted = data["tasksCompleted"] as? Int ?? 0
+                        member.role = data["role"] as? String ?? "member"
+                        if let ts = data["joinedAt"] as? Timestamp {
+                            member.joinedAt = ts.dateValue()
+                        }
+                        return member
                     }
                     .sorted { $0.progressPercent > $1.progressPercent }
                 }
@@ -119,7 +133,8 @@ final class ChallengeDetailViewModel: ObservableObject {
     }
 
     // ✅ يرجع false ولا يبدأ التحدي لو فيه عضو بدون تاسكات
-    // نقرأ مباشرة من Firestore (مش من vm.members المحلي) عشان نتجنب تأخير الـ listener
+    // نقرأ الحقل مباشرة من البيانات الخام (مش عبر Codable) عشان أي حقل ناقص
+    // أو نوع غير متوقع بمستند قديم ما يفشّل الـ decode كامل بصمت
     @discardableResult
     func startChallenge() async -> Bool {
         guard !challengeId.isEmpty else { return false }
@@ -130,13 +145,16 @@ final class ChallengeDetailViewModel: ObservableObject {
                 .collection("members")
                 .getDocuments()
 
-            let freshMembers = snap.documents.compactMap { try? $0.data(as: ChallengeMember.self) }
-
-            if let memberWithoutTasks = freshMembers.first(where: { $0.tasksTotal == 0 }) {
-                let message = "\(memberWithoutTasks.displayName) hasn't added any tasks yet."
-                errorMessage = message
-                ErrorHandler.shared.report(AppError.invalidInput(message))
-                return false
+            for doc in snap.documents {
+                let data = doc.data()
+                let tasksTotal = data["tasksTotal"] as? Int ?? 0
+                if tasksTotal == 0 {
+                    let name = data["displayName"] as? String ?? "A player"
+                    let message = "\(name) hasn't added any tasks yet."
+                    errorMessage = message
+                    ErrorHandler.shared.report(AppError.invalidInput(message))
+                    return false
+                }
             }
         } catch {
             ErrorHandler.shared.report(error, context: "checking members before start")

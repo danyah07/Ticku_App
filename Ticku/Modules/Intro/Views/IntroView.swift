@@ -155,7 +155,9 @@ extension IntroView {
             HStack {
                 Spacer()
                 Button {
-                    withAnimation { viewModel.currentPage = 2 }
+                    // ✅ Skip لازم يعتبر إن المستخدم خلص الانترو نهائياً
+                    // نفس منطق Start — ما يطلع له الانترو مرة ثانية أبداً
+                    onFinish()
                 } label: {
                     Text("intro_skip".localized)
                         .font(.system(size: 20, weight: .bold, design: .rounded))

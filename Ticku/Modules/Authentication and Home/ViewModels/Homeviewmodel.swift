@@ -26,6 +26,7 @@ struct TickuUser: Identifiable, Codable {
     var uid: String = ""
     var displayName: String = ""
     var profileImageURL: String? = nil
+    var profileImageBase64: String? = nil
     var email: String = ""
     var appleUserIdentifier: String? = nil
     var totalChallengesCompleted: Int = 0
@@ -78,20 +79,40 @@ final class HomeViewModel: ObservableObject {
     }
 
     // ✅ Listener حي — يحدث currentUser تلقائياً فور أي تغيير بـ Firestore
-    // (مثلاً تعديل الاسم من صفحة Settings ينعكس مباشرة بالهوم بدون إعادة تحميل)
+    // نقرأ الحقول يدوياً (مش عبر Codable) عشان أي حقل غير متوقع بالمستند
+    // ما يفشّل decode كامل بصمت ويأثر على باقي الحقول (زي الاسم والصورة)
     private func startUserListener(uid: String) {
         userListener?.remove()
         userListener = db
             .collection("users")
             .document(uid)
             .addSnapshotListener { [weak self] snap, _ in
-                guard let self, let snap, snap.exists else { return }
+                guard let self, let snap, snap.exists, let data = snap.data() else { return }
                 Task { @MainActor in
-                    self.currentUser = try? snap.data(as: TickuUser.self)
+                    var user = TickuUser()
+                    user.uid = uid
+                    user.displayName = data["displayName"] as? String ?? ""
+                    user.profileImageURL = data["profileImageURL"] as? String
+                    user.profileImageBase64 = data["profileImageBase64"] as? String
+                    user.email = data["email"] as? String ?? ""
+                    user.appleUserIdentifier = data["appleUserIdentifier"] as? String
+                    user.totalChallengesCompleted = data["totalChallengesCompleted"] as? Int ?? 0
+                    user.totalWins = data["totalWins"] as? Int ?? 0
+                    user.currentStreak = data["currentStreak"] as? Int ?? 0
+                    user.longestStreak = data["longestStreak"] as? Int ?? 0
+                    if let ts = data["lastActiveDate"] as? Timestamp {
+                        user.lastActiveDate = ts.dateValue()
+                    }
+                    if let ts = data["createdAt"] as? Timestamp {
+                        user.createdAt = ts.dateValue()
+                    }
+                    self.currentUser = user
                 }
             }
     }
 
+    // ✅ نقرأ Challenge يدوياً (مش try? doc.data(as: Challenge.self)) عشان أي حقل
+    // غير متوقع بمستند التحدي ما يفشّل decode كامل بصمت ويحذف التحدي من القائمة
     private func fetchActiveChallenges(uid: String) async throws -> [Challenge] {
         let snap = try await db
             .collection("challenges")
@@ -99,7 +120,29 @@ final class HomeViewModel: ObservableObject {
             .whereField("memberIds", arrayContains: uid)
             .order(by: "createdAt", descending: true)
             .getDocuments()
-        return snap.documents.compactMap { try? $0.data(as: Challenge.self) }
+
+        return snap.documents.compactMap { doc -> Challenge? in
+            let data = doc.data()
+            var challenge = Challenge()
+            challenge.id = doc.documentID
+            challenge.title = data["title"] as? String ?? ""
+            challenge.description = data["description"] as? String ?? ""
+            challenge.createdBy = data["createdBy"] as? String ?? ""
+            challenge.status = data["status"] as? String ?? "active"
+            challenge.memberCount = data["memberCount"] as? Int ?? 0
+            challenge.memberIds = data["memberIds"] as? [String] ?? []
+            challenge.challengeType = data["challengeType"] as? String ?? "group"
+            if let ts = data["startDate"] as? Timestamp {
+                challenge.startDate = ts.dateValue()
+            }
+            if let ts = data["endDate"] as? Timestamp {
+                challenge.endDate = ts.dateValue()
+            }
+            if let ts = data["createdAt"] as? Timestamp {
+                challenge.createdAt = ts.dateValue()
+            }
+            return challenge
+        }
     }
 
     // ✅ يجمع تقدمك من كل التحديات النشطة مع بعض — مو بس أول واحد
@@ -122,9 +165,9 @@ final class HomeViewModel: ObservableObject {
                 .collection("members").document(uid)
                 .getDocument()
 
-            guard let member = try? doc?.data(as: ChallengeMember.self) else { continue }
-            totalCompleted += member.tasksCompleted
-            totalTasks     += member.tasksTotal
+            guard let data = doc?.data() else { continue }
+            totalCompleted += data["tasksCompleted"] as? Int ?? 0
+            totalTasks     += data["tasksTotal"] as? Int ?? 0
         }
 
         tasksCompleted  = totalCompleted

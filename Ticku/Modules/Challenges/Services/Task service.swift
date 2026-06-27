@@ -91,17 +91,21 @@ final class ChallengeTaskService: ObservableObject {
             }
     }
 
-    func toggleTask(challengeId: String, userId: String, task: ChallengeTask) {
+    // ✅ تشيك نهائي — مرة تتعلّم التاسك "مكتملة" ما ترجع تتراجع
+    // الزر يصير معطل (disabled) بعد أول ضغطة من جهة الـ View
+    func completeTask(challengeId: String, userId: String, task: ChallengeTask) {
+        guard !task.isCompleted else { return } // أصلاً مكتملة — ما نسوي شي
+
         db.collection("challenges")
             .document(challengeId)
             .collection("members")
             .document(userId)
             .collection("tasks")
             .document(task.id)
-            .updateData(["isCompleted": !task.isCompleted]) { [weak self] error in
+            .updateData(["isCompleted": true]) { [weak self] error in
                 if let error {
                     Task { @MainActor in
-                        ErrorHandler.shared.report(error, context: "updating task")
+                        ErrorHandler.shared.report(error, context: "completing task")
                     }
                     return
                 }

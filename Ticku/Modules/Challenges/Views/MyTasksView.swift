@@ -233,7 +233,7 @@ struct MyTasksView: View {
         HStack(spacing: 10) {
             if isSaved {
                 Button(action: {
-                    service.toggleTask(challengeId: challengeId, userId: userId, task: task)
+                    service.completeTask(challengeId: challengeId, userId: userId, task: task)
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
@@ -246,6 +246,7 @@ struct MyTasksView: View {
                         }
                     }
                 }
+                .disabled(task.isCompleted) // ✅ بعد ما تكتمل، الزر يصير معطل ما يقدر يتراجع
             } else {
                 Button(action: {
                     service.deleteTask(challengeId: challengeId, userId: userId, taskId: task.id)

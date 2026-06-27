@@ -32,6 +32,9 @@ struct ChallengeDetailsPage: View {
 
     private let db = Firestore.firestore()
 
+    // ✅ لو عضو واحد بس بالتحدي، التغيير يطبق فوراً بدون انتظار موافقة أحد
+    private var isSolo: Bool { challenge.memberCount <= 1 }
+
     init(challenge: Challenge) {
         self.challenge = challenge
         _challengeName = State(initialValue: challenge.title)
@@ -348,6 +351,15 @@ struct ChallengeDetailsPage: View {
     // MARK: - Request Rule Change
     func requestRuleChange(_ newRule: String) {
         guard let cid = challenge.id, let uid = authVM.currentUserId else { return }
+
+        // ✅ لو لحاله (Solo) — يطبق التغيير مباشرة بدون pendingRuleChange/موافقة
+        if isSolo {
+            challengeRule = newRule
+            db.collection("challenges").document(cid).updateData([
+                "description": newRule
+            ])
+            return
+        }
 
         let pendingData: [String: Any] = [
             "newRule": newRule,

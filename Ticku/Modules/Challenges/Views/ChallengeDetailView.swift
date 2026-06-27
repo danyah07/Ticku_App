@@ -91,8 +91,10 @@ struct ChallengeDetailView: View {
             }
         }
         .onChange(of: vm.members) {
+            // ✅ نتأكد التحدي بدأ فعلياً (مايكون فقط challengeStartDate موجود من بيانات قديمة)
+            // ونتأكد فيه عضو واحد على الأقل عنده تاسكات (مايكون 100% من تاسكات = 0)
             if vm.challengeStartDate != nil &&
-               vm.members.contains(where: { $0.progressPercent >= 100 }) {
+               vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 }) {
                 Task { await vm.completeChallenge() }
                 showComplete = true
             }

@@ -148,11 +148,9 @@ struct SettingsView: View {
                                     HStack(spacing: 2) {
                                         toggleIconOption("sun.max.fill", isSelected: !appIsDarkMode) {
                                             appIsDarkMode = false
-                                            vm.isDarkMode = false
                                         }
                                         toggleIconOption("moon.fill", isSelected: appIsDarkMode) {
                                             appIsDarkMode = true
-                                            vm.isDarkMode = true
                                         }
                                     }
                                     .padding(2)
@@ -240,7 +238,10 @@ struct SettingsView: View {
         .task {
             if let uid = authVM.currentUserId {
                 await vm.load(uid: uid)
-                appIsDarkMode = vm.isDarkMode
+                // ✅ شلنا "appIsDarkMode = vm.isDarkMode" — كانت تفرض false كل ما تفتحين
+                // الصفحة لأن vm.isDarkMode قيمتها الافتراضية false وما تُقرأ من Firestore أبداً.
+                // appIsDarkMode (الـ AppStorage) هو مصدر الحقيقة الوحيد لوضع التطبيق كامل،
+                // وهو يبقى محفوظ بمكانه بدون أي تدخل من هنا.
             }
         }
     }

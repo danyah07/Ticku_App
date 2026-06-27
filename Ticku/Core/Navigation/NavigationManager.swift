@@ -22,6 +22,7 @@ enum AppRoute: Hashable {
     case profile
     case settings
     case allChallenges
+    case completedChallenges   // ✅ صفحة "See all" الخاصة بالبروفايل — تعرض المكتملة فقط
     case createChallenge
     case joinChallenge
     case challengeRoom(Challenge)

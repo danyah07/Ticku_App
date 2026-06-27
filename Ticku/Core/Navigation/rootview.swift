@@ -6,6 +6,7 @@ struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var navManager = NavigationManager()
     @StateObject private var homeVM = HomeViewModel()
+    @StateObject private var profileVM = ProfileViewModel()
 
     var body: some View {
         NavigationStack(path: $navManager.path) {
@@ -33,11 +34,26 @@ struct RootView: View {
                     ProfileView(
                         onBack:             { navManager.goBack() },
                         onSettings:         { navManager.navigate(to: .settings) },
-                        onSeeAllChallenges: { navManager.navigate(to: .allChallenges) }
+                        onSeeAllChallenges: { navManager.navigate(to: .completedChallenges) }
                     )
                     .environmentObject(authVM)
                     .navigationBarHidden(true)
                     .toolbar(.hidden, for: .navigationBar)
+
+                // ✅ صفحة "See all" الخاصة بالبروفايل — تعرض كل التحديات المكتملة
+                // مستقلة تماماً عن .allChallenges (اللي تعرض النشطة فقط بالهوم)
+                case .completedChallenges:
+                    CompletedChallengesView(
+                        challenges: profileVM.challenges,
+                        onBack: { navManager.goBack() }
+                    )
+                    .navigationBarHidden(true)
+                    .toolbar(.hidden, for: .navigationBar)
+                    .task {
+                        if let uid = authVM.currentUserId {
+                            await profileVM.load(uid: uid)
+                        }
+                    }
 
                 case .settings:
                     SettingsView(onBack: { navManager.goBack() })

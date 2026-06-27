@@ -53,7 +53,7 @@ struct ProfileView: View {
 
                 // ── Name + Streak ─────────────────────────
                 HStack(spacing: 6) {
-                    Text(vm.profile?.displayName ?? "")
+                    Text(vm.profile?.displayName.isEmpty == false ? vm.profile!.displayName : "Ticku User")
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     Text("×\(vm.profile?.currentStreak ?? 0)")
@@ -82,16 +82,11 @@ struct ProfileView: View {
         }
         .background(isDark ? Color(hex: "#0A0814").ignoresSafeArea() : Color.white.ignoresSafeArea())
         .navigationBarHidden(true)
-        .task {
+        // ✅ نستخدم .task(id:) — يعيد التحميل تلقائياً لو currentUserId تغيّر
+        // (مثلاً كان nil وقت أول ظهور للصفحة، وبعدها صار له قيمة فعلية)
+        .task(id: authVM.currentUserId) {
             if let uid = authVM.currentUserId {
                 await vm.load(uid: uid)
-            }
-        }
-        .onAppear {
-            Task {
-                if let uid = authVM.currentUserId {
-                    await vm.load(uid: uid)
-                }
             }
         }
     }
@@ -139,6 +134,7 @@ struct ProfileView: View {
                     .font(Font.ticku.sectionHeader)
                     .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                 Spacer()
+                // ✅ يفتح صفحة مستقلة بكل التحديات المكتملة — مايخفي شي بمكانه
                 Button(action: onSeeAllChallenges) {
                     Text("See all")
                         .font(Font.ticku.smallButton)

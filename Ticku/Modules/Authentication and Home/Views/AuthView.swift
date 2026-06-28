@@ -25,77 +25,84 @@ struct SignInView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
+
     var onBack: () -> Void = {}
+
     @State private var appleSignInCoordinator: AppleSignInCoordinator? = nil
 
     var body: some View {
         ZStack {
-            // ── Background ────────────────────────────────
             backgroundView
 
             VStack(spacing: 0) {
 
-                // ── Back Button ───────────────────────────
                 HStack {
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(isDark ? .white : Color.ticku.primary)
-                            .frame(width: 40, height: 40)
-                            .liquidGlassCircle(tint: Color.clear)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(isDark ? .white : .black)
                     }
+
                     Spacer()
                 }
-                .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, 16)
+                .padding(.horizontal, 29)
+                .padding(.top, 4)
 
                 Spacer()
 
-                // ── Hero Text ─────────────────────────────
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Welcome")
-                        .font(.system(size: 36, weight: .bold))
+                        .font(.system(size: 34, weight: .bold))
                         .foregroundColor(isDark ? .white : .black)
 
-                    Text("Ready for today's challenge?")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#3A3A3A"))
+                    Text("Ready for today’s challenge?")
+                        .font(.system(size: 21, weight: .bold))
+                        .foregroundColor(isDark ? .white.opacity(0.56) : Color(hex: "#3A3A3A"))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, TickuSpacing.screenH)
+                .padding(.horizontal, 36)
+                .offset(y: -12)
 
                 Spacer()
 
-                // ── Apple Sign In Button ──────────────────
-                VStack(spacing: 14) {
+                VStack(spacing: 48) {
                     Button(action: handleAppleSignInTap) {
                         HStack(spacing: 8) {
                             Image(systemName: "apple.logo")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 17, weight: .bold))
+
                             Text("Sign in with Apple")
-                                .font(.system(size: 17, weight: .semibold))
+                                .font(.system(size: 18, weight: .bold))
                         }
-                        .foregroundColor(appleButtonForeground)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                        .liquidGlassButton(tint: appleButtonForeground == .white ? .black : .white, cornerRadius: 27)
+                        .foregroundColor(isDark ? .white : .black)
+                        .frame(width: 330, height: 55)
+                        .background(isDark ? Color.black : Color.white)
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(isDark ? Color(hex: "#2A2525") : Color(hex: "#D3D1D1"), lineWidth: 1)
+                        )
+                        .shadow(
+                            color: Color.black.opacity(isDark ? 0.25 : 0.20),
+                            radius: 4,
+                            x: 0,
+                            y: 4
+                        )
                     }
                     .buttonStyle(.plain)
-                    .padding(.horizontal, TickuSpacing.screenH)
 
                     Text("By continuing, you agree to our Terms & Privacy.")
-                        .font(Font.ticku.caption)
-                        .foregroundColor(isDark ? .white.opacity(0.5) : Color(hex: "#3A3A3A"))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(isDark ? .white.opacity(0.60) : Color.black.opacity(0.60))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, TickuSpacing.screenH)
                 }
-                .padding(.bottom, 48)
+                .padding(.bottom, 46)
             }
 
-            // ── Error Toast ───────────────────────────────
             if let msg = authVM.errorMessage {
                 VStack {
                     Spacer()
+
                     Text(msg)
                         .font(.system(size: 14))
                         .foregroundColor(.white)
@@ -104,25 +111,24 @@ struct SignInView: View {
                         .background(Color.ticku.errorRed.opacity(0.9))
                         .clipShape(Capsule())
                         .padding(.bottom, 100)
-                        .onTapGesture { authVM.errorMessage = nil }
+                        .onTapGesture {
+                            authVM.errorMessage = nil
+                        }
                 }
             }
 
-            // ── Loading Overlay ───────────────────────────
             if authVM.isLoading {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
+
                 ProgressView()
                     .tint(.white)
                     .scaleEffect(1.4)
             }
         }
         .navigationBarHidden(true)
-        // ✅ iOS 17+ onChange syntax — auto-dismiss when sign in succeeds
         .onChange(of: authVM.isAuthenticated) {
-            print("👀 SignInView onChange fired — isAuthenticated: \(authVM.isAuthenticated)")
             if authVM.isAuthenticated {
-                print("👀 Calling onBack()")
                 onBack()
             }
         }
@@ -132,14 +138,21 @@ struct SignInView: View {
     private var backgroundView: some View {
         if isDark {
             LinearGradient(
-                colors: [Color(hex: "#5B4A8F"), Color(hex: "#1A1530"), Color(hex: "#000000")],
+                colors: [
+                    Color(hex: "#604D93"),
+                    Color.black
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
         } else {
             LinearGradient(
-                colors: [Color(hex: "#5B4DB5"), Color(hex: "#D6D0F0")],
+                colors: [
+                    Color(hex: "#9B84E7"),
+                    Color(hex: "#DED8F5"),
+                    Color.white
+                ],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -147,34 +160,29 @@ struct SignInView: View {
         }
     }
 
-    private var appleButtonForeground: Color {
-        isDark ? .white : .black
-    }
-
-    // ✅ نفس منطق SignInWithAppleButton الرسمي، بس مستدعى يدوياً
-    // عشان نقدر نصمم الزر بأنفسنا (Liquid Glass) بدون فقدان أي وظيفة
     private func handleAppleSignInTap() {
         let hashedNonce = authVM.prepareNonce()
+
         let provider = ASAuthorizationAppleIDProvider()
         let request = provider.createRequest()
         request.requestedScopes = [.fullName, .email]
         request.nonce = hashedNonce
 
         let controller = ASAuthorizationController(authorizationRequests: [request])
+
         let delegate = AppleSignInCoordinator { result in
             Task {
                 await authVM.handleAppleSignIn(result: result)
             }
         }
-        appleSignInCoordinator = delegate // نحتفظ بمرجع عشان ما يروح بالـ deinit قبل الرد
+
+        appleSignInCoordinator = delegate
         controller.delegate = delegate
         controller.presentationContextProvider = delegate
         controller.performRequests()
     }
 }
 
-// MARK: - Apple Sign In Coordinator
-// يكرر بالضبط سلوك SignInWithAppleButton الجاهز لكن بدون قيود الشكل
 private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
 
     private let onComplete: (Result<ASAuthorization, Error>) -> Void
@@ -183,11 +191,17 @@ private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerD
         self.onComplete = onComplete
     }
 
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithAuthorization authorization: ASAuthorization
+    ) {
         onComplete(.success(authorization))
     }
 
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithError error: Error
+    ) {
         onComplete(.failure(error))
     }
 

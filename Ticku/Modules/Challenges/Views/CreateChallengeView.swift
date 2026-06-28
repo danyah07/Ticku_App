@@ -19,103 +19,114 @@ struct CreateChallengeView: View {
     var onBack: () -> Void = {}
     var onCreated: (Challenge) -> Void = { _ in }
 
-    private var screenBackground: Color {
-        isDark ? Color(hex: "#0A0814") : Color(hex: "#F5F4FB")
+    private var selectedPurple: Color {
+        Color(hex: "#4C3882")
     }
 
     var body: some View {
         ZStack {
-            screenBackground.ignoresSafeArea()
+            backgroundView
 
             VStack(spacing: 0) {
 
-                // ── Nav Bar ───────────────────────────────
                 ZStack {
                     Text("Create Challenge")
-                        .font(Font.ticku.sectionHeader)
-                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
                         .frame(maxWidth: .infinity, alignment: .center)
+
                     Button(action: onBack) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(isDark ? .white : .black)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 14)
-                .padding(.bottom, 20)
-                .background(screenBackground)
+                .padding(.horizontal, 23)
+                .padding(.top, 5)
+                .padding(.bottom, 48)
+                .background(Color.clear)
                 .zIndex(1)
 
-                // ── Scrollable Content ────────────────────
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
 
                         fieldLabel("Challenge name")
                         inputField(placeholder: "e.g. 30-Day Grind", text: $vm.challengeName)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 23)
                             .padding(.bottom, 28)
 
                         fieldLabel("Challenge type")
-                        HStack(spacing: 10) {
+
+                        HStack(spacing: 8) {
                             ForEach(ChallengeType.allCases) { type in
                                 Button(action: { vm.selectedType = type }) {
-                                    HStack(spacing: 8) {
+                                    VStack(spacing: 4) {
                                         Image(systemName: type.icon)
-                                            .font(.system(size: 16, weight: .semibold))
+                                            .font(.system(size: 17, weight: .bold))
+
                                         Text(type.label)
-                                            .font(.system(size: 15, weight: .semibold))
+                                            .font(.system(size: 16, weight: .bold))
                                     }
-                                    .foregroundColor(typeTextColor(selected: vm.selectedType == type))
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 54)
+                                    .foregroundColor(vm.selectedType == type ? .white : typeUnselectedTextColor)
+                                    .frame(width: 174, height: 52)
                                     .background(typeBackground(selected: vm.selectedType == type))
                                     .clipShape(Capsule())
                                     .overlay(
-                                        Capsule().stroke(
-                                            vm.selectedType == type ? Color.clear : (isDark ? Color.white.opacity(0.2) : Color(hex: "#DDDAEE")),
-                                            lineWidth: 1.5
-                                        )
+                                        Capsule()
+                                            .stroke(typeStrokeColor(selected: vm.selectedType == type), lineWidth: 1)
+                                    )
+                                    .shadow(
+                                        color: vm.selectedType == type ? .clear : Color.black.opacity(isDark ? 0 : 0.15),
+                                        radius: vm.selectedType == type ? 0 : 4,
+                                        x: 0,
+                                        y: vm.selectedType == type ? 0 : 4
                                     )
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 25)
+                        .padding(.vertical, 10)
                         .padding(.bottom, 24)
 
                         fieldLabel("Duration")
+
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
                                 ForEach(DurationOption.allCases) { option in
                                     Button(action: { vm.selectedDuration = option }) {
-                                        Text(option.rawValue == "today" ? "Today" : option.rawValue)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(durationTextColor(selected: vm.selectedDuration == option))
-                                            .padding(.horizontal, 22)
-                                            .frame(height: 44)
-                                            .fixedSize()
+                                        Text(option.rawValue == "today" ? "today" : option.rawValue)
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(vm.selectedDuration == option ? .white : durationUnselectedTextColor)
+                                            .padding(.horizontal, 25)
+                                            .frame(height: 46)
                                             .background(durationBackground(selected: vm.selectedDuration == option))
                                             .clipShape(Capsule())
                                             .overlay(
-                                                Capsule().stroke(
-                                                    vm.selectedDuration == option ? Color.clear : (isDark ? Color.white.opacity(0.2) : Color(hex: "#DDDAEE")),
-                                                    lineWidth: 1.5
-                                                )
+                                                Capsule()
+                                                    .stroke(durationStrokeColor(selected: vm.selectedDuration == option), lineWidth: 1)
+                                            )
+                                            .shadow(
+                                                color: vm.selectedDuration == option ? .clear : Color.black.opacity(isDark ? 0 : 0.15),
+                                                radius: vm.selectedDuration == option ? 0 : 4,
+                                                x: 0,
+                                                y: vm.selectedDuration == option ? 0 : 4
                                             )
                                     }
+                                    .buttonStyle(.plain)
                                     .fixedSize()
                                 }
                             }
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 5)
+                            .padding(.horizontal, 23)
+                            .padding(.vertical, 10)
                         }
-                        .padding(.bottom, 16)
+                        .padding(.bottom, 22)
 
                         if vm.showTimePicker {
                             purpleTimePicker
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 20)
+                                .padding(.horizontal, 23)
+                                .padding(.bottom, 22)
                                 .popoverTip(enterTimeTip, arrowEdge: .top)
                                 .onAppear {
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
@@ -126,15 +137,14 @@ struct CreateChallengeView: View {
 
                         fieldLabel("Challenge rule")
                         inputField(placeholder: "e.g. Punishment or Reward", text: $vm.challengeRule)
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, 23)
                             .padding(.bottom, 40)
                     }
-                    .padding(.top, 8)
                 }
 
-                // ── Create Button ─────────────────────────
                 HStack {
                     Spacer()
+
                     Button {
                         Task {
                             guard let uid = authVM.currentUserId else { return }
@@ -148,28 +158,32 @@ struct CreateChallengeView: View {
                                 ProgressView().tint(.white)
                             } else {
                                 Text("Create")
-                                    .font(.system(size: 15, weight: .bold))
+                                    .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.white)
                             }
                         }
-                        .frame(width: 220, height: 44)
+                        .frame(width: 250, height: 52)
                         .background(createButtonBackground)
                         .clipShape(Capsule())
+                        .shadow(color: Color.black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
                     }
                     .disabled(!vm.isFormValid || vm.isLoading)
+
                     Spacer()
                 }
                 .padding(.vertical, 20)
-                .background(screenBackground)
+                .background(Color.clear)
             }
 
             if let msg = vm.errorMessage {
                 VStack {
                     Spacer()
+
                     Text(msg)
                         .font(Font.ticku.caption)
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
                         .background(Color.ticku.errorRed.opacity(0.9))
                         .clipShape(Capsule())
                         .padding(.bottom, 100)
@@ -181,33 +195,55 @@ struct CreateChallengeView: View {
         .withErrorHandling()
     }
 
-    // ── أزرار ثابتة بنفس اللون بكل الأوضاع ──
-    private var createButtonBackground: Color {
-        guard vm.isFormValid else {
-            return isDark ? Color.white.opacity(0.15) : Color(hex: "#C4C4C4")
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            LinearGradient(
+                colors: [
+                    Color.black,
+                    Color.black,
+                    Color(hex: "#3E3C5E")
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        } else {
+            Color.white.ignoresSafeArea()
         }
-        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
     }
 
-    private func typeTextColor(selected: Bool) -> Color {
-        selected ? .white : Color(hex: "#341D71")
+    private var createButtonBackground: Color {
+        guard vm.isFormValid else {
+            return isDark ? Color(hex: "#4C3882").opacity(0.35) : Color(hex: "#C4C4C4")
+        }
+        return selectedPurple
+    }
+
+    private var typeUnselectedTextColor: Color {
+        isDark ? .white : .black
+    }
+
+    private var durationUnselectedTextColor: Color {
+        isDark ? .white : Color(hex: "#341D71")
     }
 
     private func typeBackground(selected: Bool) -> Color {
-        guard selected else { return isDark ? Color.white.opacity(0.05) : Color.white }
-        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
+        selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white)
     }
 
-    private func durationTextColor(selected: Bool) -> Color {
-        selected ? .white : Color(hex: "#341D71")
+    private func typeStrokeColor(selected: Bool) -> Color {
+        selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF"))
     }
 
     private func durationBackground(selected: Bool) -> Color {
-        guard selected else { return isDark ? Color.white.opacity(0.05) : Color.white }
-        return isDark ? Color(hex: "#5B3FA0") : Color(hex: "#341D71")
+        selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white)
     }
 
-    // ── تايمر الوقت ثابت اللون بكل الأوضاع ──
+    private func durationStrokeColor(selected: Bool) -> Color {
+        selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF"))
+    }
+
     private var purpleTimePicker: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Enter time")
@@ -219,17 +255,19 @@ struct CreateChallengeView: View {
 
             HStack(spacing: 0) {
                 timeBox(text: $vm.hourText, max: 23, label: "Hour")
+
                 Text(":")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 24)
+
                 timeBox(text: $vm.minuteText, max: 59, label: "Minute")
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity)
-        .background(isDark ? Color(hex: "#2A1F5C") : Color(hex: "#341D71"))
+        .background(isDark ? selectedPurple.opacity(0.75) : Color(hex: "#341D71"))
         .clipShape(RoundedRectangle(cornerRadius: 24))
     }
 
@@ -251,6 +289,7 @@ struct CreateChallengeView: View {
                     if let n = Int(f), n > max { f = String(max) }
                     if f != text.wrappedValue { text.wrappedValue = f }
                 }
+
             Text(label)
                 .font(.system(size: 12))
                 .foregroundColor(.white)
@@ -260,9 +299,9 @@ struct CreateChallengeView: View {
 
     private func fieldLabel(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 13, weight: .bold))
-            .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color.ticku.primary.opacity(0.65))
-            .padding(.horizontal, 24)
+            .font(.system(size: 18, weight: .bold))
+            .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71").opacity(0.65))
+            .padding(.horizontal, 23)
             .padding(.bottom, 7)
     }
 
@@ -282,7 +321,7 @@ struct CreateChallengeView: View {
 
     private func inputFieldBackground(isEmpty: Bool) -> Color {
         if isDark {
-            return isEmpty ? Color.white.opacity(0.05) : Color.white.opacity(0.1)
+            return isEmpty ? Color(hex: "#2A2A2A") : Color(hex: "#303030")
         }
         return isEmpty ? Color(hex: "#F0EFF7") : Color.white
     }

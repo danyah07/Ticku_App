@@ -86,6 +86,7 @@ enum TickuColors {
     static let challengeGradientEnd   = Color(hex: "#F6EFFA")
     static let challengeProgressTrack = Color(hex: "#D9D9D9")
     static let challengeButton        = Color(hex: "#5A3F93")
+    static let joinButtonBlue = Color(hex: "#579CE7")
     // ── Brand ────────────────────────────────────────────────
     static let primary       = Color(hex: "#3D2C8D")
     static let primaryLight  = Color(hex: "#5B4DB5")

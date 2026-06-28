@@ -19,46 +19,35 @@ struct AllChallengesView: View {
     var onMyTasks: (Challenge) -> Void = { _ in }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
+        ZStack(alignment: .top) {
+            backgroundView
 
-                // MARK: - Nav Bar
-                HStack {
-                    Button(action: onBack) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-                    }
-                    Spacer()
-                    Text("Active Challenges")
-                        .font(Font.ticku.sectionHeader)
-                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-                    Spacer()
-                    Color.clear.frame(width: 24)
-                }
-                .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, 16)
-                .padding(.bottom, 16)
-
-                if vm.activeChallenges.isEmpty {
-                    EmptyStateView()
-                        .padding(.top, 40)
-                } else {
-                    VStack(spacing: 14) {
-                        ForEach(vm.activeChallenges) { challenge in
-                            ChallengeCard(
-                                challenge: challenge,
-                                onViewRoom: { onViewRoom(challenge) },
-                                onMyTasks:  { onMyTasks(challenge) }
-                            )
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    if vm.activeChallenges.isEmpty {
+                        EmptyStateView()
+                            .padding(.horizontal, 23)
+                            .padding(.top, 40)
+                    } else {
+                        VStack(spacing: 14) {
+                            ForEach(vm.activeChallenges) { challenge in
+                                ChallengeCard(
+                                    challenge: challenge,
+                                    isDark: isDark,
+                                    onViewRoom: { onViewRoom(challenge) },
+                                    onMyTasks: { onMyTasks(challenge) }
+                                )
+                            }
                         }
+                        .padding(.horizontal, 23)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, 32)
                 }
+                .padding(.top, 100)
             }
+
+            fixedHeader
         }
-        .background(backgroundView)
         .navigationBarHidden(true)
         .task {
             if let uid = authVM.currentUserId {
@@ -67,94 +56,121 @@ struct AllChallengesView: View {
         }
     }
 
+    private var fixedHeader: some View {
+        HStack {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDark ? .white : .black)
+            }
+
+            Spacer()
+
+            Text("Active Challenges")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
+            Spacer()
+
+            Color.clear.frame(width: 24)
+        }
+        .padding(.horizontal, 23)
+        .padding(.top, 5)
+        .frame(height: 64)
+        .background(isDark ? Color.black : Color.white)
+    }
+
     @ViewBuilder
     private var backgroundView: some View {
-        if isDark {
-            Color(hex: "#0A0814").ignoresSafeArea()
-        } else {
-            Color(hex: "#F5F4FA").ignoresSafeArea()
-        }
+        isDark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea()
     }
 }
 
-// MARK: - Challenge Card
 private struct ChallengeCard: View {
     let challenge: Challenge
+    let isDark: Bool
     var onViewRoom: () -> Void
     var onMyTasks: () -> Void
-    @Environment(\.colorScheme) private var colorScheme
-    private var isDark: Bool { colorScheme == .dark }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
 
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(challenge.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
-                    Text("\(challenge.memberCount) Paticipants  |  \(challenge.durationLabel) left")
-                        .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.7))
+
+                    Text("\(challenge.memberCount) Participants | \(challenge.durationLabel) left")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.62))
                 }
+
                 Spacer()
+
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.7))
+                    .rotationEffect(.degrees(90))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
             }
 
             HStack(spacing: -8) {
                 ForEach(0..<max(challenge.memberCount, 0), id: \.self) { _ in
                     Circle()
-                        .fill(Color.white.opacity(0.3))
+                        .fill(Color(hex: "#F2F2F7"))
                         .frame(width: 32, height: 32)
                         .overlay(
                             Image(systemName: "person.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.8))
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Color(hex: "#341D71"))
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(Color(hex: "#341D71"), lineWidth: 2)
                         )
                 }
             }
 
-            HStack(spacing: 10) {
+            HStack(spacing: 18) {
                 Button(action: onViewRoom) {
                     Text("View Room")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Color.white.opacity(0.2))
+                        .frame(width: 151, height: 57)
+                        .background(Color.white.opacity(0.10))
                         .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
                 }
 
                 Button(action: onMyTasks) {
                     Text("My Tasks")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color(hex: "#341D71"))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.black)
+                        .frame(width: 151, height: 57)
                         .background(Color.white)
                         .clipShape(Capsule())
                 }
             }
         }
-        .padding(20)
-        .background(isDark ? Color(hex: "#2A2150") : Color(hex: "#341D71"))
-        .cornerRadius(20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 18)
+        .frame(maxWidth: .infinity)
+        .frame(height: 190)
+        .background(isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"))
+        .clipShape(RoundedRectangle(cornerRadius: 26))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26)
+                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
     }
 }
-
 #Preview("Light") {
     NavigationStack {
         AllChallengesView(vm: HomeViewModel())
             .environmentObject(AuthViewModel())
     }
-}
-
-#Preview("Dark") {
-    NavigationStack {
-        AllChallengesView(vm: HomeViewModel())
-            .environmentObject(AuthViewModel())
-    }
-    .preferredColorScheme(.dark)
 }

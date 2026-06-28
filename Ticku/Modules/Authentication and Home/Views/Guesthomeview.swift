@@ -12,6 +12,7 @@ struct GuestHomeView: View {
     var onSignIn: () -> Void
     var onCreateChallenge: () -> Void
     var onJoinChallenge: () -> Void
+
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
 
@@ -22,89 +23,95 @@ struct GuestHomeView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
 
-                // ── Header ────────────────────────────────
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Welcome!")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(isDark ? .white.opacity(0.5) : Color(hex: "#8B8B9E"))
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.39))
+
                         Text("Get started")
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundColor(isDark ? .white : .black)
                     }
+
                     Spacer()
+
                     Button(action: onSignIn) {
                         Text("Sign in")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#6B5CE7"))
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(Color(hex: "#1D73D8"))
                     }
                     .padding(.top, 4)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 26)
+                .padding(.horizontal, 34)
+                .padding(.top, 5)
+                .padding(.bottom, 50)
 
-                // ── Today's Tasks ──────────────────────────
                 Text("Today's Tasks")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 12)
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+                    .padding(.horizontal, 34)
+                    .padding(.bottom, 8)
 
-                HStack(spacing: 12) {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(isDark ? Color.white.opacity(0.04) : Color.white)
+                HStack(spacing: 14) {
+                    RoundedRectangle(cornerRadius: 25)
+                        .fill(isDark ? Color.black.opacity(0.18) : Color(hex: "#F6F6F6"))
+                        .frame(width: 188, height: 214)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(isDark ? Color(hex: "#B296EB").opacity(0.2) : Color.clear, lineWidth: 1)
+                            RoundedRectangle(cornerRadius: 25)
+                                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
                         )
-                        .shadow(color: .black.opacity(isDark ? 0 : 0.05), radius: 10, x: 0, y: 4)
-                        .overlay(ProgressRingView(percentage: 0))
-                        .frame(height: 160)
+                        .shadow(color: Color.black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
+                        .overlay(
+                            ProgressRingView(
+                                percentage: 0,
+                                ringSize: 120,
+                                lineWidth: 10
+                            )
+                        )
                         .popoverTip(addTaskTip, arrowEdge: .top)
 
-                    StatsSidePanelView(tasksCompleted: 0, wins: 0)
-                        .frame(height: 160)
+                    FigmaGuestStatsSidePanelView(tasksCompleted: 0, wins: 0, isDark: isDark)
+                        .frame(width: 147, height: 217)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 23)
 
-                // ── Active Challenge ───────────────────────
                 HStack {
                     Text("Active Challenge")
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
+                        .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
                     Spacer()
+
                     Text("See all")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor((isDark ? Color(hex: "#B296EB") : Color(hex: "#6B5CE7")).opacity(0.4))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(hex: "#4FA2FF"))
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 26)
-                .padding(.bottom, 12)
+                .padding(.horizontal, 34)
+                .padding(.top, 30)
+                .padding(.bottom, -5)
 
                 EmptyStateView()
+                    .padding(.top, 49)
+                    .frame(height: 190)
                     .padding(.horizontal, 20)
 
-                // ── CTA Buttons ────────────────────────────
-                // ✅ تستدعي onCreateChallenge/onJoinChallenge اللي تجي من HomeView
-                // مربوطة فعلياً بـ onSignIn للضيف (راجع HomeView.swift) — مايصل لصفحة حقيقية بدون حساب
-                HStack(spacing: 12) {
+                HStack(spacing: 13) {
                     PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
                         .popoverTip(createChallengeTip, arrowEdge: .top)
+
                     PrimaryButtonView(title: "Join", style: .muted, action: onJoinChallenge)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 23)
+                .padding(.top, 59)
+                .padding(.bottom, 40)
             }
         }
         .background(backgroundView)
         .onAppear {
-            // ✅ تب كيت الدائرة أول شي يطلع للضيف غير المسجل
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 AddTaskTip.hasOpenedHomeBefore = true
             }
-            // ✅ ما فيه تحديات أصلاً للضيف — التب الثاني يطلع تلقائياً بعد إقفال الأول
             CreateChallengeTip.hasNoActiveChallenges = true
         }
     }
@@ -112,10 +119,76 @@ struct GuestHomeView: View {
     @ViewBuilder
     private var backgroundView: some View {
         if isDark {
-            Color(hex: "#0A0814").ignoresSafeArea()
+            LinearGradient(
+                colors: [
+                    Color.black,
+                    Color.black,
+                    Color(hex: "#3E3C5E")
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
         } else {
-            Color.clear
+            LinearGradient(
+                colors: [
+                    Color.white,
+                    Color.white,
+                    Color(hex: "#341D71").opacity(0.69)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
         }
+    }
+}
+
+private struct FigmaGuestStatsSidePanelView: View {
+    let tasksCompleted: Int
+    let wins: Int
+    let isDark: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 12) {
+                HStack(spacing: 3) {
+                    Text("\(tasksCompleted)")
+                    Text("✓")
+                }
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(Color(hex: "#377329"))
+
+                Text("Done")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(isDark ? .white.opacity(0.65) : Color.black.opacity(0.45))
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Rectangle()
+                .fill(isDark ? Color.white.opacity(0.18) : Color(hex: "#D5D5D5"))
+                .frame(height: 1)
+
+            VStack(spacing: 12) {
+                HStack(spacing: 3) {
+                    Text("\(wins)")
+                    Image(systemName: "trophy")
+                }
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(Color(hex: "#C57723"))
+
+                Text("Wins")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(isDark ? .white.opacity(0.65) : Color.black.opacity(0.45))
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(isDark ? Color.black.opacity(0.18) : Color(hex: "#F8F8F8"))
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .overlay(
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(isDark ? Color.white.opacity(0.18) : Color(hex: "#D5D5D5"), lineWidth: 1)
+        )
     }
 }
 

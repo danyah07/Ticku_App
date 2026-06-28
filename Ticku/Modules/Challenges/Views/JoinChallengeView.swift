@@ -12,6 +12,7 @@ struct JoinChallengeView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var vm = JoinChallengeViewModel()
     @Environment(\.colorScheme) private var colorScheme
+
     private var isDark: Bool { colorScheme == .dark }
 
     var onDismiss: () -> Void = {}
@@ -19,36 +20,36 @@ struct JoinChallengeView: View {
     var displayName: String = ""
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 10) {
 
-            // Code Input
-            TextField("e.g. ABC123", text: $vm.inviteCode)
-                .font(.system(size: 20, weight: .bold, design: .monospaced))
+            TextField("e.g.GRA829", text: $vm.inviteCode)
+                .font(.system(size: 17, weight: .bold, design: .rounded))
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
-                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.primary)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
-                .background(isDark ? Color.white.opacity(0.05) : Color(hex: "#F5F4FB"))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(isDark ? Color(hex: "#B296EB").opacity(0.2) : Color.clear, lineWidth: 1)
+                .foregroundColor(isDark ? .white : Color.black.opacity(0.75))
+                .frame(width: 318, height: 54)
+                .background(
+                    RoundedRectangle(cornerRadius: 50)
+                        .fill(isDark ? Color(hex: "#8D8C8C").opacity(0.25) : Color(hex: "#DDDDDD").opacity(0.48))
                 )
-                .onChange(of: vm.inviteCode) {
+                .overlay(
+                    RoundedRectangle(cornerRadius: 50)
+                        .stroke(isDark ? Color(hex: "#535353") : Color.clear, lineWidth: 1)
+                )
+                .onChange(of: vm.inviteCode) { newValue in
                     vm.inviteCode = String(
-                        vm.inviteCode
+                        newValue
                             .uppercased()
                             .filter { $0.isLetter || $0.isNumber || $0 == "-" }
                             .prefix(8)
                     )
                 }
 
-            // Join Button
             Button {
                 Task {
                     guard let uid = authVM.currentUserId else { return }
+
                     if let challenge = await vm.joinChallenge(
                         userId: uid,
                         displayName: displayName
@@ -59,15 +60,15 @@ struct JoinChallengeView: View {
             } label: {
                 ZStack {
                     if vm.isLoading {
-                        ProgressView().tint(.white)
+                        ProgressView()
+                            .tint(.white)
                     } else {
                         Text("Join")
-                            .font(Font.ticku.button)
+                            .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.white)
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
+                .frame(width: 165, height: 52)
                 .background(joinButtonBackground)
                 .clipShape(Capsule())
             }
@@ -77,16 +78,17 @@ struct JoinChallengeView: View {
                 Text(error)
                     .font(Font.ticku.caption)
                     .foregroundColor(Color.ticku.errorRed)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 10)
             }
         }
     }
 
     private var joinButtonBackground: Color {
-        let base = isDark ? Color(hex: "#B296EB") : Color.ticku.primary
-        return vm.isCodeValid ? base : base.opacity(0.4)
+        let base = isDark ? Color(hex: "#2A1B53") : Color(hex: "#341D71")
+        return vm.isCodeValid ? base : base.opacity(0.83)
     }
 }
-
 #Preview("Light") {
     ZStack {
         Color.gray.opacity(0.3).ignoresSafeArea()

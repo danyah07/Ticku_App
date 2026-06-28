@@ -18,79 +18,55 @@ struct ProfileView: View {
     var onSeeAllChallenges: ([ChallengeHistoryEntry]) -> Void = { _ in }
 
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
+        ZStack(alignment: .top) {
+            backgroundView
 
-                // ── Nav Bar ───────────────────────────────
-                HStack {
-                    Button(action: onBack) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    AvatarView(
+                        imageURL: nil,
+                        size: 100,
+                        base64: vm.profile?.profileImageBase64
+                    )
+                    .padding(.bottom, 16)
+
+                    HStack(spacing: 4) {
+                        Text(vm.profile?.displayName.isEmpty == false ? vm.profile!.displayName : "Ticku User")
+                            .font(.system(size: 27, weight: .black, design: .rounded))
+                            .foregroundColor(isDark ? .white : .black)
+
+                        Text("×\(vm.profile?.currentStreak ?? 0)")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(isDark ? .white : .black)
+
+                        Text("🔥")
+                            .font(.system(size: 15))
                     }
-                    Spacer()
-                    Text("Profile")
-                        .font(Font.ticku.sectionHeader)
-                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-                    Spacer()
-                    Button(action: onSettings) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 18))
-                            .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.accent)
-                    }
+
+                    Text(handleText)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+                        .padding(.bottom, 25)
+
+                    statsPill
+                        .frame(width: 349, height: 65)
+                        .padding(.bottom, 22)
+
+                    challengesSection
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 32)
                 }
-                .padding(.horizontal, TickuSpacing.screenH)
-                .padding(.top, 16)
-                .padding(.bottom, 20)
-
-                // ── Avatar ────────────────────────────────
-                AvatarView(
-                    imageURL: nil,
-                    size: 100,
-                    base64: vm.profile?.profileImageBase64
-                )
-                .padding(.bottom, 12)
-
-                // ── Name + Streak ─────────────────────────
-                HStack(spacing: 6) {
-                    Text(vm.profile?.displayName.isEmpty == false ? vm.profile!.displayName : "Ticku User")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-                    Text("×\(vm.profile?.currentStreak ?? 0)")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-                    Text("🔥")
-                        .font(.system(size: 15))
-                }
-
-                Text(handleText)
-                    .font(.system(size: 15))
-                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
-                    .padding(.top, 4)
-                    .padding(.bottom, 24)
-
-                // ── Stats Pill ────────────────────────────
-                statsPill
-                    .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, 24)
-
-                // ── All Challenges ────────────────────────
-                challengesSection
-                    .padding(.horizontal, TickuSpacing.screenH)
-                    .padding(.bottom, 32)
+                .padding(.top, 85)
             }
+
+            fixedHeader
         }
-        .background(isDark ? Color(hex: "#0A0814").ignoresSafeArea() : Color.white.ignoresSafeArea())
         .navigationBarHidden(true)
-        // ✅ .task(id:) يحمّل أول ما تفتح الصفحة أو لو currentUserId تغيّر
         .task(id: authVM.currentUserId) {
             if let uid = authVM.currentUserId {
                 await vm.load(uid: uid)
             }
         }
-        // ✅ .onAppear يعيد التحميل كل مرة الصفحة "تظهر" من جديد —
-        // زي لما ترجعين من Settings بعد تعديل الاسم/الصورة، لأن currentUserId
-        // ما يتغير بهذي الحالة (.task ما تتفعل من جديد لحالها)
         .onAppear {
             Task {
                 if let uid = authVM.currentUserId {
@@ -100,69 +76,107 @@ struct ProfileView: View {
         }
     }
 
+    private var fixedHeader: some View {
+        HStack {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDark ? .white : .black)
+            }
+            Spacer()
+
+            Text("Profile")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
+            Spacer()
+
+            Button(action: onSettings) {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 23, weight: .bold))
+                    .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
+            }
+        }
+        .padding(.horizontal, 21)
+        .padding(.top, 1)
+        .padding(.bottom, 20)
+        .background(isDark ? Color.black : Color.white)
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isDark {
+            Color.black.ignoresSafeArea()
+        } else {
+            Color.white.ignoresSafeArea()
+        }
+    }
+
     private var handleText: String {
         let raw = vm.profile?.handle ?? vm.profile?.displayName ?? ""
         let stripped = raw.hasPrefix("@") ? String(raw.dropFirst()) : raw
         return "@\(stripped)"
     }
 
-    // MARK: - Stats Pill
     private var statsPill: some View {
         HStack(spacing: 0) {
             statCell(value: "\(vm.profile?.totalChallengesCompleted ?? 0)", label: "Challenges")
-            Divider().frame(height: 40)
+
+            Rectangle()
+                .fill(isDark ? Color.white.opacity(0.15) : Color(hex: "#EBEBEB"))
+                .frame(width: 1, height: 75)
+
             statCell(value: "\(vm.winRate)%", label: "Win Rate")
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(isDark ? Color.white.opacity(0.04) : Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .background(isDark ? Color.white.opacity(0.05) : Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 25))
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color(hex: "#E5E5EA"), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(isDark ? Color.white.opacity(0.12) : Color(hex: "#EBEBEB"), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(isDark ? 0 : 0.15), radius: 9, x: 0, y: 4)
     }
 
     private func statCell(value: String, label: String) -> some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                .foregroundColor(isDark ? .white : .black)
+
             Text(label)
-                .font(.system(size: 13))
-                .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isDark ? .white.opacity(0.5) : Color.black.opacity(0.35))
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Challenges
     private var challengesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             HStack {
                 Text("All Challenges")
-                    .font(Font.ticku.sectionHeader)
-                    .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(isDark ? .white : Color.black.opacity(0.47))
+                    .padding(.top, 37)
+
                 Spacer()
-                // ✅ يفتح صفحة مستقلة بكل التحديات المكتملة — مايخفي شي بمكانه
+
                 Button(action: { onSeeAllChallenges(vm.challenges) }) {
                     Text("See all")
-                        .font(Font.ticku.smallButton)
-                        .foregroundColor(isDark ? Color(hex: "#B296EB") : Color.ticku.accent)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(Color(hex: "#4FA2FF"))
+                        .padding(.top, 37)
                 }
             }
 
             if vm.challenges.isEmpty {
                 Text("No challenges yet.")
-                    .font(Font.ticku.caption)
-                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.25))
                     .padding(.vertical, 20)
                     .frame(maxWidth: .infinity)
             } else {
                 VStack(spacing: 0) {
-                    ForEach(
-                        Array(vm.challenges.prefix(3).enumerated()),
-                        id: \.element.id
-                    ) { index, entry in
+                    ForEach(Array(vm.challenges.prefix(3).enumerated()), id: \.element.id) { index, entry in
                         if index > 0 {
                             Divider()
                                 .padding(.horizontal, 16)
@@ -170,18 +184,18 @@ struct ProfileView: View {
                         ChallengeHistoryRow(entry: entry)
                     }
                 }
-                .background(isDark ? Color.white.opacity(0.04) : Color.white)
+                .background(isDark ? Color.white.opacity(0.05) : Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color(hex: "#E5E5EA"), lineWidth: 1)
+                        .stroke(isDark ? Color.white.opacity(0.12) : Color(hex: "#E5E5EA"), lineWidth: 1)
                 )
+                .shadow(color: Color.black.opacity(isDark ? 0 : 0.12), radius: 9, x: 0, y: 2)
             }
         }
     }
 }
 
-// MARK: - ChallengeHistoryRow
 private struct ChallengeHistoryRow: View {
     let entry: ChallengeHistoryEntry
     @Environment(\.colorScheme) private var colorScheme
@@ -193,6 +207,7 @@ private struct ChallengeHistoryRow: View {
                 Circle()
                     .fill(Color(hex: "#3A3A3C"))
                     .frame(width: 44, height: 44)
+
                 Text(entry.challenge.durationLabel)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
@@ -201,13 +216,15 @@ private struct ChallengeHistoryRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.challenge.title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                    .foregroundColor(isDark ? .white : .black)
+
                 Text(entry.challenge.startDate.monthYear)
                     .font(.system(size: 13))
-                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
+                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.black.opacity(0.35))
             }
 
             Spacer()
+
             rankView
         }
         .padding(.horizontal, 16)
@@ -222,7 +239,9 @@ private struct ChallengeHistoryRow: View {
                 .foregroundColor(Color.ticku.doneGreen)
         } else if let rank = entry.rank {
             HStack(spacing: 4) {
-                Text(rankEmoji(rank)).font(.system(size: 14))
+                Text(rankEmoji(rank))
+                    .font(.system(size: 14))
+
                 Text(rankLabel(rank))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(rankColor(rank))
@@ -231,17 +250,29 @@ private struct ChallengeHistoryRow: View {
     }
 
     private func rankEmoji(_ rank: Int) -> String {
-        switch rank { case 1: return "🥇"; case 2: return "🥈"; case 3: return "🥉"; default: return "🏅" }
+        switch rank {
+        case 1: return "🥇"
+        case 2: return "🥈"
+        case 3: return "🥉"
+        default: return "🏅"
+        }
     }
+
     private func rankLabel(_ rank: Int) -> String {
-        switch rank { case 1: return "1st"; case 2: return "2nd"; case 3: return "3rd"; default: return "\(rank)th" }
+        switch rank {
+        case 1: return "1st"
+        case 2: return "2nd"
+        case 3: return "3rd"
+        default: return "\(rank)th"
+        }
     }
+
     private func rankColor(_ rank: Int) -> Color {
         switch rank {
         case 1: return Color.ticku.winsOrange
         case 2: return Color(hex: "#8E8E93")
         case 3: return Color(hex: "#CD7F32")
-        default: return isDark ? .white.opacity(0.5) : Color.ticku.textSecondary
+        default: return isDark ? .white.opacity(0.5) : Color.black.opacity(0.35)
         }
     }
 }
@@ -255,7 +286,8 @@ private extension Date {
 }
 
 #Preview("Light") {
-    ProfileView().environmentObject(AuthViewModel())
+    ProfileView()
+        .environmentObject(AuthViewModel())
 }
 
 #Preview("Dark") {

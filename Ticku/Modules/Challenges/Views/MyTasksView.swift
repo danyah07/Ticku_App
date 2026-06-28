@@ -33,139 +33,24 @@ struct MyTasksView: View {
     var progress: Double { tasks.isEmpty ? 0 : Double(completedCount) / Double(tasks.count) }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .top) {
+            backgroundView
 
-            // MARK: - Nav Bar
-            HStack {
-                Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
-                }
-                Spacer()
-                Text("Your tasks")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
-                Spacer()
-                if isAdding {
-                    Button("Save") {
-                        withAnimation(.easeInOut) { isAdding = false }
-                        inputFocused = false
-                        isSaved = true
-                        newTaskText = ""
-                    }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                } else if isSaved && !challengeStarted {
-                    Button("Edit") {
-                        withAnimation(.easeInOut) { isSaved = false; isAdding = true }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { inputFocused = true }
-                    }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                } else {
-                    Color.clear.frame(width: 40, height: 20)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 50)
-
-            // MARK: - Progress Ring
-            ZStack {
-                Circle().fill(isDark ? Color(hex: "#3A3550") : Color.clear)
-                Circle().stroke(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E5F5"), lineWidth: 12)
-                Circle().trim(from: 0, to: progress)
-                    .stroke(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"), style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .animation(.easeInOut(duration: 0.4), value: progress)
-                Text(tasks.isEmpty ? "%0" : "%\(Int(progress * 100))")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
-            }
-            .frame(width: 130, height: 130)
-            .padding(.bottom, 80)
-
-            // MARK: - Tasks Container
-            ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(isDark ? Color(hex: "#15111F") : Color.white)
-                    .ignoresSafeArea(edges: .bottom)
-
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    if tasks.isEmpty && !isAdding {
-                        Text("Tap 'Add a task' below to get started!")
-                            .font(.system(size: 13))
-                            .foregroundColor((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.4))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                            .padding(.top, 40)
-                    }
+                    progressSection
+                        .padding(.top, 96)
+                        .padding(.bottom, 42)
 
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            ForEach(tasks) { task in
-                                taskRow(task: task)
-                                if task.id != tasks.last?.id || isAdding {
-                                    Divider().padding(.leading, 50)
-                                }
-                            }
-                            if isAdding {
-                                HStack(spacing: 10) {
-                                    Button(action: { submitTask() }) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .fill(addButtonBackground)
-                                                .frame(width: 26, height: 26)
-                                            Image(systemName: "plus")
-                                                .font(.system(size: 12, weight: .bold))
-                                                .foregroundColor(addButtonIconColor)
-                                        }
-                                        .animation(.easeInOut(duration: 0.2), value: newTaskText.isEmpty)
-                                    }
-                                    .disabled(newTaskText.isEmpty)
-
-                                    TextField("Add a task...", text: $newTaskText)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
-                                        .focused($inputFocused)
-                                        .onSubmit { submitTask() }
-                                    Spacer()
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 13)
-                            }
-                        }
+                    tasksContainer
                         .padding(.bottom, 120)
-                    }
                 }
-                .padding(.top, 8)
             }
-            .padding(.horizontal, 20)
+
+            fixedHeader
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(backgroundView)
         .safeAreaInset(edge: .bottom) {
-            if !isAdding && !isSaved {
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        withAnimation(.easeInOut) { isAdding = true }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { inputFocused = true }
-                    }) {
-                        Text("Add a task")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 200, height: 46)
-                            .background(Color(hex: "#341D71"))
-                            .cornerRadius(23)
-                            .shadow(color: (isDark ? Color.clear : Color(hex: "#341D71")).opacity(0.3), radius: 8, x: 0, y: 4)
-                    }
-                    Spacer()
-                }
-                .padding(.top, 12).padding(.bottom, 36)
-                .background(Color.clear)
-            }
+            bottomAddButton
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
@@ -192,12 +77,191 @@ struct MyTasksView: View {
         .withErrorHandling()
     }
 
+    private var fixedHeader: some View {
+        HStack {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDark ? .white : .black)
+            }
+
+            Spacer()
+
+            Text("Your tasks")
+                .font(.system(size: 21, weight: .bold))
+                .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
+            Spacer()
+
+            if isAdding {
+                Button("Save") {
+                    withAnimation(.easeInOut) { isAdding = false }
+                    inputFocused = false
+                    isSaved = true
+                    newTaskText = ""
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+            } else if isSaved && !challengeStarted {
+                Button("Edit") {
+                    withAnimation(.easeInOut) {
+                        isSaved = false
+                        isAdding = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        inputFocused = true
+                    }
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+            } else {
+                Color.clear.frame(width: 40, height: 20)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
+        .background(isDark ? Color.black : Color(hex: "#F5F4FB"))
+    }
+
+    private var progressSection: some View {
+        ZStack {
+            Circle()
+                .fill(isDark ? Color(hex: "#3A3550") : Color(hex: "#F2F2F7"))
+                .shadow(color: Color.black.opacity(isDark ? 0 : 0.20), radius: 4, x: 0, y: 4)
+
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"),
+                    style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 0.4), value: progress)
+
+            Text(tasks.isEmpty ? "%0" : "%\(Int(progress * 100))")
+                .font(.system(size: 27, weight: .bold))
+                .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
+        }
+        .frame(width: 136.62, height: 138.08)
+    }
+
+    private var tasksContainer: some View {
+        ZStack(alignment: .top) {
+            RoundedRectangle(cornerRadius: 18)
+                .fill(isDark ? Color(hex: "#15111F") : Color(hex: "#EDEDED"))
+                .frame(width: 369, height: 520)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.30), lineWidth: 1)
+                )
+
+            VStack(spacing: 0) {
+                if tasks.isEmpty && !isAdding {
+                    Text("+ Add your first task to begin")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor((isDark ? Color(hex: "#B296EB") : Color.black).opacity(0.35))
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 180)
+                }
+
+                List {
+                    ForEach(tasks) { task in
+                        taskRow(task: task)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                if !challengeStarted {
+                                    Button(role: .destructive) {
+                                        service.deleteTask(
+                                            challengeId: challengeId,
+                                            userId: userId,
+                                            taskId: task.id
+                                        )
+                                    } label: {
+                                        Text("Delete")
+                                    }
+                                }
+                            }
+                    }
+
+                    if isAdding {
+                        addTaskRow
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+            }
+            .frame(width: 369, height: 520)
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+        }
+    }
+
+    private var addTaskRow: some View {
+        HStack(spacing: 10) {
+            Button(action: { submitTask() }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(addButtonBackground)
+                        .frame(width: 26, height: 26)
+
+                    Image(systemName: "plus")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(addButtonIconColor)
+                }
+            }
+            .disabled(newTaskText.isEmpty)
+
+            TextField("Add a task...", text: $newTaskText)
+                .font(.system(size: 14))
+                .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
+                .focused($inputFocused)
+                .onSubmit { submitTask() }
+
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 13)
+    }
+
+    @ViewBuilder
+    private var bottomAddButton: some View {
+        if !isAdding && !isSaved {
+            HStack {
+                Spacer()
+
+                Button(action: {
+                    withAnimation(.easeInOut) { isAdding = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        inputFocused = true
+                    }
+                }) {
+                    Text("Add a task")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 166, height: 60)
+                        .background(Color(hex: "#4C3882"))
+                        .clipShape(Capsule())
+                }
+
+                Spacer()
+            }
+            .padding(.bottom, 36)
+            .background(Color.clear)
+        }
+    }
+
     @ViewBuilder
     private var backgroundView: some View {
         if isDark {
-            Color(hex: "#0A0814")
+            Color.black.ignoresSafeArea()
         } else {
-            Color(hex: "#F5F4FB")
+            Color(hex: "#F5F4FB").ignoresSafeArea()
         }
     }
 
@@ -215,9 +279,9 @@ struct MyTasksView: View {
         return isDark ? Color(hex: "#E0D6FA") : .white
     }
 
-    // MARK: - Listen to challenge startDate from Firebase
     private func startChallengeListener() {
         guard !challengeId.isEmpty else { return }
+
         challengeListener = db.collection("challenges").document(challengeId)
             .addSnapshotListener { snap, _ in
                 if let ts = snap?.data()?["startDate"] as? Timestamp {
@@ -233,14 +297,18 @@ struct MyTasksView: View {
         HStack(spacing: 10) {
             if isSaved {
                 Button(action: {
-                    // ✅ ما يقدر يسوي تشيك إلا بعد ما يبدأ التحدي (START)
                     guard challengeStarted else { return }
                     service.completeTask(challengeId: challengeId, userId: userId, task: task)
                 }) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(task.isCompleted ? (isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")) : (isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E5F5")))
+                            .fill(
+                                task.isCompleted
+                                ? (isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                                : (isDark ? Color.white.opacity(0.1) : Color(hex: "#C9C9C9"))
+                            )
                             .frame(width: 24, height: 24)
+
                         if task.isCompleted {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 12, weight: .bold))
@@ -248,7 +316,7 @@ struct MyTasksView: View {
                         }
                     }
                 }
-                .disabled(task.isCompleted || !challengeStarted) // ✅ معطل لو خلصت التاسك، أو التحدي لسا ما بدأ
+                .disabled(task.isCompleted || !challengeStarted)
             } else {
                 Button(action: {
                     service.deleteTask(challengeId: challengeId, userId: userId, taskId: task.id)
@@ -257,6 +325,7 @@ struct MyTasksView: View {
                         RoundedRectangle(cornerRadius: 6)
                             .fill((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.7))
                             .frame(width: 24, height: 24)
+
                         Rectangle()
                             .fill(Color.white)
                             .frame(width: 10, height: 2)
@@ -271,13 +340,13 @@ struct MyTasksView: View {
                 .strikethrough(task.isCompleted && isSaved)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 14).padding(.vertical, 13)
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            if !isSaved {
-                Button(role: .destructive) {
-                    service.deleteTask(challengeId: challengeId, userId: userId, taskId: task.id)
-                } label: { Label("Delete", systemImage: "trash") }
-            }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 13)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.12))
+                .frame(height: 1)
+                .padding(.leading, 50)
         }
     }
 
@@ -291,13 +360,19 @@ struct MyTasksView: View {
     private func submitTask() {
         let trimmed = newTaskText.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
+
         service.addTask(challengeId: challengeId, userId: userId, title: trimmed)
         newTaskText = ""
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { inputFocused = true }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            inputFocused = true
+        }
     }
 }
 
-#Preview("Light") { MyTasksView(challengeId: "demo", userId: "user1") }
+#Preview("Light") {
+    MyTasksView(challengeId: "demo", userId: "user1")
+}
 
 #Preview("Dark") {
     MyTasksView(challengeId: "demo", userId: "user1")

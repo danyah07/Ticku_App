@@ -8,50 +8,141 @@
 import SwiftUI
 
 struct PrimaryButtonView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let title: String
     var style: ButtonStyle = .solid
     var action: () -> Void
 
     enum ButtonStyle {
-        case solid    // purple fill
-        case muted    // lavender fill
-        case outline  // white border on dark bg
-        case white    // white fill on dark bg
+        case solid
+        case muted
+        case outline
+        case white
     }
 
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundColor(fgColor)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .frame(height: 52)
                 .background(bgColor)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(strokeColor, lineWidth: strokeWidth))
+                .overlay(
+                    Capsule()
+                        .stroke(strokeColor, lineWidth: strokeWidth)
+                )
+                .shadow(
+                    color: shadowColor,
+                    radius: shadowRadius,
+                    x: 0,
+                    y: shadowY
+                )
         }
+        .buttonStyle(.plain)
     }
+
+    // MARK: - Colors
 
     private var fgColor: Color {
         switch style {
-        case .solid:   return .white
-        case .muted:   return Color(hex: "#1A1A2E")
-        case .outline: return .white
-        case .white:   return Color(hex: "#3D2C8D")
+
+        case .solid:
+            return .white
+
+        case .muted:
+            return colorScheme == .dark ? .white : .black
+
+        case .outline:
+            return .white
+
+        case .white:
+            return Color.ticku.challengeDarkPurple
         }
     }
+
     private var bgColor: Color {
         switch style {
-        case .solid:   return Color(hex: "#3D2C8D")
-        case .muted:   return Color(hex: "#C8C4E8")
-        case .outline: return Color.white.opacity(0.15)
-        case .white:   return .white
+
+        case .solid:
+            return colorScheme == .dark
+                ? Color(hex: "#7771C8")
+                : Color.ticku.challengeDarkPurple
+
+        case .muted:
+            return colorScheme == .dark
+                ? Color(hex: "#C9E3FF").opacity(0.35)
+                : Color(hex: "#579CE7").opacity(0.35)
+
+        case .outline:
+            return Color.white.opacity(0.15)
+
+        case .white:
+            return .white
         }
     }
+
     private var strokeColor: Color {
-        style == .outline ? Color.white.opacity(0.35) : .clear
+        switch style {
+
+        case .muted:
+            return colorScheme == .dark
+                ? Color.white.opacity(0.08)
+                : Color.white.opacity(0.35)
+
+        case .outline:
+            return Color.white.opacity(0.35)
+
+        default:
+            return .clear
+        }
     }
+
     private var strokeWidth: CGFloat {
-        style == .outline ? 1 : 0
+        switch style {
+        case .muted, .outline:
+            return 1
+
+        default:
+            return 0
+        }
+    }
+
+    private var shadowColor: Color {
+        switch style {
+
+        case .solid:
+            return Color.black.opacity(0.25)
+
+        case .muted:
+            return colorScheme == .dark
+                ? Color.black.opacity(0.25)
+                : .clear
+
+        default:
+            return .clear
+        }
+    }
+
+    private var shadowRadius: CGFloat {
+        switch style {
+        case .solid, .muted:
+            return 4
+
+        default:
+            return 0
+        }
+    }
+
+    private var shadowY: CGFloat {
+        switch style {
+        case .solid, .muted:
+            return 4
+
+        default:
+            return 0
+        }
     }
 }

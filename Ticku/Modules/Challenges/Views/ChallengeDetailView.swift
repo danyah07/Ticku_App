@@ -41,7 +41,7 @@ struct ChallengeDetailView: View {
         onMyTasks: @escaping (Challenge) -> Void = { _ in }
     ) {
         _vm = StateObject(wrappedValue: ChallengeDetailViewModel(challenge: challenge))
-        self.onBack    = onBack
+        self.onBack = onBack
         self.onMyTasks = onMyTasks
     }
 
@@ -53,21 +53,12 @@ struct ChallengeDetailView: View {
                 soloLayout
             } else {
                 VStack(spacing: 0) {
-
-                    // ── Nav Bar ───────────────────────────────
                     navBarSection
-
                     Spacer().frame(height: 36)
-
-                    // ── Title ─────────────────────────────────
                     titleSection
-
                     Spacer().frame(height: 8)
-
                     timerSection
-
                     Spacer().frame(height: 24)
-
                     membersGridSection
                 }
             }
@@ -91,19 +82,17 @@ struct ChallengeDetailView: View {
                     showComplete = true
                 }
             }
+
+            if vm.timerDisplay != "START" {
+                StreakTip.hasStartedChallengeBefore = true
+                streakTip.invalidate(reason: .actionPerformed)
+            }
         }
         .onChange(of: vm.members) {
-            print("🟡 onChange(vm.members) FIRED — count: \(vm.members.count), startDate: \(String(describing: vm.challengeStartDate))")
-            for m in vm.members {
-                print("🟡   member \(m.userId): progress=\(m.progressPercent) tasksTotal=\(m.tasksTotal)")
-            }
-            // ✅ نتأكد التحدي بدأ فعلياً (مايكون فقط challengeStartDate موجود من بيانات قديمة)
-            // ونتأكد فيه عضو واحد على الأقل عنده تاسكات (مايكون 100% من تاسكات = 0)
             let shouldComplete = vm.challengeStartDate != nil &&
-               vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 })
-            print("🟡 shouldComplete = \(shouldComplete)")
+            vm.members.contains(where: { $0.progressPercent >= 100 && $0.tasksTotal > 0 })
+
             if shouldComplete {
-                print("🟡 Calling completeChallenge now...")
                 Task {
                     await vm.completeChallenge()
                     showComplete = true
@@ -119,13 +108,6 @@ struct ChallengeDetailView: View {
         .onAppear {
             vm.startListening(currentUserId: authVM.currentUserId ?? "")
             startPendingListener()
-        }
-        .onChange(of: vm.timerDisplay) {
-            if vm.timerDisplay != "START" {
-                // ✅ بعد START، التب لازم يختفي ولا يطلع مرة ثانية لهذا المستخدم
-                StreakTip.hasStartedChallengeBefore = true
-                streakTip.invalidate(reason: .actionPerformed)
-            }
         }
         .onDisappear {
             pendingListener?.remove()
@@ -145,18 +127,18 @@ struct ChallengeDetailView: View {
         .withErrorHandling()
     }
 
-    // MARK: - Solo Layout
     @ViewBuilder
     private var soloLayout: some View {
         VStack(spacing: 0) {
-            // Nav bar بدون زر مشاركة — فقط back و menu (لو بدأ)
             HStack {
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(isDark ? .white : .black)
                 }
+
                 Spacer()
+
                 if vm.timerDisplay != "START" {
                     menuButton
                 }
@@ -187,16 +169,13 @@ struct ChallengeDetailView: View {
         }
     }
 
-    // MARK: - Background (Light / Dark)
     @ViewBuilder
     private var backgroundView: some View {
         if isDark {
             LinearGradient(
                 colors: [
-                    Color(hex: "#0A0814"),
-                    Color(hex: "#0A0814"),
-                    Color(hex: "#2A2150"),
-                    Color(hex: "#5B4A8F")
+                    Color(hex: "#000000"),
+                    Color(hex: "#3E3C5E")
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -205,10 +184,9 @@ struct ChallengeDetailView: View {
         } else {
             LinearGradient(
                 colors: [
-                    Color(hex: "#FFFFFF"),
-                    Color(hex: "#FFFFFF"),
-                    Color(hex: "#EEE8FF"),
-                    Color(hex: "#DDD4F8")
+                    Color.white,
+                    Color.white,
+                    Color(hex: "#341D71").opacity(0.69)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -229,14 +207,15 @@ struct ChallengeDetailView: View {
     private var playersList: [Player] {
         var result: [Player] = []
         for (index, member) in vm.members.enumerated() {
-            let player = Player(
-                name: member.displayName,
-                rank: index + 1,
-                isMe: member.userId == authVM.currentUserId,
-                completedTasks: member.tasksCompleted,
-                totalTasks: member.tasksTotal
+            result.append(
+                Player(
+                    name: member.displayName,
+                    rank: index + 1,
+                    isMe: member.userId == authVM.currentUserId,
+                    completedTasks: member.tasksCompleted,
+                    totalTasks: member.tasksTotal
+                )
             )
-            result.append(player)
         }
         return result
     }
@@ -249,7 +228,9 @@ struct ChallengeDetailView: View {
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(isDark ? .white : .black)
             }
+
             Spacer()
+
             if vm.timerDisplay == "START" {
                 shareButton
             } else {
@@ -307,6 +288,7 @@ struct ChallengeDetailView: View {
             RoundedRectangle(cornerRadius: 32)
                 .fill(isDark ? Color.white.opacity(0.12) : Color(hex: "#E8E2F8"))
                 .frame(width: 260, height: 58)
+
             Text(vm.timerDisplay)
                 .font(.system(size: 24, weight: .black))
                 .foregroundColor(isDark ? Color(hex: "#B7A9E8") : Color(hex: "#5B3DBF"))
@@ -323,7 +305,8 @@ struct ChallengeDetailView: View {
         Text("\(vm.members.count) PLAYERS")
             .font(.system(size: 11, weight: .semibold))
             .foregroundColor(isDark ? Color(hex: "#A8C4E8") : Color(hex: "#5B6AD4"))
-            .padding(.horizontal, 16).padding(.vertical, 5)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 5)
             .background(isDark ? Color(hex: "#1E3A5F").opacity(0.7) : Color(hex: "#E4E8FF"))
             .cornerRadius(20)
     }
@@ -350,6 +333,7 @@ struct ChallengeDetailView: View {
             Text(vm.challenge.title)
                 .font(.system(size: 26, weight: .black))
                 .foregroundColor(isDark ? .white : .black)
+
             if vm.timerDisplay == "START" {
                 Button(action: {
                     editedName = vm.challenge.title
@@ -366,6 +350,7 @@ struct ChallengeDetailView: View {
     @ViewBuilder
     private func memberGridItem(member: ChallengeMember, index: Int) -> some View {
         let isMe = member.userId == authVM.currentUserId
+
         if isMe {
             Button(action: { onMyTasks(vm.challenge) }) {
                 MemberCard(member: member, rank: index + 1, isMe: true)
@@ -405,45 +390,87 @@ private struct MemberCard: View {
     let member: ChallengeMember
     let rank: Int
     let isMe: Bool
+
     @Environment(\.colorScheme) private var colorScheme
 
-    private var progress: Double { member.progressPercent / 100.0 }
+    private var progress: Double {
+        min(max(member.progressPercent / 100.0, 0), 1)
+    }
+
     private var isDark: Bool { colorScheme == .dark }
+
+    private var progressColor: Color {
+        isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71")
+    }
+
+    private var trackColor: Color {
+        isDark ? Color(hex: "#8E8AC5").opacity(0.28) : Color(hex: "#D9D5F0")
+    }
 
     var body: some View {
         VStack(spacing: 8) {
-            ZStack {
-                Circle().stroke(isDark ? Color.white.opacity(0.15) : Color(hex: "#D9D5F0"), lineWidth: 7).frame(width: 90, height: 90)
-                if progress > 0 {
-                    Circle()
-                        .trim(from: 0.0, to: progress)
-                        .stroke(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                        .frame(width: 90, height: 90)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeInOut(duration: 0.4), value: progress)
-                }
-                Circle().fill(isDark ? Color.white.opacity(0.1) : Color(hex: "#E8E4F0")).frame(width: 74, height: 74)
-                Image(systemName: "person.fill").font(.system(size: 34)).foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#341D71"))
-            }
-            .frame(width: 100, height: 100).padding(.top, 16)
+            progressAvatar
+                .padding(.top, 16)
 
             Text(isMe ? "ME" : member.displayName.uppercased())
-                .font(.system(size: 14, weight: .black)).foregroundColor(isDark ? .white : Color(hex: "#341D71")).lineLimit(1)
+                .font(.system(size: 14, weight: .black))
+                .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+                .lineLimit(1)
+
             Text("\(Int(member.progressPercent))%")
-                .font(.system(size: 13, weight: .semibold)).foregroundColor(isDark ? .white.opacity(0.5) : Color(hex: "#9E9E9E"))
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(isDark ? Color.white.opacity(0.65) : Color(hex: "#9E9E9E"))
+
             if isMe {
                 Text("View tasks »")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#5B6AD4"))
             }
+
             Spacer(minLength: 4)
         }
-        .frame(height: 210).frame(maxWidth: .infinity)
+        .frame(height: 210)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(isDark ? Color.white.opacity(0.04) : Color.white.opacity(0.30))
-                .overlay(RoundedRectangle(cornerRadius: 24).stroke(isDark ? Color(hex: "#B296EB").opacity(0.35) : Color(hex: "#8EBAC5").opacity(0.45), lineWidth: 1))
+                .fill(isDark ? Color.black.opacity(0.35) : Color(hex: "#F6F6F6").opacity(0.65))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(
+                            isDark ? Color(hex: "#8E8AC5").opacity(0.55) : Color.white.opacity(0.85),
+                            lineWidth: 1
+                        )
+                )
         )
+    }
+
+    private var progressAvatar: some View {
+        ZStack {
+            Circle()
+                .stroke(trackColor, lineWidth: 7)
+                .frame(width: 82, height: 82)
+
+            if progress > 0 {
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(
+                        progressColor,
+                        style: StrokeStyle(lineWidth: 7, lineCap: .round)
+                    )
+                    .frame(width: 82, height: 82)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeInOut(duration: 0.4), value: progress)
+            }
+
+            Circle()
+                .fill(isDark ? Color(hex: "#3A3A3A") : Color(hex: "#E8E4F0"))
+                .frame(width: 68, height: 68)
+
+            Image(systemName: "person.fill")
+                .font(.system(size: 32, weight: .regular))
+                .foregroundColor(isDark ? Color(hex: "#FFE8CB") : Color(hex: "#341D71"))
+        }
+        .frame(width: 100, height: 100)
     }
 }
 
@@ -452,21 +479,38 @@ private struct EmptySlotCard: View {
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                Circle().stroke(Color(hex: "#D9D5F0"), lineWidth: 7).frame(width: 90, height: 90)
-                Circle().fill(Color(hex: "#E8E4F0")).frame(width: 74, height: 74)
-                Image(systemName: "person.badge.plus").font(.system(size: 28)).foregroundColor(Color(hex: "#A89DD4"))
+                Circle()
+                    .stroke(Color(hex: "#D9D5F0"), lineWidth: 7)
+                    .frame(width: 82, height: 82)
+
+                Circle()
+                    .fill(Color(hex: "#E8E4F0"))
+                    .frame(width: 68, height: 68)
+
+                Image(systemName: "person.badge.plus")
+                    .font(.system(size: 28))
+                    .foregroundColor(Color(hex: "#A89DD4"))
             }
-            .frame(width: 100, height: 100).padding(.top, 16)
-            Text("Invite").font(.system(size: 14, weight: .black)).foregroundColor(Color(hex: "#A89DD4"))
+            .frame(width: 100, height: 100)
+            .padding(.top, 16)
+
+            Text("Invite")
+                .font(.system(size: 14, weight: .black))
+                .foregroundColor(Color(hex: "#A89DD4"))
+
             Spacer(minLength: 4)
         }
-        .frame(height: 210).frame(maxWidth: .infinity)
+        .frame(height: 210)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color.white.opacity(0.15))
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color(hex: "#C8C4E8").opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6]))
+                        .stroke(
+                            Color(hex: "#C8C4E8").opacity(0.5),
+                            style: StrokeStyle(lineWidth: 1.5, dash: [6])
+                        )
                 )
         )
     }
@@ -476,10 +520,16 @@ private struct EmptySlotCard: View {
     NavigationStack {
         ChallengeDetailView(
             challenge: Challenge(
-                id: "preview", title: "let's do it", description: "",
-                createdBy: "uid", startDate: Date().addingTimeInterval(60),
+                id: "preview",
+                title: "let's do it",
+                description: "",
+                createdBy: "uid",
+                startDate: Date().addingTimeInterval(60),
                 endDate: Calendar.current.date(byAdding: .day, value: 3, to: Date())!,
-                status: "active", memberCount: 1, createdAt: Date(), memberIds: ["uid"]
+                status: "active",
+                memberCount: 1,
+                createdAt: Date(),
+                memberIds: ["uid"]
             )
         )
         .environmentObject(AuthViewModel())
@@ -490,10 +540,16 @@ private struct EmptySlotCard: View {
     NavigationStack {
         ChallengeDetailView(
             challenge: Challenge(
-                id: "preview", title: "let's do it", description: "",
-                createdBy: "uid", startDate: Date().addingTimeInterval(60),
+                id: "preview",
+                title: "let's do it",
+                description: "",
+                createdBy: "uid",
+                startDate: Date().addingTimeInterval(60),
                 endDate: Calendar.current.date(byAdding: .day, value: 3, to: Date())!,
-                status: "active", memberCount: 1, createdAt: Date(), memberIds: ["uid"]
+                status: "active",
+                memberCount: 1,
+                createdAt: Date(),
+                memberIds: ["uid"]
             )
         )
         .environmentObject(AuthViewModel())

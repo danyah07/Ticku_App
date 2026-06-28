@@ -32,7 +32,6 @@ struct ChallengeDetailsPage: View {
 
     private let db = Firestore.firestore()
 
-    // ✅ لو عضو واحد بس بالتحدي، التغيير يطبق فوراً بدون انتظار موافقة أحد
     private var isSolo: Bool { challenge.memberCount <= 1 }
 
     init(challenge: Challenge) {
@@ -42,84 +41,14 @@ struct ChallengeDetailsPage: View {
     }
 
     var body: some View {
-        ZStack {
-            ScrollView {
+        ZStack(alignment: .top) {
+            darkLightBackground.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
 
-                    // ── Pending Change Banner (top) ───────
-                    if let pending = pendingRule, let requester = requestedBy {
-                        let requesterName = memberNames[requester] ?? requester
-                        let myId = authVM.currentUserId ?? ""
-                        let isRequester = requester == myId
-                        let alreadyAccepted = acceptedBy.contains(myId)
+                    pendingTopBanner
 
-                        HStack {
-                            Button(action: { dismiss() }) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(isDark ? .white : .black)
-                            }
-
-                            Group {
-                                Text(isRequester ? "You" : requesterName).fontWeight(.bold)
-                                + Text(" requested a change")
-                            }
-                            .font(.system(size: 14))
-                            .foregroundColor(isDark ? .white : .black)
-
-                            Spacer()
-
-                            if !alreadyAccepted && !isRequester {
-                                Button(action: { acceptRuleChange() }) {
-                                    Text("Accepted")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                        .padding(.horizontal, 18)
-                                        .padding(.vertical, 8)
-                                        .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                                        .cornerRadius(20)
-                                }
-                            } else {
-                                Text("Accepted")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                    .padding(.horizontal, 18)
-                                    .padding(.vertical, 8)
-                                    .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                                    .cornerRadius(20)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(isDark ? Color.white.opacity(0.06) : Color(hex: "#F0EDF8"))
-                        .cornerRadius(20)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
-                    }
-
-                    // ── Nav Bar ───────────────────────────
-                    HStack {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(isDark ? .white : .black)
-                        }
-
-                        Spacer()
-
-                        Text("Details")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(isDark ? .white : .black)
-
-                        Spacer()
-
-                        Color.clear.frame(width: 28)
-                    }
-                    .padding(.horizontal, 36)
-                    .padding(.top, 5)
-                    .padding(.bottom, 50)
-
-                    // ── Challenge Name ────────────────────
                     detailSection(label: "Challenge name") {
                         HStack(spacing: 18) {
                             Text(challengeName)
@@ -137,7 +66,6 @@ struct ChallengeDetailsPage: View {
                         }
                     }
 
-                    // ── Duration ──────────────────────────
                     detailSection(label: "Duration") {
                         HStack(spacing: 10) {
                             Image(systemName: "clock.fill")
@@ -154,7 +82,6 @@ struct ChallengeDetailsPage: View {
                         .cornerRadius(24)
                     }
 
-                    // ── Challenge Rule ────────────────────
                     detailSection(label: "Challenge role") {
                         HStack(spacing: 2) {
                             if pendingRule != nil {
@@ -179,55 +106,18 @@ struct ChallengeDetailsPage: View {
                         }
                     }
 
-                    // ── Pending Rule Change ───────────────
-                    if let pending = pendingRule, let requester = requestedBy {
-                        let requesterName = memberNames[requester] ?? requester
-                        let myId = authVM.currentUserId ?? ""
-                        let isRequester = requester == myId
-                        let alreadyAccepted = acceptedBy.contains(myId)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            Group {
-                                Text(isRequester ? "You" : requesterName)
-                                    .fontWeight(.bold)
-                                + Text(" requested\nto change the challenge role to : ")
-                                + Text(pending)
-                                    .fontWeight(.bold)
-                            }
-                            .font(.system(size: 14))
-                            .foregroundColor(isDark ? .white : .black)
-
-                            if !alreadyAccepted && !isRequester {
-                                Button(action: { acceptRuleChange() }) {
-                                    Text("Accepted")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                        .padding(.horizontal, 20).padding(.vertical, 8)
-                                        .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
-                                        .cornerRadius(20)
-                                }
-                            } else {
-                                Text("Accepted")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
-                                    .padding(.horizontal, 20).padding(.vertical, 8)
-                                    .background((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.5))
-                                    .cornerRadius(20)
-                            }
-                        }
-                        .padding(.horizontal, 36)
-                        .padding(.vertical, 16)
-                        .background(isDark ? Color.white.opacity(0.05) : Color.clear)
-                        .cornerRadius(20)
-                        .padding(.top, 8)
-                    }
+                    pendingRuleSection
 
                     Spacer(minLength: 20)
                 }
+                .padding(.top, 105)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            .background(darkLightBackground.ignoresSafeArea())
-            .navigationBarHidden(true)
+
+            fixedStyleHeader
+                .frame(height: 70)
+                .background(isDark ? Color.black : Color.white)
+                .zIndex(10)
 
             if showRolePopup {
                 popupOverlay(
@@ -242,6 +132,7 @@ struct ChallengeDetailsPage: View {
                         showRolePopup = false
                     }
                 )
+                .zIndex(20)
             }
 
             if showNamePopup {
@@ -257,8 +148,19 @@ struct ChallengeDetailsPage: View {
                         showNamePopup = false
                     }
                 )
+                .zIndex(20)
             }
         }
+        .navigationBarHidden(true)
+        .onAppear {
+            memberCount = challenge.memberIds.count
+            startListener()
+            Task { await loadMemberNames() }
+        }
+        .onDisappear {
+            listener?.remove()
+        }
+    
         .onAppear {
             memberCount = challenge.memberIds.count
             startListener()
@@ -269,13 +171,123 @@ struct ChallengeDetailsPage: View {
         }
     }
 
+    private var fixedStyleHeader: some View {
+        HStack {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(isDark ? .white : .black)
+            }
+
+            Spacer()
+
+            Text("Details")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
+            Spacer()
+
+            Color.clear.frame(width: 24)
+        }
+        .padding(.horizontal, 23)
+        .padding(.top, 5)
+    }
+
+    @ViewBuilder
+    private var pendingTopBanner: some View {
+        if let pending = pendingRule, let requester = requestedBy {
+            let requesterName = memberNames[requester] ?? requester
+            let myId = authVM.currentUserId ?? ""
+            let isRequester = requester == myId
+            let alreadyAccepted = acceptedBy.contains(myId)
+
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isDark ? .white : .black)
+                }
+
+                Group {
+                    Text(isRequester ? "You" : requesterName).fontWeight(.bold)
+                    + Text(" requested a change")
+                }
+                .font(.system(size: 14))
+                .foregroundColor(isDark ? .white : .black)
+
+                Spacer()
+
+                if !alreadyAccepted && !isRequester {
+                    Button(action: { acceptRuleChange() }) {
+                        acceptedButtonText
+                    }
+                } else {
+                    acceptedButtonText
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(isDark ? Color.white.opacity(0.06) : Color(hex: "#F0EDF8"))
+            .cornerRadius(20)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+    }
+
+    private var acceptedButtonText: some View {
+        Text("Accepted")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 8)
+            .background(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
+            .cornerRadius(20)
+    }
+
+    @ViewBuilder
+    private var pendingRuleSection: some View {
+        if let pending = pendingRule, let requester = requestedBy {
+            let requesterName = memberNames[requester] ?? requester
+            let myId = authVM.currentUserId ?? ""
+            let isRequester = requester == myId
+            let alreadyAccepted = acceptedBy.contains(myId)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Group {
+                    Text(isRequester ? "You" : requesterName)
+                        .fontWeight(.bold)
+                    + Text(" requested\nto change the challenge role to : ")
+                    + Text(pending)
+                        .fontWeight(.bold)
+                }
+                .font(.system(size: 14))
+                .foregroundColor(isDark ? .white : .black)
+
+                if !alreadyAccepted && !isRequester {
+                    Button(action: { acceptRuleChange() }) {
+                        acceptedButtonText
+                    }
+                } else {
+                    Text("Accepted")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background((isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71")).opacity(0.5))
+                        .cornerRadius(20)
+                }
+            }
+            .padding(.horizontal, 36)
+            .padding(.vertical, 16)
+            .background(isDark ? Color.white.opacity(0.05) : Color.clear)
+            .cornerRadius(20)
+            .padding(.top, 8)
+        }
+    }
+
     @ViewBuilder
     private var darkLightBackground: some View {
-        if isDark {
-            Color.black
-        } else {
-            Color.white
-        }
+        isDark ? Color.black : Color.white
     }
 
     private var challengeRuleColor: Color {
@@ -342,7 +354,6 @@ struct ChallengeDetailsPage: View {
     func requestRuleChange(_ newRule: String) {
         guard let cid = challenge.id, let uid = authVM.currentUserId else { return }
 
-        // ✅ لو لحاله (Solo) — يطبق التغيير مباشرة بدون pendingRuleChange/موافقة
         if isSolo {
             challengeRule = newRule
             db.collection("challenges").document(cid).updateData([
@@ -396,7 +407,6 @@ struct ChallengeDetailsPage: View {
         ])
     }
 
-    // MARK: - Section helper
     private func detailSection<Content: View>(
         label: String,
         @ViewBuilder content: () -> Content
@@ -412,7 +422,6 @@ struct ChallengeDetailsPage: View {
         .padding(.bottom, 30)
     }
 
-    // MARK: - Popup
     private func popupOverlay(
         title: String,
         text: Binding<String>,
@@ -493,7 +502,6 @@ struct ChallengeDetailsPage: View {
         }
     }
 }
-
 #Preview("Light") {
     NavigationStack {
         ChallengeDetailsPage(

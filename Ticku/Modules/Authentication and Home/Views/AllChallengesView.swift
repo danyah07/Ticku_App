@@ -59,14 +59,14 @@ struct AllChallengesView: View {
     private var fixedHeader: some View {
         HStack {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
 
             Spacer()
 
-            Text("Active Challenges")
+            Text(NSLocalizedString("active_challenges", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 
@@ -101,7 +101,7 @@ private struct ChallengeCard: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
 
-                    Text("\(challenge.memberCount) Participants | \(challenge.durationLabel) left")
+                    Text("\(challenge.memberCount) \(NSLocalizedString("participants", comment: "")) | \(challenge.durationLabel) \(NSLocalizedString("days_left", comment: ""))")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.white.opacity(0.62))
                 }
@@ -133,7 +133,7 @@ private struct ChallengeCard: View {
 
             HStack(spacing: 18) {
                 Button(action: onViewRoom) {
-                    Text("View Room")
+                    Text(NSLocalizedString("view_room", comment: ""))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 151, height: 57)
@@ -146,7 +146,7 @@ private struct ChallengeCard: View {
                 }
 
                 Button(action: onMyTasks) {
-                    Text("My Tasks")
+                    Text(NSLocalizedString("my_tasks", comment: ""))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.black)
                         .frame(width: 151, height: 57)
@@ -163,11 +163,20 @@ private struct ChallengeCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 26))
         .overlay(
             RoundedRectangle(cornerRadius: 26)
-                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
+                .stroke(
+                    isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear,
+                    lineWidth: 1
+                )
         )
-        .shadow(color: .black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
+        .shadow(
+            color: .black.opacity(isDark ? 0 : 0.25),
+            radius: 4,
+            x: 0,
+            y: 4
+        )
     }
 }
+
 #Preview("Light") {
     NavigationStack {
         AllChallengesView(vm: HomeViewModel())

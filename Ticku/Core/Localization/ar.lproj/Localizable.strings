@@ -17,3 +17,167 @@
 
 "intro_stay_title" = "كن ثابتًا";
 "intro_stay_desc" = "ابنِ سلاسل إنجاز، واكسب شارات، وأثبت إنك تقدر تكمل ما تبدأه.";
+"welcome" = "أهلًا";
+"get_started" = "ابدأ الآن";
+"sign_in" = "تسجيل الدخول";
+"ready_for_today_challenge" = "مستعد لتحدي اليوم؟";
+"sign_in_with_apple" = "Sign in with Apple";
+"terms_privacy_note" = "باستمرارك فإنك توافق على الشروط وسياسة الخصوصية.";
+"hello" = "مرحبًا 👋";
+"today_tasks" = "مهام اليوم";
+"done" = "مكتمل";
+"wins" = "فوز";
+"active_challenges" = "التحديات النشطة";
+"see_all" = "عرض الكل";
+"ready_to_compete" = "مستعد للمنافسة؟";
+"create_first_challenge" = "أنشئ تحديك الأول وادعُ أصدقاءك للبقاء أكثر إنتاجية.";
+"create" = "+ إنشاء";
+"join" = "انضم";
+"view_room" = "عرض الغرفة";
+"my_tasks" = "مهامي";
+"participants" = "مشاركين";
+"days_left" = "أيام متبقية";
+"min_left" = "دقيقة متبقية";
+"today_tasks_title" = "مهام اليوم";
+"invite_code" = "أدخل رمز الدعوة";
+
+
+
+
+"create_challenge_title" = "إنشاء تحدي";
+"challenge_name" = "اسم التحدي";
+"challenge_name_placeholder" = "مثال: تحدي 30 يوم";
+"duration" = "المدة";
+"today" = "اليوم";
+"three_days" = "3 أيام";
+"seven_days" = "7 أيام";
+"fourteen_days" = "14 يوم";
+"enter_time" = "أدخل الوقت";
+"hour" = "ساعة";
+"minute" = "دقيقة";
+"challenge_rule" = "الحكم";
+"challenge_rule_placeholder" = "مثال: عقوبة أو مكافأة";
+"create_challenge_button" = "إنشاء";
+"add_tasks" = "إضافة مهام";
+"add_your_tasks" = "أضف مهامك";
+"save" = "حفظ";
+
+
+
+"start" = "ابدأ";
+"time_remaining" = "الوقت المتبقي";
+"players_count" = "٤ لاعبين";
+"days_left" = "٣ أيام";
+"give_up" = "استسلام";
+"details" = "التفاصيل";
+
+
+
+"details" = "التفاصيل";
+"challenge_name" = "اسم التحدي";
+"duration" = "المدة";
+"challenge_role" = "الحكم";
+"cancel" = "إلغاء";
+"request" = "طلب";
+"change_challenge_role_request" = "طلبت تغيير حكم التحدي إلى";
+
+
+
+"accept" = "قبول";
+"give_up" = "استسلام";
+"details" = "التفاصيل";
+"time_remaining" = "الوقت المتبقي";
+"days_left" = "أيام متبقية";
+"players_count" = "لاعبين";
+"change_request" = "طلبت تغيير";
+"accepted" = "قُبلت";
+
+
+
+"add_tasks" = "إضافة مهام";
+"add_your_tasks" = "أضف مهامك";
+"submit_progress" = "إرسال";
+"challenge_complete" = "اكتمل التحدي";
+"ranked_last_with_completion" = "خسرت";
+"continue" = "متابعة";
+
+
+
+"profile" = "الملف الشخصي";
+"edit" = "تعديل";
+"settings" = "الإعدادات";
+"challenges" = "التحديات";
+"win_rate" = "نسبة الفوز";
+"badges" = "الشارات";
+"wins_badge" = "انتصار";
+"streak_badge" = "أيام متتالية";
+"all_challenges" = "جميع التحديات";
+"see_all" = "عرض الكل";
+"language" = "اللغة";
+"mode" = "الوضع";
+"system_settings" = "إعدادات النظام";
+"save" = "حفظ";
+"active" = "نشط";
+
+
+"no_tasks_yet" = "لا توجد مهام بعد";
+"add_tasks_inside_challenge" = "أضف مهام داخل التحدي لتتبعها هنا.";
+
+
+"no_rule_set" = "لا يوجد حكم";
+"finished" = "انتهى";
+"day_left" = "يوم متبقٍ";
+"someone" = "شخص";
+"you" = "أنت";
+
+"details_title" = "التفاصيل";
+"challenge_name_title" = "اسم التحدي";
+"duration_title" = "المدة";
+"challenge_role_title" = "الحكم";
+
+"change_request" = "طلب تغيير";
+"change_role_request" = "طلبت تغيير حكم التحدي إلى";
+
+
+
+"give_up_question" = "استسلام؟";
+"give_up_message" = "هل أنت متأكد أنك تريد مغادرة هذا التحدي؟";
+"a_player" = "لاعب";
+"me" = "أنا";
+"view_tasks" = "عرض المهام »";
+"invite" = "دعوة";
+
+
+"challenge" = "التحدي";
+"complete" = "اكتمل";
+"failed" = "فشل";
+"you_win_all_tasks" = "فزت، كل المهام اكتملت في الوقت 🎉";
+"two_day_streak" = "🔥 يومين متتالية";
+"you_lose" = "خسرت";
+"tasks_left_undone" = "مهام غير مكتملة";
+"ranked_last_with" = "حصل على آخر مركز بنسبة";
+"completion" = "اكتمال";
+"sample_task_morning_run" = "جري صباحي 5 كم";
+"sample_task_read_pages" = "قراءة 20 صفحة";
+"sample_task_no_junk_food" = "بدون أكل غير صحي اليوم";
+"sample_task_meditate" = "تأمل 10 دقائق";
+
+"no_completed_challenges_yet" = "لا توجد تحديات مكتملة بعد.";
+
+
+"challenge_type" = "نوع التحدي";
+"group" = "جماعي";
+"solo" = "فردي";
+
+
+"your_tasks" = "مهامك";
+"add_first_task_to_begin" = "+ أضف أول مهمة للبدء";
+"delete" = "حذف";
+"add_a_task_placeholder" = "أضف مهمة...";
+"add_a_task" = "أضف مهمة";
+
+
+"me" = "أنا";
+
+
+"no_challenges_yet" = "لا توجد تحديات بعد.";

@@ -11,9 +11,9 @@ struct EmptyStateView: View {
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
 
-    var title: String = "Ready to compete?"
-    var message: String = "Create your first challenge and invite your friends to stay productive together"
-
+    var title: String = NSLocalizedString("ready_to_compete", comment: "")
+    var message: String = NSLocalizedString("create_first_challenge", comment: "")
+    
     var body: some View {
         VStack(spacing: 14) {
 

@@ -96,24 +96,24 @@ struct ChallengeCompleteView: View {
 
     private var soloBadgeSection: some View {
         badgeView(
-            statusText: isSoloComplete ? "COMPLETE" : "FAILED",
+            statusText: isSoloComplete ? NSLocalizedString("complete", comment: "") : NSLocalizedString("failed", comment: ""),
             iconName: isSoloComplete ? "trophy" : "xmark.circle"
         )
     }
 
     private var badgeSection: some View {
-        badgeView(statusText: "COMPLETE", iconName: "trophy")
+        badgeView(statusText: NSLocalizedString("complete", comment: ""), iconName: "trophy")
     }
 
     private func badgeView(statusText: String, iconName: String) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: -2) {
-                Text("CHALLENGE")
+                Text(NSLocalizedString("challenge", comment: ""))
                     .font(.system(size: 24, weight: .black))
 
                 Text(statusText)
                     .font(.system(size: 24, weight: .black))
-                    .padding(.leading, statusText == "FAILED" ? 95 : 56)
+                    .padding(.leading, statusText == NSLocalizedString("failed", comment: "") ? 95 : 56)
             }
             .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
 
@@ -150,7 +150,7 @@ struct ChallengeCompleteView: View {
     private var soloProgressSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("ME")
+                Text(NSLocalizedString("me", comment: ""))
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
 
@@ -159,6 +159,7 @@ struct ChallengeCompleteView: View {
                 Text("\(Int(soloProgress * 100))%")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             progressBar(progress: soloProgress, color: Color(hex: "#341D71"))
@@ -175,10 +176,10 @@ struct ChallengeCompleteView: View {
 
     private var soloTasksList: some View {
         VStack(alignment: .leading, spacing: 14) {
-            soloTaskRow(title: "Morning run 5km", done: true)
-            soloTaskRow(title: "Read 20 pages", done: true)
-            soloTaskRow(title: "No junk food today", done: false)
-            soloTaskRow(title: "Meditate 10 min", done: false)
+            soloTaskRow(title: NSLocalizedString("sample_task_morning_run", comment: ""), done: true)
+            soloTaskRow(title: NSLocalizedString("sample_task_read_pages", comment: ""), done: true)
+            soloTaskRow(title: NSLocalizedString("sample_task_no_junk_food", comment: ""), done: false)
+            soloTaskRow(title: NSLocalizedString("sample_task_meditate", comment: ""), done: false)
         }
         .padding(.top, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -208,17 +209,18 @@ struct ChallengeCompleteView: View {
     private var soloMessageCard: some View {
         VStack(spacing: 6) {
             if isSoloComplete {
-                Text("YOU win all tasks done on time 🎉")
+                Text(NSLocalizedString("you_win_all_tasks", comment: ""))
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(Color(hex: "#2ECC71"))
 
-                Text("🔥 2 day streak")
+                Text(NSLocalizedString("two_day_streak", comment: ""))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
             } else {
-                Text("YOU lose \(unfinishedTasksCount) tasks left undone")
+                Text("\(NSLocalizedString("you_lose", comment: "")) \(unfinishedTasksCount) \(NSLocalizedString("tasks_left_undone", comment: ""))")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(.red)
+                    .environment(\.locale, Locale(identifier: "en_US"))
 
                 Text(challengeRule)
                     .font(.system(size: 24, weight: .black))
@@ -247,7 +249,7 @@ struct ChallengeCompleteView: View {
     private func playerRow(player: Player, rank: Int) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(player.isMe ? "You" : player.name)
+                Text(player.isMe ? NSLocalizedString("you", comment: "") : player.name)
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
 
@@ -256,6 +258,7 @@ struct ChallengeCompleteView: View {
                 Text("\(Int(player.progress * 100))%")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             progressBar(progress: player.progress, color: progressColor(for: rank))
@@ -274,9 +277,10 @@ struct ChallengeCompleteView: View {
         Group {
             if let loser = lastPlayer {
                 VStack(spacing: 4) {
-                    Text("\(loser.isMe ? "You" : loser.name) ranked last with \(Int(loser.progress * 100))% completion")
+                    Text("\(loser.isMe ? NSLocalizedString("you", comment: "") : loser.name) \(NSLocalizedString("ranked_last_with", comment: "")) \(Int(loser.progress * 100))% \(NSLocalizedString("completion", comment: ""))")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
+                        .environment(\.locale, Locale(identifier: "en_US"))
 
                     Text(challengeRule)
                         .font(.system(size: 20, weight: .black))
@@ -296,7 +300,7 @@ struct ChallengeCompleteView: View {
 
     private var continueButton: some View {
         Button(action: { onDone() }) {
-            Text("Continue")
+            Text(NSLocalizedString("continue", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
                 .frame(width: 166, height: 60)
@@ -334,6 +338,7 @@ struct ChallengeCompleteView: View {
         }
     }
 }
+
 #Preview("Group Light") {
     ChallengeCompleteView(
         players: [

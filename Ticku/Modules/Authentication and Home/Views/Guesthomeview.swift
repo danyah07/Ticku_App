@@ -25,11 +25,11 @@ struct GuestHomeView: View {
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Welcome!")
+                        Text(NSLocalizedString("welcome", comment: ""))
                             .font(.system(size: 19, weight: .bold))
                             .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.39))
 
-                        Text("Get started")
+                        Text(NSLocalizedString("get_started", comment: ""))
                             .font(.system(size: 30, weight: .bold))
                             .foregroundColor(isDark ? .white : .black)
                     }
@@ -37,7 +37,7 @@ struct GuestHomeView: View {
                     Spacer()
 
                     Button(action: onSignIn) {
-                        Text("Sign in")
+                        Text(NSLocalizedString("sign_in", comment: ""))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(Color(hex: "#1D73D8"))
                     }
@@ -47,7 +47,7 @@ struct GuestHomeView: View {
                 .padding(.top, 5)
                 .padding(.bottom, 50)
 
-                Text("Today's Tasks")
+                Text(NSLocalizedString("today_tasks", comment: ""))
                     .font(.system(size: 19, weight: .bold))
                     .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
                     .padding(.horizontal, 34)
@@ -77,13 +77,13 @@ struct GuestHomeView: View {
                 .padding(.horizontal, 23)
 
                 HStack {
-                    Text("Active Challenge")
+                    Text(NSLocalizedString("active_challenges", comment: ""))
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 
                     Spacer()
 
-                    Text("See all")
+                    Text(NSLocalizedString("see_all", comment: ""))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(Color(hex: "#4FA2FF"))
                 }
@@ -91,16 +91,24 @@ struct GuestHomeView: View {
                 .padding(.top, 30)
                 .padding(.bottom, -5)
 
-                EmptyStateView()
+                HomeGuestEmptyChallengeView(isDark: isDark)
                     .padding(.top, 49)
                     .frame(height: 190)
                     .padding(.horizontal, 20)
 
                 HStack(spacing: 13) {
-                    PrimaryButtonView(title: "+ Create", style: .solid, action: onCreateChallenge)
-                        .popoverTip(createChallengeTip, arrowEdge: .top)
+                    PrimaryButtonView(
+                        title: NSLocalizedString("create", comment: ""),
+                        style: .solid,
+                        action: onCreateChallenge
+                    )
+                    .popoverTip(createChallengeTip, arrowEdge: .top)
 
-                    PrimaryButtonView(title: "Join", style: .muted, action: onJoinChallenge)
+                    PrimaryButtonView(
+                        title: NSLocalizedString("join", comment: ""),
+                        style: .muted,
+                        action: onJoinChallenge
+                    )
                 }
                 .padding(.horizontal, 23)
                 .padding(.top, 59)
@@ -144,6 +152,31 @@ struct GuestHomeView: View {
     }
 }
 
+private struct HomeGuestEmptyChallengeView: View {
+    let isDark: Bool
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(NSLocalizedString("ready_to_compete", comment: ""))
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+
+            Text(NSLocalizedString("create_first_challenge", comment: ""))
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.35))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(isDark ? Color(hex: "#341D71").opacity(0.20) : Color.white.opacity(0.30))
+        .clipShape(RoundedRectangle(cornerRadius: 26))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26)
+                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
+        )
+    }
+}
+
 private struct FigmaGuestStatsSidePanelView: View {
     let tasksCompleted: Int
     let wins: Int
@@ -156,10 +189,11 @@ private struct FigmaGuestStatsSidePanelView: View {
                     Text("\(tasksCompleted)")
                     Text("✓")
                 }
+                .environment(\.locale, Locale(identifier: "en"))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(Color(hex: "#377329"))
 
-                Text("Done")
+                Text(NSLocalizedString("done", comment: ""))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(isDark ? .white.opacity(0.65) : Color.black.opacity(0.45))
             }
@@ -174,10 +208,11 @@ private struct FigmaGuestStatsSidePanelView: View {
                     Text("\(wins)")
                     Image(systemName: "trophy")
                 }
+                .environment(\.locale, Locale(identifier: "en"))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(Color(hex: "#C57723"))
 
-                Text("Wins")
+                Text(NSLocalizedString("wins", comment: ""))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(isDark ? .white.opacity(0.65) : Color.black.opacity(0.45))
             }

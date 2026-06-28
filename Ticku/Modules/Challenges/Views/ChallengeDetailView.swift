@@ -99,11 +99,11 @@ struct ChallengeDetailView: View {
                 }
             }
         }
-        .alert("Give up?", isPresented: $showGiveUpAlert) {
-            Button("Give up", role: .destructive) { handleGiveUp() }
-            Button("Cancel", role: .cancel) {}
+        .alert(NSLocalizedString("give_up_question", comment: ""), isPresented: $showGiveUpAlert) {
+            Button(NSLocalizedString("give_up", comment: ""), role: .destructive) { handleGiveUp() }
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
         } message: {
-            Text("Are you sure you want to leave this challenge?")
+            Text(NSLocalizedString("give_up_message", comment: ""))
         }
         .onAppear {
             vm.startListening(currentUserId: authVM.currentUserId ?? "")
@@ -115,10 +115,10 @@ struct ChallengeDetailView: View {
         .task {
             await vm.saveInviteCode()
         }
-        .alert("Edit challenge name", isPresented: $showNamePopup) {
-            TextField("Challenge name", text: $editedName)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
+        .alert(NSLocalizedString("edit_challenge_name", comment: ""), isPresented: $showNamePopup) {
+            TextField(NSLocalizedString("challenge_name_title", comment: ""), text: $editedName)
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
+            Button(NSLocalizedString("save", comment: "")) {
                 if !editedName.isEmpty && editedName != vm.challenge.title {
                     updateChallengeName(editedName)
                 }
@@ -132,7 +132,7 @@ struct ChallengeDetailView: View {
         VStack(spacing: 0) {
             HStack {
                 Button(action: onBack) {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "chevron.backward")
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(isDark ? .white : .black)
                 }
@@ -196,7 +196,7 @@ struct ChallengeDetailView: View {
     }
 
     private func handleGiveUp() {
-        let myName = vm.members.first(where: { $0.userId == authVM.currentUserId })?.displayName ?? "A player"
+        let myName = vm.members.first(where: { $0.userId == authVM.currentUserId })?.displayName ?? NSLocalizedString("a_player", comment: "")
         NotificationManager.shared.sendPlayerLeft(
             playerName: myName,
             challengeName: vm.challenge.title
@@ -224,7 +224,7 @@ struct ChallengeDetailView: View {
     private var navBarSection: some View {
         HStack {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(isDark ? .white : .black)
             }
@@ -269,15 +269,15 @@ struct ChallengeDetailView: View {
             }
         }
         .confirmationDialog("", isPresented: $showMenu) {
-            Button("Give up", role: .destructive) { showGiveUpAlert = true }
-            Button("Details") { showDetails = true }
-            Button("Cancel", role: .cancel) {}
+            Button(NSLocalizedString("give_up", comment: ""), role: .destructive) { showGiveUpAlert = true }
+            Button(NSLocalizedString("details_title", comment: "")) { showDetails = true }
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
         }
     }
 
     @ViewBuilder
     private var timerSection: some View {
-        Text("TIME REMAINING")
+        Text(NSLocalizedString("time_remaining", comment: ""))
             .font(.system(size: 11, weight: .medium))
             .foregroundColor(isDark ? Color.white.opacity(0.5) : Color(hex: "#AAAAAA"))
             .tracking(1.5)
@@ -293,6 +293,7 @@ struct ChallengeDetailView: View {
                 .font(.system(size: 24, weight: .black))
                 .foregroundColor(isDark ? Color(hex: "#B7A9E8") : Color(hex: "#5B3DBF"))
                 .tracking(1)
+                .environment(\.locale, Locale(identifier: "en_US"))
         }
         .onTapGesture {
             if vm.timerDisplay == "START" {
@@ -302,13 +303,14 @@ struct ChallengeDetailView: View {
 
         Spacer().frame(height: 14)
 
-        Text("\(vm.members.count) PLAYERS")
+        Text("\(vm.members.count) \(NSLocalizedString("players_count", comment: ""))")
             .font(.system(size: 11, weight: .semibold))
             .foregroundColor(isDark ? Color(hex: "#A8C4E8") : Color(hex: "#5B6AD4"))
             .padding(.horizontal, 16)
             .padding(.vertical, 5)
             .background(isDark ? Color(hex: "#1E3A5F").opacity(0.7) : Color(hex: "#E4E8FF"))
             .cornerRadius(20)
+            .environment(\.locale, Locale(identifier: "en_US"))
     }
 
     @ViewBuilder
@@ -385,7 +387,6 @@ struct ChallengeDetailView: View {
     }
 }
 
-// MARK: - MemberCard
 private struct MemberCard: View {
     let member: ChallengeMember
     let rank: Int
@@ -412,7 +413,7 @@ private struct MemberCard: View {
             progressAvatar
                 .padding(.top, 16)
 
-            Text(isMe ? "ME" : member.displayName.uppercased())
+            Text(isMe ? NSLocalizedString("me", comment: "") : member.displayName.uppercased())
                 .font(.system(size: 14, weight: .black))
                 .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
                 .lineLimit(1)
@@ -420,9 +421,10 @@ private struct MemberCard: View {
             Text("\(Int(member.progressPercent))%")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(isDark ? Color.white.opacity(0.65) : Color(hex: "#9E9E9E"))
+                .environment(\.locale, Locale(identifier: "en_US"))
 
             if isMe {
-                Text("View tasks »")
+                Text(NSLocalizedString("view_tasks", comment: ""))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#5B6AD4"))
             }
@@ -474,7 +476,6 @@ private struct MemberCard: View {
     }
 }
 
-// MARK: - EmptySlotCard
 private struct EmptySlotCard: View {
     var body: some View {
         VStack(spacing: 8) {
@@ -494,7 +495,7 @@ private struct EmptySlotCard: View {
             .frame(width: 100, height: 100)
             .padding(.top, 16)
 
-            Text("Invite")
+            Text(NSLocalizedString("invite", comment: ""))
                 .font(.system(size: 14, weight: .black))
                 .foregroundColor(Color(hex: "#A89DD4"))
 
@@ -515,7 +516,6 @@ private struct EmptySlotCard: View {
         )
     }
 }
-
 #Preview("Light") {
     NavigationStack {
         ChallengeDetailView(

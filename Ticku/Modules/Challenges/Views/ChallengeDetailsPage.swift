@@ -37,7 +37,7 @@ struct ChallengeDetailsPage: View {
     init(challenge: Challenge) {
         self.challenge = challenge
         _challengeName = State(initialValue: challenge.title)
-        _challengeRule = State(initialValue: challenge.description.isEmpty ? "No rule set" : challenge.description)
+        _challengeRule = State(initialValue: challenge.description.isEmpty ? NSLocalizedString("no_rule_set", comment: "") : challenge.description)
     }
 
     var body: some View {
@@ -49,7 +49,7 @@ struct ChallengeDetailsPage: View {
 
                     pendingTopBanner
 
-                    detailSection(label: "Challenge name") {
+                    detailSection(label: NSLocalizedString("challenge_name_title", comment: "")) {
                         HStack(spacing: 18) {
                             Text(challengeName)
                                 .font(.system(size: 24, weight: .black))
@@ -66,7 +66,7 @@ struct ChallengeDetailsPage: View {
                         }
                     }
 
-                    detailSection(label: "Duration") {
+                    detailSection(label: NSLocalizedString("duration_title", comment: "")) {
                         HStack(spacing: 10) {
                             Image(systemName: "clock.fill")
                                 .font(.system(size: 20, weight: .bold))
@@ -75,6 +75,7 @@ struct ChallengeDetailsPage: View {
                             Text(durationText)
                                 .font(.system(size: 20, weight: .black))
                                 .foregroundColor(isDark ? Color(hex: "#C9C9C9").opacity(0.68) : Color(hex: "#6B6B72"))
+                                .environment(\.locale, Locale(identifier: "en_US"))
                         }
                         .padding(.horizontal, 14)
                         .frame(height: 47)
@@ -82,7 +83,7 @@ struct ChallengeDetailsPage: View {
                         .cornerRadius(24)
                     }
 
-                    detailSection(label: "Challenge role") {
+                    detailSection(label: NSLocalizedString("challenge_role_title", comment: "")) {
                         HStack(spacing: 2) {
                             if pendingRule != nil {
                                 Circle()
@@ -121,9 +122,9 @@ struct ChallengeDetailsPage: View {
 
             if showRolePopup {
                 popupOverlay(
-                    title: "Challenge role",
+                    title: NSLocalizedString("challenge_role_title", comment: ""),
                     text: $newRole,
-                    buttonLabel: "Request",
+                    buttonLabel: NSLocalizedString("request", comment: ""),
                     onCancel: { showRolePopup = false },
                     onSave: {
                         if !newRole.isEmpty && newRole != challengeRule {
@@ -137,9 +138,9 @@ struct ChallengeDetailsPage: View {
 
             if showNamePopup {
                 popupOverlay(
-                    title: "Challenge name",
+                    title: NSLocalizedString("challenge_name_title", comment: ""),
                     text: $newName,
-                    buttonLabel: "Save",
+                    buttonLabel: NSLocalizedString("save", comment: ""),
                     onCancel: { showNamePopup = false },
                     onSave: {
                         if !newName.isEmpty && newName != challengeName {
@@ -174,14 +175,14 @@ struct ChallengeDetailsPage: View {
     private var fixedStyleHeader: some View {
         HStack {
             Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
 
             Spacer()
 
-            Text("Details")
+            Text(NSLocalizedString("details_title", comment: ""))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 
@@ -203,14 +204,14 @@ struct ChallengeDetailsPage: View {
 
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "chevron.backward")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(isDark ? .white : .black)
                 }
 
                 Group {
-                    Text(isRequester ? "You" : requesterName).fontWeight(.bold)
-                    + Text(" requested a change")
+                    Text(isRequester ? NSLocalizedString("you", comment: "") : requesterName).fontWeight(.bold)
+                    + Text(" \(NSLocalizedString("change_request", comment: ""))")
                 }
                 .font(.system(size: 14))
                 .foregroundColor(isDark ? .white : .black)
@@ -235,7 +236,7 @@ struct ChallengeDetailsPage: View {
     }
 
     private var acceptedButtonText: some View {
-        Text("Accepted")
+        Text(NSLocalizedString("accepted", comment: ""))
             .font(.system(size: 14, weight: .bold))
             .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
             .padding(.horizontal, 18)
@@ -254,9 +255,9 @@ struct ChallengeDetailsPage: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 Group {
-                    Text(isRequester ? "You" : requesterName)
+                    Text(isRequester ? NSLocalizedString("you", comment: "") : requesterName)
                         .fontWeight(.bold)
-                    + Text(" requested\nto change the challenge role to : ")
+                    + Text(" \(NSLocalizedString("change_role_request", comment: "")) ")
                     + Text(pending)
                         .fontWeight(.bold)
                 }
@@ -268,7 +269,7 @@ struct ChallengeDetailsPage: View {
                         acceptedButtonText
                     }
                 } else {
-                    Text("Accepted")
+                    Text(NSLocalizedString("accepted", comment: ""))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(isDark ? Color(hex: "#E0D6FA") : .white)
                         .padding(.horizontal, 20)
@@ -296,7 +297,7 @@ struct ChallengeDetailsPage: View {
 
     private var durationText: String {
         let remaining = challenge.endDate.timeIntervalSinceNow
-        if remaining <= 0 { return "Finished" }
+        if remaining <= 0 { return NSLocalizedString("finished", comment: "") }
 
         let total = Int(remaining)
         let days = total / 86400
@@ -304,8 +305,8 @@ struct ChallengeDetailsPage: View {
         let mins = (total % 3600) / 60
         let secs = total % 60
 
-        if days > 1 { return "\(days) Days left" }
-        if days == 1 { return "1 Day left" }
+        if days > 1 { return "\(days) \(NSLocalizedString("days_left", comment: ""))" }
+        if days == 1 { return "1 \(NSLocalizedString("day_left", comment: ""))" }
         return String(format: "%02d:%02d:%02d", hours, mins, secs)
     }
 
@@ -372,7 +373,7 @@ struct ChallengeDetailsPage: View {
             "pendingRuleChange": pendingData
         ])
 
-        let requesterName = memberNames[uid] ?? "Someone"
+        let requesterName = memberNames[uid] ?? NSLocalizedString("someone", comment: "")
 
         NotificationManager.shared.sendRuleChangeRequest(
             requesterName: requesterName,
@@ -463,6 +464,7 @@ struct ChallengeDetailsPage: View {
                     Text("\(text.wrappedValue.count)/40")
                         .font(.system(size: 16))
                         .foregroundColor(isDark ? .white.opacity(0.7) : Color(hex: "#55555A"))
+                        .environment(\.locale, Locale(identifier: "en_US"))
                 }
                 .padding(.horizontal, 32)
                 .padding(.top, 6)
@@ -470,7 +472,7 @@ struct ChallengeDetailsPage: View {
 
                 HStack(spacing: 12) {
                     Button(action: onCancel) {
-                        Text("Cancel")
+                        Text(NSLocalizedString("cancel", comment: ""))
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(isDark ? .white : .black)
                             .frame(maxWidth: .infinity, minHeight: 46)
@@ -502,6 +504,7 @@ struct ChallengeDetailsPage: View {
         }
     }
 }
+
 #Preview("Light") {
     NavigationStack {
         ChallengeDetailsPage(

@@ -38,6 +38,7 @@ struct ProfileView: View {
                         Text("×\(vm.profile?.currentStreak ?? 0)")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(isDark ? .white : .black)
+                            .environment(\.locale, Locale(identifier: "en_US"))
 
                         Text("🔥")
                             .font(.system(size: 15))
@@ -79,13 +80,14 @@ struct ProfileView: View {
     private var fixedHeader: some View {
         HStack {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
+
             Spacer()
 
-            Text("Profile")
+            Text(NSLocalizedString("profile", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 
@@ -120,14 +122,21 @@ struct ProfileView: View {
 
     private var statsPill: some View {
         HStack(spacing: 0) {
-            statCell(value: "\(vm.profile?.totalChallengesCompleted ?? 0)", label: "Challenges")
+            statCell(
+                value: "\(vm.profile?.totalChallengesCompleted ?? 0)",
+                label: NSLocalizedString("challenges", comment: "")
+            )
 
             Rectangle()
                 .fill(isDark ? Color.white.opacity(0.15) : Color(hex: "#EBEBEB"))
                 .frame(width: 1, height: 75)
 
-            statCell(value: "\(vm.winRate)%", label: "Win Rate")
+            statCell(
+                value: "\(vm.winRate)%",
+                label: NSLocalizedString("win_rate", comment: "")
+            )
         }
+        .environment(\.locale, Locale(identifier: "en_US"))
         .background(isDark ? Color.white.opacity(0.05) : Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 25))
         .overlay(
@@ -153,7 +162,7 @@ struct ProfileView: View {
     private var challengesSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("All Challenges")
+                Text(NSLocalizedString("all_challenges", comment: ""))
                     .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(isDark ? .white : Color.black.opacity(0.47))
                     .padding(.top, 37)
@@ -161,7 +170,7 @@ struct ProfileView: View {
                 Spacer()
 
                 Button(action: { onSeeAllChallenges(vm.challenges) }) {
-                    Text("See all")
+                    Text(NSLocalizedString("see_all", comment: ""))
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(Color(hex: "#4FA2FF"))
                         .padding(.top, 37)
@@ -169,7 +178,7 @@ struct ProfileView: View {
             }
 
             if vm.challenges.isEmpty {
-                Text("No challenges yet.")
+                Text(NSLocalizedString("no_challenges_yet", comment: ""))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.25))
                     .padding(.vertical, 20)
@@ -211,6 +220,7 @@ private struct ChallengeHistoryRow: View {
                 Text(entry.challenge.durationLabel)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -221,6 +231,7 @@ private struct ChallengeHistoryRow: View {
                 Text(entry.challenge.startDate.monthYear)
                     .font(.system(size: 13))
                     .foregroundColor(isDark ? .white.opacity(0.5) : Color.black.opacity(0.35))
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             Spacer()
@@ -234,7 +245,7 @@ private struct ChallengeHistoryRow: View {
     @ViewBuilder
     private var rankView: some View {
         if entry.challenge.status == "active" {
-            Text("Active")
+            Text(NSLocalizedString("active", comment: ""))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color.ticku.doneGreen)
         } else if let rank = entry.rank {
@@ -245,6 +256,7 @@ private struct ChallengeHistoryRow: View {
                 Text(rankLabel(rank))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(rankColor(rank))
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
         }
     }
@@ -280,6 +292,7 @@ private struct ChallengeHistoryRow: View {
 private extension Date {
     var monthYear: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
         f.dateFormat = "MMM yyyy"
         return f.string(from: self)
     }

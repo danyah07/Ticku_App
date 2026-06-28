@@ -38,7 +38,7 @@ struct SignInView: View {
 
                 HStack {
                     Button(action: onBack) {
-                        Image(systemName: "chevron.left")
+                        Image(systemName: "chevron.backward")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(isDark ? .white : .black)
                     }
@@ -51,11 +51,11 @@ struct SignInView: View {
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Welcome")
+                    Text(NSLocalizedString("welcome", comment: ""))
                         .font(.system(size: 34, weight: .bold))
                         .foregroundColor(isDark ? .white : .black)
 
-                    Text("Ready for today’s challenge?")
+                    Text(NSLocalizedString("ready_for_today_challenge", comment: ""))
                         .font(.system(size: 21, weight: .bold))
                         .foregroundColor(isDark ? .white.opacity(0.56) : Color(hex: "#3A3A3A"))
                 }
@@ -71,7 +71,7 @@ struct SignInView: View {
                             Image(systemName: "apple.logo")
                                 .font(.system(size: 17, weight: .bold))
 
-                            Text("Sign in with Apple")
+                            Text(NSLocalizedString("sign_in_with_apple", comment: ""))
                                 .font(.system(size: 18, weight: .bold))
                         }
                         .foregroundColor(isDark ? .white : .black)
@@ -91,7 +91,7 @@ struct SignInView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Text("By continuing, you agree to our Terms & Privacy.")
+                    Text(NSLocalizedString("terms_privacy_note", comment: ""))
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(isDark ? .white.opacity(0.60) : Color.black.opacity(0.60))
                         .multilineTextAlignment(.center)

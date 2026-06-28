@@ -38,11 +38,11 @@ struct TodayTasksDetailView: View {
                                     .font(.system(size: 40))
                                     .foregroundColor(isDark ? Color(hex: "#8E8AC5").opacity(0.45) : Color(hex: "#341D71").opacity(0.35))
 
-                                Text("No tasks yet")
+                                Text(NSLocalizedString("no_tasks_yet", comment: ""))
                                     .font(Font.ticku.bodyMedium)
                                     .foregroundColor(isDark ? .white.opacity(0.65) : Color.ticku.textSecondary)
 
-                                Text("Add tasks inside a challenge to track them here.")
+                                Text(NSLocalizedString("add_tasks_inside_challenge", comment: ""))
                                     .font(Font.ticku.caption)
                                     .foregroundColor(isDark ? .white.opacity(0.45) : Color.ticku.textSecondary.opacity(0.7))
                                     .multilineTextAlignment(.center)
@@ -86,16 +86,17 @@ struct TodayTasksDetailView: View {
     private var fixedHeader: some View {
         HStack {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
 
             Spacer()
 
-            Text("Today Tasks")
+            Text(NSLocalizedString("today_tasks_title", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
+
             Spacer()
 
             Color.clear.frame(width: 24)
@@ -137,6 +138,7 @@ struct TodayTasksDetailView: View {
                 Text("\(Int(vm.overallProgress * 100))%")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundColor(isDark ? .white : .black)
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
             .frame(width: 170, height: 170)
         }
@@ -212,6 +214,7 @@ private struct TaskRowItem: View {
                 Text(due.shortDate)
                     .font(Font.ticku.caption)
                     .foregroundColor(isDark ? .white.opacity(0.45) : Color.ticku.textSecondary)
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
         }
         .padding(.horizontal, 16)
@@ -223,6 +226,7 @@ private struct TaskRowItem: View {
 private extension Date {
     var shortDate: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
         f.dateFormat = "MMM d"
         return f.string(from: self)
     }

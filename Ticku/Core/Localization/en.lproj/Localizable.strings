@@ -19,3 +19,160 @@
 "intro_stay_desc" = "Build streaks, earn badges, and prove you have what it takes to finish what you start.";
 
 
+"welcome" = "Welcome!";
+"get_started" = "Get started";
+"sign_in" = "Sign in";
+"ready_for_today_challenge" = "Ready for today's challenge?";
+"sign_in_with_apple" = "Sign in with Apple";
+"terms_privacy_note" = "By continuing, you agree to our Terms & Privacy.";
+"hello" = "Hello 👋";
+"today_tasks" = "Today's Tasks";
+"done" = "Done";
+"wins" = "Wins";
+"active_challenges" = "Active Challenges";
+"see_all" = "See all";
+"ready_to_compete" = "Ready to compete?";
+"create_first_challenge" = "Create your first challenge and invite your friends to stay productive together.";
+"create" = "+ Create";
+"join" = "Join";
+"view_room" = "View Room";
+"my_tasks" = "My Tasks";
+"participants" = "Participants";
+"days_left" = "Days left";
+"min_left" = "min left";
+"today_tasks_title" = "Today Tasks";
+"invite_code" = "Enter invite code";
+
+
+"create_challenge_title" = "Create Challenge";
+"challenge_name" = "Challenge name";
+"challenge_name_placeholder" = "e.g. 30-Day Grind";
+"duration" = "Duration";
+"today" = "Today";
+"three_days" = "3 Days";
+"seven_days" = "7 Days";
+"fourteen_days" = "14 Days";
+"enter_time" = "Enter time";
+"hour" = "Hour";
+"minute" = "Minute";
+"challenge_rule" = "Challenge rule";
+"challenge_rule_placeholder" = "e.g. Punishment or Reward";
+"create_challenge_button" = "Create";
+"add_tasks" = "Add tasks";
+"add_your_tasks" = "Add your tasks";
+"save" = "Save";
+
+
+"start" = "START";
+"time_remaining" = "TIME REMAINING";
+"players_count" = "4 PLAYERS";
+"days_left" = "3 Days left";
+"give_up" = "Give up";
+"details" = "Details";
+
+
+"details_title" = "Details";
+"challenge_name_title" = "Challenge name";
+"duration_title" = "Duration";
+"challenge_role_title" = "Challenge role";
+"request" = "Request";
+"cancel" = "Cancel";
+"change_role_request" = "You requested to change the challenge role to";
+
+
+"accept" = "Accept";
+"give_up" = "Give up";
+"details" = "Details";
+"time_remaining" = "TIME REMAINING";
+"days_left" = "Days left";
+"players_count" = "PLAYERS";
+"change_request" = "requested a change";
+"accepted" = "Accepted";
+
+
+"add_tasks" = "Add tasks";
+"add_your_tasks" = "add your tasks";
+"submit_progress" = "SUBMIT PROGRESS";
+"challenge_complete" = "CHALLENGE COMPLETE";
+"ranked_last_with_completion" = "ranked last with completion";
+"continue" = "Continue";
+
+
+
+"profile" = "Profile";
+"edit" = "Edit";
+"settings" = "Settings";
+"challenges" = "Challenges";
+"win_rate" = "Win Rate";
+"badges" = "Badges";
+"wins_badge" = "Wins";
+"streak_badge" = "Streak";
+"all_challenges" = "All Challenges";
+"see_all" = "see all";
+"language" = "Language";
+"mode" = "Mode";
+"system_settings" = "System settings";
+"save" = "Save";
+"active" = "Active";
+
+"no_tasks_yet" = "No tasks yet";
+"add_tasks_inside_challenge" = "Add tasks inside a challenge to track them here.";
+
+
+"no_rule_set" = "No rule set";
+"finished" = "Finished";
+"day_left" = "Day left";
+"someone" = "Someone";
+"you" = "You";
+
+"details_title" = "Details";
+"challenge_name_title" = "Challenge name";
+"duration_title" = "Duration";
+"challenge_role_title" = "Challenge rule";
+
+"change_request" = "requested a change";
+"change_role_request" = "requested to change the challenge rule to";
+
+
+
+"give_up_question" = "Give up?";
+"give_up_message" = "Are you sure you want to leave this challenge?";
+"a_player" = "A player";
+"me" = "ME";
+"view_tasks" = "View tasks »";
+"invite" = "Invite";
+
+
+"challenge" = "CHALLENGE";
+"complete" = "COMPLETE";
+"failed" = "FAILED";
+"you_win_all_tasks" = "YOU win all tasks done on time 🎉";
+"two_day_streak" = "🔥 2 day streak";
+"you_lose" = "YOU lose";
+"tasks_left_undone" = "tasks left undone";
+"ranked_last_with" = "ranked last with";
+"completion" = "completion";
+"sample_task_morning_run" = "Morning run 5km";
+"sample_task_read_pages" = "Read 20 pages";
+"sample_task_no_junk_food" = "No junk food today";
+"sample_task_meditate" = "Meditate 10 min";
+
+
+"no_completed_challenges_yet" = "No completed challenges yet.";
+
+
+"challenge_type" = "Challenge type";
+"group" = "Group";
+"solo" = "solo";
+
+
+"your_tasks" = "Your tasks";
+"add_first_task_to_begin" = "+ Add your first task to begin";
+"delete" = "Delete";
+"add_a_task_placeholder" = "Add a task...";
+"add_a_task" = "Add a task";
+
+"me" = "ME";
+
+
+"no_challenges_yet" = "No challenges yet.";

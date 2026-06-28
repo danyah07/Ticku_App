@@ -88,7 +88,7 @@ struct SettingsView: View {
                     .padding(.bottom, 16)
 
                     HStack(spacing: 6) {
-                        TextField("Your Name", text: $vm.displayName)
+                        TextField(NSLocalizedString("your_name", comment: ""), text: $vm.displayName)
                             .font(.system(size: 27, weight: .black, design: .rounded))
                             .foregroundColor(isDark ? .white : .black)
                             .multilineTextAlignment(.center)
@@ -107,13 +107,13 @@ struct SettingsView: View {
                         .padding(.bottom, 76)
 
                     VStack(alignment: .leading, spacing: 13) {
-                        Text("System settings")
+                        Text(NSLocalizedString("system_settings", comment: ""))
                             .font(.system(size: 17, weight: .medium))
                             .foregroundColor(isDark ? .white.opacity(0.5) : Color.black.opacity(0.35))
                             .padding(.horizontal, 1)
 
                         VStack(spacing: 0) {
-                            settingsRow(icon: "globe", title: "Language") {
+                            settingsRow(icon: "globe", title: NSLocalizedString("language", comment: "")) {
                                 HStack(spacing: 0) {
                                     toggleOption("EN", isSelected: vm.language == "EN") {
                                         vm.language = "EN"
@@ -131,7 +131,7 @@ struct SettingsView: View {
                             Divider()
                                 .padding(.horizontal, 16)
 
-                            settingsRow(icon: "circle.lefthalf.filled", title: "Mode") {
+                            settingsRow(icon: "circle.lefthalf.filled", title: NSLocalizedString("mode", comment: "")) {
                                 HStack(spacing: 0) {
                                     toggleIconOption("sun.max.fill", isSelected: !appIsDarkMode) {
                                         appIsDarkMode = false
@@ -177,7 +177,7 @@ struct SettingsView: View {
                         if vm.isSaving {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Save")
+                            Text(NSLocalizedString("save", comment: ""))
                                 .font(.system(size: 25, weight: .bold))
                                 .foregroundColor(.white)
                         }
@@ -226,13 +226,13 @@ struct SettingsView: View {
             }
         }
         .navigationBarHidden(true)
-        .alert("Sign Out", isPresented: $showSignOutAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Sign Out", role: .destructive) {
+        .alert(NSLocalizedString("sign_out", comment: ""), isPresented: $showSignOutAlert) {
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
+            Button(NSLocalizedString("sign_out", comment: ""), role: .destructive) {
                 authVM.signOut()
             }
         } message: {
-            Text("Are you sure you want to sign out?")
+            Text(NSLocalizedString("sign_out_message", comment: ""))
         }
         .task {
             if let uid = authVM.currentUserId {
@@ -244,14 +244,14 @@ struct SettingsView: View {
     private var fixedHeader: some View {
         HStack {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
 
             Spacer()
 
-            Text("Settings")
+            Text(NSLocalizedString("settings", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 

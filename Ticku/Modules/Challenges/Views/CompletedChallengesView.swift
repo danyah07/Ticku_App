@@ -19,18 +19,21 @@ struct CompletedChallengesView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
 
-                // ── Nav Bar ───────────────────────────
                 HStack {
                     Button(action: onBack) {
-                        Image(systemName: "chevron.left")
+                        Image(systemName: "chevron.backward")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     }
+
                     Spacer()
-                    Text("All Challenges")
+
+                    Text(NSLocalizedString("all_challenges", comment: ""))
                         .font(Font.ticku.sectionHeader)
                         .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+
                     Spacer()
+
                     Color.clear.frame(width: 24)
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
@@ -38,7 +41,7 @@ struct CompletedChallengesView: View {
                 .padding(.bottom, 20)
 
                 if challenges.isEmpty {
-                    Text("No completed challenges yet.")
+                    Text(NSLocalizedString("no_completed_challenges_yet", comment: ""))
                         .font(Font.ticku.caption)
                         .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
                         .padding(.top, 60)
@@ -67,7 +70,6 @@ struct CompletedChallengesView: View {
     }
 }
 
-// نفس تصميم ChallengeHistoryRow الموجود بصفحة البروفايل (مستخرج كـ View مستقل قابل لإعادة الاستخدام)
 struct ChallengeHistoryRowFull: View {
     let entry: ChallengeHistoryEntry
     @Environment(\.colorScheme) private var colorScheme
@@ -79,28 +81,35 @@ struct ChallengeHistoryRowFull: View {
                 Circle()
                     .fill(Color(hex: "#3A3A3C"))
                     .frame(width: 44, height: 44)
+
                 Text(entry.challenge.durationLabel)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(.white)
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.challenge.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+
                 Text(entry.challenge.startDate.monthYearShort)
                     .font(.system(size: 13))
                     .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
+                    .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             Spacer()
 
             if let rank = entry.rank {
                 HStack(spacing: 4) {
-                    Text(rankEmoji(rank)).font(.system(size: 14))
+                    Text(rankEmoji(rank))
+                        .font(.system(size: 14))
+
                     Text(rankLabel(rank))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(rankColor(rank))
+                        .environment(\.locale, Locale(identifier: "en_US"))
                 }
             }
         }
@@ -109,11 +118,23 @@ struct ChallengeHistoryRowFull: View {
     }
 
     private func rankEmoji(_ rank: Int) -> String {
-        switch rank { case 1: return "🥇"; case 2: return "🥈"; case 3: return "🥉"; default: return "🏅" }
+        switch rank {
+        case 1: return "🥇"
+        case 2: return "🥈"
+        case 3: return "🥉"
+        default: return "🏅"
+        }
     }
+
     private func rankLabel(_ rank: Int) -> String {
-        switch rank { case 1: return "1st"; case 2: return "2nd"; case 3: return "3rd"; default: return "\(rank)th" }
+        switch rank {
+        case 1: return "1st"
+        case 2: return "2nd"
+        case 3: return "3rd"
+        default: return "\(rank)th"
+        }
     }
+
     private func rankColor(_ rank: Int) -> Color {
         switch rank {
         case 1: return Color.ticku.winsOrange
@@ -127,6 +148,7 @@ struct ChallengeHistoryRowFull: View {
 private extension Date {
     var monthYearShort: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US")
         f.dateFormat = "MMM yyyy"
         return f.string(from: self)
     }

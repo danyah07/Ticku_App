@@ -30,7 +30,7 @@ struct CreateChallengeView: View {
             VStack(spacing: 0) {
 
                 ZStack {
-                    Text("Create Challenge")
+                    Text(NSLocalizedString("create_challenge_title", comment: ""))
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -45,18 +45,19 @@ struct CreateChallengeView: View {
                 .padding(.horizontal, 23)
                 .padding(.top, 5)
                 .padding(.bottom, 48)
-                .background(Color.clear)
-                .zIndex(1)
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
 
-                        fieldLabel("Challenge name")
-                        inputField(placeholder: "e.g. 30-Day Grind", text: $vm.challengeName)
-                            .padding(.horizontal, 23)
-                            .padding(.bottom, 28)
+                        fieldLabel(NSLocalizedString("challenge_name", comment: ""))
+                        inputField(
+                            placeholder: NSLocalizedString("challenge_name_placeholder", comment: ""),
+                            text: $vm.challengeName
+                        )
+                        .padding(.horizontal, 23)
+                        .padding(.bottom, 28)
 
-                        fieldLabel("Challenge type")
+                        fieldLabel(NSLocalizedString("challenge_type", comment: ""))
 
                         HStack(spacing: 8) {
                             ForEach(ChallengeType.allCases) { type in
@@ -65,7 +66,7 @@ struct CreateChallengeView: View {
                                         Image(systemName: type.icon)
                                             .font(.system(size: 17, weight: .bold))
 
-                                        Text(type.label)
+                                        Text(localizedChallengeType(type))
                                             .font(.system(size: 16, weight: .bold))
                                     }
                                     .foregroundColor(vm.selectedType == type ? .white : typeUnselectedTextColor)
@@ -76,12 +77,6 @@ struct CreateChallengeView: View {
                                         Capsule()
                                             .stroke(typeStrokeColor(selected: vm.selectedType == type), lineWidth: 1)
                                     )
-                                    .shadow(
-                                        color: vm.selectedType == type ? .clear : Color.black.opacity(isDark ? 0 : 0.15),
-                                        radius: vm.selectedType == type ? 0 : 4,
-                                        x: 0,
-                                        y: vm.selectedType == type ? 0 : 4
-                                    )
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -90,13 +85,13 @@ struct CreateChallengeView: View {
                         .padding(.vertical, 10)
                         .padding(.bottom, 24)
 
-                        fieldLabel("Duration")
+                        fieldLabel(NSLocalizedString("duration", comment: ""))
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
                                 ForEach(DurationOption.allCases) { option in
                                     Button(action: { vm.selectedDuration = option }) {
-                                        Text(option.rawValue == "today" ? "today" : option.rawValue)
+                                        Text(localizedDuration(option.rawValue))
                                             .font(.system(size: 14, weight: .bold))
                                             .foregroundColor(vm.selectedDuration == option ? .white : durationUnselectedTextColor)
                                             .padding(.horizontal, 25)
@@ -106,12 +101,6 @@ struct CreateChallengeView: View {
                                             .overlay(
                                                 Capsule()
                                                     .stroke(durationStrokeColor(selected: vm.selectedDuration == option), lineWidth: 1)
-                                            )
-                                            .shadow(
-                                                color: vm.selectedDuration == option ? .clear : Color.black.opacity(isDark ? 0 : 0.15),
-                                                radius: vm.selectedDuration == option ? 0 : 4,
-                                                x: 0,
-                                                y: vm.selectedDuration == option ? 0 : 4
                                             )
                                     }
                                     .buttonStyle(.plain)
@@ -135,10 +124,13 @@ struct CreateChallengeView: View {
                                 }
                         }
 
-                        fieldLabel("Challenge rule")
-                        inputField(placeholder: "e.g. Punishment or Reward", text: $vm.challengeRule)
-                            .padding(.horizontal, 23)
-                            .padding(.bottom, 40)
+                        fieldLabel(NSLocalizedString("challenge_rule", comment: ""))
+                        inputField(
+                            placeholder: NSLocalizedString("challenge_rule_placeholder", comment: ""),
+                            text: $vm.challengeRule
+                        )
+                        .padding(.horizontal, 23)
+                        .padding(.bottom, 40)
                     }
                 }
 
@@ -157,7 +149,7 @@ struct CreateChallengeView: View {
                             if vm.isLoading {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Create")
+                                Text(NSLocalizedString("create_challenge_button", comment: ""))
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.white)
                             }
@@ -165,20 +157,17 @@ struct CreateChallengeView: View {
                         .frame(width: 250, height: 52)
                         .background(createButtonBackground)
                         .clipShape(Capsule())
-                        .shadow(color: Color.black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
                     }
                     .disabled(!vm.isFormValid || vm.isLoading)
 
                     Spacer()
                 }
                 .padding(.vertical, 20)
-                .background(Color.clear)
             }
 
             if let msg = vm.errorMessage {
                 VStack {
                     Spacer()
-
                     Text(msg)
                         .font(Font.ticku.caption)
                         .foregroundColor(.white)
@@ -193,6 +182,34 @@ struct CreateChallengeView: View {
         }
         .navigationBarHidden(true)
         .withErrorHandling()
+    }
+
+    private func localizedChallengeType(_ type: ChallengeType) -> String {
+        let value = type.label.lowercased()
+
+        if value.contains("group") {
+            return NSLocalizedString("group", comment: "")
+        } else if value.contains("solo") {
+            return NSLocalizedString("solo", comment: "")
+        }
+
+        return type.label
+    }
+
+    private func localizedDuration(_ value: String) -> String {
+        let key = value.lowercased()
+
+        if key.contains("today") {
+            return NSLocalizedString("today", comment: "")
+        } else if key.contains("3") || key.contains("three") {
+            return NSLocalizedString("three_days", comment: "")
+        } else if key.contains("7") || key.contains("seven") {
+            return NSLocalizedString("seven_days", comment: "")
+        } else if key.contains("14") || key.contains("fourteen") {
+            return NSLocalizedString("fourteen_days", comment: "")
+        }
+
+        return value
     }
 
     @ViewBuilder
@@ -246,7 +263,7 @@ struct CreateChallengeView: View {
 
     private var purpleTimePicker: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Enter time")
+            Text(NSLocalizedString("enter_time", comment: ""))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.white)
                 .padding(.top, 20)
@@ -254,14 +271,14 @@ struct CreateChallengeView: View {
                 .padding(.bottom, 12)
 
             HStack(spacing: 0) {
-                timeBox(text: $vm.hourText, max: 23, label: "Hour")
+                timeBox(text: $vm.hourText, max: 23, label: NSLocalizedString("hour", comment: ""))
 
                 Text(":")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 24)
 
-                timeBox(text: $vm.minuteText, max: 59, label: "Minute")
+                timeBox(text: $vm.minuteText, max: 59, label: NSLocalizedString("minute", comment: ""))
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 20)

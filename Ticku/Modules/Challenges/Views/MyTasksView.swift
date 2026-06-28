@@ -80,21 +80,21 @@ struct MyTasksView: View {
     private var fixedHeader: some View {
         HStack {
             Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "chevron.backward")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
 
             Spacer()
 
-            Text("Your tasks")
+            Text(NSLocalizedString("your_tasks", comment: ""))
                 .font(.system(size: 21, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
 
             Spacer()
 
             if isAdding {
-                Button("Save") {
+                Button(NSLocalizedString("save", comment: "")) {
                     withAnimation(.easeInOut) { isAdding = false }
                     inputFocused = false
                     isSaved = true
@@ -103,7 +103,7 @@ struct MyTasksView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(isDark ? Color(hex: "#B296EB") : Color(hex: "#341D71"))
             } else if isSaved && !challengeStarted {
-                Button("Edit") {
+                Button(NSLocalizedString("edit", comment: "")) {
                     withAnimation(.easeInOut) {
                         isSaved = false
                         isAdding = true
@@ -142,6 +142,7 @@ struct MyTasksView: View {
             Text(tasks.isEmpty ? "%0" : "%\(Int(progress * 100))")
                 .font(.system(size: 27, weight: .bold))
                 .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
+                .environment(\.locale, Locale(identifier: "en_US"))
         }
         .frame(width: 136.62, height: 138.08)
     }
@@ -158,7 +159,7 @@ struct MyTasksView: View {
 
             VStack(spacing: 0) {
                 if tasks.isEmpty && !isAdding {
-                    Text("+ Add your first task to begin")
+                    Text(NSLocalizedString("add_first_task_to_begin", comment: ""))
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor((isDark ? Color(hex: "#B296EB") : Color.black).opacity(0.35))
                         .multilineTextAlignment(.center)
@@ -180,7 +181,7 @@ struct MyTasksView: View {
                                             taskId: task.id
                                         )
                                     } label: {
-                                        Text("Delete")
+                                        Text(NSLocalizedString("delete", comment: ""))
                                     }
                                 }
                             }
@@ -217,7 +218,7 @@ struct MyTasksView: View {
             }
             .disabled(newTaskText.isEmpty)
 
-            TextField("Add a task...", text: $newTaskText)
+            TextField(NSLocalizedString("add_a_task_placeholder", comment: ""), text: $newTaskText)
                 .font(.system(size: 14))
                 .foregroundColor(isDark ? .white : Color(hex: "#1A1A2E"))
                 .focused($inputFocused)
@@ -241,7 +242,7 @@ struct MyTasksView: View {
                         inputFocused = true
                     }
                 }) {
-                    Text("Add a task")
+                    Text(NSLocalizedString("add_a_task", comment: ""))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 166, height: 60)

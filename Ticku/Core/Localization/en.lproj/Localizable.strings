@@ -176,3 +176,11 @@
 
 
 "no_challenges_yet" = "No challenges yet.";
+
+"create_challenge_tip" = "Tap here to create your first challenge";
+
+
+"add_task_tip" = "Tap the progress circle to see your list of tasks";
+
+
+"enter_time_tip" = "Choose how long this challenge lasts.";

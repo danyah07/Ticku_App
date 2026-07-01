@@ -8,12 +8,10 @@
 import SwiftUI
 import TipKit
 
-// يطلع على زر "+ Create" في الهوم
-// يشجع المستخدم يسوي أول تحدي له
 struct CreateChallengeTip: Tip {
 
     var title: Text {
-        Text("Tap here to create your first challenge")
+        Text(NSLocalizedString("create_challenge_tip", comment: ""))
     }
 
     var message: Text? {

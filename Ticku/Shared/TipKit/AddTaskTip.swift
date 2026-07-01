@@ -11,7 +11,7 @@ import TipKit
 struct AddTaskTip: Tip {
 
     var title: Text {
-        Text("Tap the progress circle to see your list of tasks")
+        Text(NSLocalizedString("add_task_tip", comment: ""))
     }
 
     var message: Text? {

@@ -13,7 +13,7 @@ import TipKit
 struct EnterTimeTip: Tip {
 
     var title: Text {
-        Text("Choose how long this challenge lasts.")
+        Text(NSLocalizedString("enter_time_tip", comment: ""))
     }
 
     var message: Text? {

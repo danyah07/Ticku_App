@@ -67,7 +67,9 @@ struct GuestHomeView: View {
                                 percentage: 0,
                                 ringSize: 120,
                                 lineWidth: 10
+                                
                             )
+                     .environment(\.locale, Locale(identifier: "en_US"))
                         )
                         .popoverTip(addTaskTip, arrowEdge: .top)
 

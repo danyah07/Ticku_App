@@ -7,24 +7,25 @@
 
 import SwiftUI
 
-
 struct LiquidGlassStyle {
-    /// شدة اللون تحت الزجاج (0 = زجاج شفاف بالكامل، 1 = صلب بدون شفافية)
+
+    /// شدة اللون الافتراضية للكاردات
     static let tintIntensity: Double = 0.55
+
     /// نصف قطر الانحناء الافتراضي
     static let defaultCornerRadius: CGFloat = 20
 }
 
 extension View {
 
-    /// يطبق Liquid Glass الرسمي (iOS 26) مع لون شفاف فوقه.
-    /// التينت يُقص بنفس شكل الزجاج بالضبط — ما يبرز أي مستطيل وراه.
+    /// للكاردات
     @ViewBuilder
     func liquidGlass(
         tint: Color,
         cornerRadius: CGFloat = LiquidGlassStyle.defaultCornerRadius,
         intensity: Double = LiquidGlassStyle.tintIntensity
     ) -> some View {
+
         if #available(iOS 26.0, *) {
             self
                 .background(
@@ -44,17 +45,19 @@ extension View {
         }
     }
 
-    /// نسخة للأزرار التفاعلية — فيها تأثير ضغط زجاجي خفيف
+    /// للأزرار (يمكن تحديد شفافية مختلفة)
     @ViewBuilder
     func liquidGlassButton(
         tint: Color,
-        cornerRadius: CGFloat = LiquidGlassStyle.defaultCornerRadius
+        cornerRadius: CGFloat = LiquidGlassStyle.defaultCornerRadius,
+        intensity: Double = LiquidGlassStyle.tintIntensity
     ) -> some View {
+
         if #available(iOS 26.0, *) {
             self
                 .background(
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(tint.opacity(LiquidGlassStyle.tintIntensity))
+                        .fill(tint.opacity(intensity))
                 )
                 .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
@@ -62,27 +65,33 @@ extension View {
             self
                 .background(
                     RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(tint.opacity(LiquidGlassStyle.tintIntensity))
+                        .fill(tint.opacity(intensity))
                 )
                 .background(.ultraThinMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
     }
 
-    /// زجاج دائري (للأفاتار، الأيقونات المستديرة، إلخ)
+    /// للعناصر الدائرية
     @ViewBuilder
-    func liquidGlassCircle(tint: Color) -> some View {
+    func liquidGlassCircle(
+        tint: Color,
+        intensity: Double = LiquidGlassStyle.tintIntensity
+    ) -> some View {
+
         if #available(iOS 26.0, *) {
             self
                 .background(
-                    Circle().fill(tint.opacity(LiquidGlassStyle.tintIntensity))
+                    Circle()
+                        .fill(tint.opacity(intensity))
                 )
                 .glassEffect(.regular, in: .circle)
                 .clipShape(Circle())
         } else {
             self
                 .background(
-                    Circle().fill(tint.opacity(LiquidGlassStyle.tintIntensity))
+                    Circle()
+                        .fill(tint.opacity(intensity))
                 )
                 .background(.ultraThinMaterial)
                 .clipShape(Circle())

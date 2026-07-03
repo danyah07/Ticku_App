@@ -54,6 +54,7 @@ struct AllChallengesView: View {
             }
 
             fixedHeader
+                .background(isDark ? Color.black : Color.white)
         }
         .navigationBarHidden(true)
         .task {
@@ -106,10 +107,14 @@ private struct ChallengeCard: View {
                     Text(challenge.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .lineLimit(1)
 
                     Text("\(challenge.memberCount) \(NSLocalizedString("participants", comment: "")) | \(challenge.durationLabel) \(NSLocalizedString("days_left", comment: ""))")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.white.opacity(0.62))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .environment(\.locale, Locale(identifier: "en_US"))
                 }
 
                 Spacer()
@@ -136,22 +141,30 @@ private struct ChallengeCard: View {
                 }
             }
 
-            HStack(spacing: 18) {
-                // ✅ Liquid Glass على زر View Room
+            HStack(spacing: 12) {
                 Button(action: onViewRoom) {
                     Text(NSLocalizedString("view_room", comment: ""))
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 151, height: 57)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 57)
                 }
-                .liquidGlassButton(tint: .white, cornerRadius: 28)
+                .liquidGlassButton(
+                    tint: .white,
+                    cornerRadius: 28,
+                    intensity: 0.10
+                )
 
-                // ✅ زر My Tasks أبيض صلب (تباين مع الزجاج)
                 Button(action: onMyTasks) {
                     Text(NSLocalizedString("my_tasks", comment: ""))
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
-                        .frame(width: 151, height: 57)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 57)
                         .background(Color.white)
                         .clipShape(Capsule())
                 }
@@ -161,15 +174,22 @@ private struct ChallengeCard: View {
         .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
         .frame(height: 190)
-        // ✅ Liquid Glass على كارد التحدي
+        .background(isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"))
+        .clipShape(RoundedRectangle(cornerRadius: 26))
+        .overlay(
+            RoundedRectangle(cornerRadius: 26)
+                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
+        )
         .liquidGlass(
-            tint: isDark ? Color(hex: "#341D71").opacity(0.4) : Color(hex: "#341D71"),
+            tint: isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"),
             cornerRadius: 26,
-            intensity: isDark ? 0.3 : 0.85
+            intensity: isDark ? 0.18 : 0.35
         )
         .shadow(
             color: .black.opacity(isDark ? 0 : 0.25),
-            radius: 4, x: 0, y: 4
+            radius: 4,
+            x: 0,
+            y: 4
         )
     }
 }

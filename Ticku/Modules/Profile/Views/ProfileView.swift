@@ -35,13 +35,13 @@ struct ProfileView: View {
                             .font(.system(size: 27, weight: .black, design: .rounded))
                             .foregroundColor(isDark ? .white : .black)
 
-                        Text("×\(vm.profile?.currentStreak ?? 0)")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(isDark ? .white : .black)
-                            .environment(\.locale, Locale(identifier: "en_US"))
+//                        Text("×\(vm.profile?.currentStreak ?? 0)")
+//                            .font(.system(size: 15, weight: .semibold))
+//                            .foregroundColor(isDark ? .white : .black)
+//                            .environment(\.locale, Locale(identifier: "en_US"))
 
-                        Text("🔥")
-                            .font(.system(size: 15))
+//                        Text("")
+//                            .font(.system(size: 15))
                     }
 
                     Text(handleText)

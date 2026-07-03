@@ -36,14 +36,15 @@ struct AuthenticatedHomeView: View {
 
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(NSLocalizedString("Hello 👋  ", comment: ""))
+                            Text(NSLocalizedString("hello", comment: ""))
                                 .font(.system(size: 19, weight: .bold))
                                 .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.39))
 
-                            // ✅ الاسم بدل "get_started" — يتحدث تلقائياً من HomeViewModel listener
                             Text(vm.currentUser?.displayName ?? NSLocalizedString("get_started", comment: ""))
                                 .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(isDark ? .white : .black)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
                         }
 
                         Spacer()
@@ -70,7 +71,8 @@ struct AuthenticatedHomeView: View {
                         Button(action: onTodayTasks) {
                             RoundedRectangle(cornerRadius: 25)
                                 .fill(isDark ? Color.black.opacity(0.18) : Color(hex: "#F6F6F6"))
-                                .frame(width: 188, height: 214)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 214)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 25)
                                         .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
@@ -84,6 +86,7 @@ struct AuthenticatedHomeView: View {
                                     )
                                     .environment(\.locale, Locale(identifier: "en_US"))
                                 )
+                                .glassEffectIfAvailable(cornerRadius: 25)
                         }
                         .buttonStyle(.plain)
                         .popoverTip(addTaskTip, arrowEdge: .top)
@@ -203,7 +206,7 @@ struct AuthenticatedHomeView: View {
     private var backgroundView: some View {
         if isDark {
             LinearGradient(
-                colors: [Color(hex: "#000000"), Color(hex: "#3E3C5E")],
+                colors: [Color.black, Color.black, Color(hex: "#3E3C5E")],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -215,6 +218,17 @@ struct AuthenticatedHomeView: View {
                 endPoint: .bottom
             )
             .ignoresSafeArea()
+        }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func glassEffectIfAvailable(cornerRadius: CGFloat) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            self
         }
     }
 }
@@ -257,11 +271,14 @@ private struct HomeActiveChallengeCardView: View {
                     Text(challenge.title)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
+                        .lineLimit(1)
 
                     Text("\(challenge.memberCount) \(NSLocalizedString("participants", comment: "")) | \(challenge.durationLabel) \(NSLocalizedString("days_left", comment: ""))")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.white.opacity(0.62))
                         .environment(\.locale, Locale(identifier: "en_US"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
 
                 Spacer()
@@ -288,24 +305,30 @@ private struct HomeActiveChallengeCardView: View {
                 }
             }
 
-            HStack(spacing: 18) {
+            HStack(spacing: 12) {
                 Button(action: onViewRoom) {
                     Text(NSLocalizedString("view_room", comment: ""))
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                        .frame(width: 151, height: 57)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 57)
                         .background(Color.white.opacity(0.10))
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(Color.white.opacity(0.15), lineWidth: 1))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
 
                 Button(action: onMyTasks) {
                     Text(NSLocalizedString("my_tasks", comment: ""))
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
-                        .frame(width: 151, height: 57)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 57)
                         .background(Color.white)
                         .clipShape(Capsule())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
                 }
             }
         }
@@ -332,9 +355,9 @@ private struct FigmaStatsSidePanelView: View {
             VStack(spacing: 12) {
                 HStack(spacing: 3) {
                     Text("\(tasksCompleted)")
-                        .environment(\.locale, Locale(identifier: "en_US"))
                     Text("✓")
                 }
+                .environment(\.locale, Locale(identifier: "en"))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(Color(hex: "#377329"))
 
@@ -351,9 +374,9 @@ private struct FigmaStatsSidePanelView: View {
             VStack(spacing: 12) {
                 HStack(spacing: 3) {
                     Text("\(wins)")
-                        .environment(\.locale, Locale(identifier: "en_US"))
                     Image(systemName: "trophy")
                 }
+                .environment(\.locale, Locale(identifier: "en"))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(Color(hex: "#C57723"))
 

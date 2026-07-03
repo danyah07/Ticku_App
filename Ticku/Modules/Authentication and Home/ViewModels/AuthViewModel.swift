@@ -31,6 +31,7 @@ final class AuthViewModel: ObservableObject {
     @Published var currentUserId: String? = nil
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var isDeleting: Bool = false
 
     private(set) var currentNonce: String? = nil
     private var authListener: AuthStateDidChangeListenerHandle?
@@ -58,7 +59,7 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Nonce
+    // MARK: - Nonce (للـ Sign In العادي)
     func prepareNonce() -> String {
         let nonce = CryptoUtils.randomNonceString()
         currentNonce = nonce
@@ -104,7 +105,6 @@ final class AuthViewModel: ObservableObject {
                 let authResult = try await Auth.auth().signIn(with: firebaseCredential)
                 print("✅ Firebase sign in succeeded, uid: \(authResult.user.uid)")
 
-                // Apple only sends the name on FIRST sign in — capture immediately
                 let displayName = [
                     appleCredential.fullName?.givenName,
                     appleCredential.fullName?.familyName
@@ -123,7 +123,6 @@ final class AuthViewModel: ObservableObject {
                 )
                 print("✅ Firestore write complete")
 
-                // ✅ Yield to let auth listener publish isAuthenticated = true
                 try await Task.sleep(for: .milliseconds(500))
                 print("✅ isAuthenticated is now: \(self.isAuthenticated)")
                 currentNonce = nil
@@ -132,6 +131,84 @@ final class AuthViewModel: ObservableObject {
                 print("❌ Error during Firebase sign in: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
             }
+        }
+    }
+
+    // MARK: - Re-authenticate then Delete Account
+    // ✅ Apple تشترط حذف الحساب الكامل للـ App Store
+    // Firebase يطلب re-auth قبل الحذف لو تسجيل الدخول قديم
+    // هذا منفصل تماماً عن منطق تسجيل الدخول العادي
+    func reauthAndDelete(idToken: String, rawNonce: String) async {
+        isDeleting = true
+        defer { isDeleting = false }
+
+        guard let uid = currentUserId else { return }
+
+        do {
+            // 1. Re-authenticate
+            let credential = OAuthProvider.appleCredential(
+                withIDToken: idToken,
+                rawNonce: rawNonce,
+                fullName: nil
+            )
+            try await Auth.auth().currentUser?.reauthenticate(with: credential)
+
+            // 2. احذف كل التحديات
+            let snap = try? await db
+                .collection("challenges")
+                .whereField("memberIds", arrayContains: uid)
+                .getDocuments()
+
+            for doc in snap?.documents ?? [] {
+                let members = try? await doc.reference.collection("members").getDocuments()
+                for m in members?.documents ?? [] { try? await m.reference.delete() }
+                let tasks = try? await doc.reference.collection("tasks").getDocuments()
+                for t in tasks?.documents ?? [] { try? await t.reference.delete() }
+                try? await doc.reference.delete()
+            }
+
+            // 3. احذف مستند المستخدم
+            try? await db.collection("users").document(uid).delete()
+
+            // 4. احذف Firebase Auth — يطلق listener → isAuthenticated = false → الهوم
+            try await Auth.auth().currentUser?.delete()
+
+            print("✅ Account fully deleted")
+        } catch {
+            errorMessage = error.localizedDescription
+            print("❌ Delete failed: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Delete Account (fallback بدون re-auth — للحالات القريبة من تسجيل الدخول)
+    func deleteAccount() async {
+        isDeleting = true
+        defer { isDeleting = false }
+
+        guard let uid = currentUserId else { return }
+
+        let snap = try? await db
+            .collection("challenges")
+            .whereField("memberIds", arrayContains: uid)
+            .getDocuments()
+
+        for doc in snap?.documents ?? [] {
+            let members = try? await doc.reference.collection("members").getDocuments()
+            for m in members?.documents ?? [] { try? await m.reference.delete() }
+            let tasks = try? await doc.reference.collection("tasks").getDocuments()
+            for t in tasks?.documents ?? [] { try? await t.reference.delete() }
+            try? await doc.reference.delete()
+        }
+
+        try? await db.collection("users").document(uid).delete()
+
+        do {
+            try await Auth.auth().currentUser?.delete()
+            print("✅ Account deleted")
+        } catch {
+            // لو فشل بسبب re-auth، نعمل sign out على الأقل
+            print("⚠️ Auth delete failed, signing out: \(error.localizedDescription)")
+            signOut()
         }
     }
 
@@ -146,13 +223,11 @@ final class AuthViewModel: ObservableObject {
         let doc = try await ref.getDocument()
 
         if doc.exists {
-            // Returning user — only refresh lastActiveDate
             try await ref.updateData([
                 "lastActiveDate": FieldValue.serverTimestamp()
             ])
             print("✅ Returning user — lastActiveDate updated")
         } else {
-            // New user — write exactly your Firestore schema
             let newUser: [String: Any] = [
                 "uid":                      uid,
                 "displayName":              displayName,
@@ -168,17 +243,6 @@ final class AuthViewModel: ObservableObject {
             try await ref.setData(newUser)
             print("✅ New user document created for uid: \(uid)")
         }
-    }
-
-    // MARK: - Handle Generator
-    private func generateHandle(from displayName: String) -> String {
-        let base = displayName
-            .lowercased()
-            .components(separatedBy: .whitespaces)
-            .joined()
-            .filter { $0.isLetter || $0.isNumber }
-        let suffix = Int.random(in: 100...9999)
-        return "@\(base.isEmpty ? "user" : base)\(suffix)"
     }
 
     // MARK: - Sign Out

@@ -4,7 +4,6 @@
 //
 //  Created by Danyah ALbarqawi on 05/06/2026.
 //
-
 import SwiftUI
 
 struct TodayTasksDetailView: View {
@@ -22,7 +21,6 @@ struct TodayTasksDetailView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-
                     if vm.isLoading {
                         ProgressView()
                             .tint(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
@@ -37,11 +35,9 @@ struct TodayTasksDetailView: View {
                                 Image(systemName: "checkmark.circle")
                                     .font(.system(size: 40))
                                     .foregroundColor(isDark ? Color(hex: "#8E8AC5").opacity(0.45) : Color(hex: "#341D71").opacity(0.35))
-
                                 Text(NSLocalizedString("no_tasks_yet", comment: ""))
                                     .font(Font.ticku.bodyMedium)
                                     .foregroundColor(isDark ? .white.opacity(0.65) : Color.ticku.textSecondary)
-
                                 Text(NSLocalizedString("add_tasks_inside_challenge", comment: ""))
                                     .font(Font.ticku.caption)
                                     .foregroundColor(isDark ? .white.opacity(0.45) : Color.ticku.textSecondary.opacity(0.7))
@@ -57,9 +53,7 @@ struct TodayTasksDetailView: View {
                                             group: group,
                                             isDark: isDark,
                                             onToggle: { task in
-                                                Task {
-                                                    await vm.toggleTask(task, in: group.challenge.id ?? "")
-                                                }
+                                                Task { await vm.toggleTask(task, in: group.challenge.id ?? "") }
                                             }
                                         )
                                     }
@@ -90,15 +84,11 @@ struct TodayTasksDetailView: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
-
             Spacer()
-
             Text(NSLocalizedString("today_tasks_title", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
-
             Spacer()
-
             Color.clear.frame(width: 24)
         }
         .padding(.horizontal, 23)
@@ -109,11 +99,8 @@ struct TodayTasksDetailView: View {
 
     @ViewBuilder
     private var backgroundView: some View {
-        if isDark {
-            Color.black.ignoresSafeArea()
-        } else {
-            Color.white.ignoresSafeArea()
-        }
+        if isDark { Color.black.ignoresSafeArea() }
+        else { Color.white.ignoresSafeArea() }
     }
 
     private var progressRingSection: some View {
@@ -131,9 +118,11 @@ struct TodayTasksDetailView: View {
                         .animation(.easeOut(duration: 1.2), value: vm.overallProgress)
                 }
 
+                // ✅ glassEffect على دائرة الخلفية بدون تغيير اللون
                 Circle()
                     .fill(isDark ? Color(hex: "#212122") : Color(hex: "#F2F2F7"))
                     .frame(width: 136, height: 136)
+                    .glassEffectIfAvailable(cornerRadius: 68)
 
                 Text("\(Int(vm.overallProgress * 100))%")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
@@ -161,19 +150,17 @@ private struct TaskGroupSection: View {
             VStack(spacing: 0) {
                 ForEach(group.tasks) { task in
                     TaskRowItem(task: task, isDark: isDark, onToggle: { onToggle(task) })
-
                     if task.id != group.tasks.last?.id {
                         Divider()
                             .background(isDark ? Color.white.opacity(0.12) : Color(hex: "#D5D5D5"))
                     }
                 }
             }
+            // ✅ glassEffect على كارد التاسكات بدون تغيير الألوان
             .background(isDark ? Color(hex: "#171717") : Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 22))
-            .overlay(
-                RoundedRectangle(cornerRadius: 22)
-                    .stroke(isDark ? Color(hex: "#303030") : Color(hex: "#D5D5D5"), lineWidth: 1)
-            )
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(isDark ? Color(hex: "#303030") : Color(hex: "#D5D5D5"), lineWidth: 1))
+            .glassEffectIfAvailable(cornerRadius: 22)
         }
     }
 }
@@ -196,10 +183,7 @@ private struct TaskRowItem: View {
                                 .foregroundColor(.white)
                         }
                     }
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(isDark ? Color.white.opacity(0.12) : Color.clear, lineWidth: 1)
-                    )
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(isDark ? Color.white.opacity(0.12) : Color.clear, lineWidth: 1))
             }
             .buttonStyle(.plain)
 
@@ -223,6 +207,18 @@ private struct TaskRowItem: View {
     }
 }
 
+// ✅ glassEffect فقط على iOS 26+ — صفر تغيير بالألوان
+private extension View {
+    @ViewBuilder
+    func glassEffectIfAvailable(cornerRadius: CGFloat) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            self
+        }
+    }
+}
+
 private extension Date {
     var shortDate: String {
         let f = DateFormatter()
@@ -233,12 +229,8 @@ private extension Date {
 }
 
 #Preview("Light") {
-    TodayTasksDetailView(activeChallenges: [])
-        .environmentObject(AuthViewModel())
+    TodayTasksDetailView(activeChallenges: []).environmentObject(AuthViewModel())
 }
-
 #Preview("Dark") {
-    TodayTasksDetailView(activeChallenges: [])
-        .environmentObject(AuthViewModel())
-        .preferredColorScheme(.dark)
+    TodayTasksDetailView(activeChallenges: []).environmentObject(AuthViewModel()).preferredColorScheme(.dark)
 }

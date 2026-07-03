@@ -5,6 +5,13 @@
 //  Created by Danyah ALbarqawi on 13/06/2026.
 //
 
+//
+//  AllChallengesView.swift
+//  firebasetrial
+//
+//  Created by Danyah ALbarqawi on 13/06/2026.
+//
+
 import SwiftUI
 
 struct AllChallengesView: View {
@@ -77,7 +84,6 @@ struct AllChallengesView: View {
         .padding(.horizontal, 23)
         .padding(.top, 5)
         .frame(height: 64)
-        .background(isDark ? Color.black : Color.white)
     }
 
     @ViewBuilder
@@ -125,26 +131,22 @@ private struct ChallengeCard: View {
                                 .foregroundColor(Color(hex: "#341D71"))
                         )
                         .overlay(
-                            Circle()
-                                .stroke(Color(hex: "#341D71"), lineWidth: 2)
+                            Circle().stroke(Color(hex: "#341D71"), lineWidth: 2)
                         )
                 }
             }
 
             HStack(spacing: 18) {
+                // ✅ Liquid Glass على زر View Room
                 Button(action: onViewRoom) {
                     Text(NSLocalizedString("view_room", comment: ""))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 151, height: 57)
-                        .background(Color.white.opacity(0.10))
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                        )
                 }
+                .liquidGlassButton(tint: .white, cornerRadius: 28)
 
+                // ✅ زر My Tasks أبيض صلب (تباين مع الزجاج)
                 Button(action: onMyTasks) {
                     Text(NSLocalizedString("my_tasks", comment: ""))
                         .font(.system(size: 20, weight: .bold))
@@ -159,20 +161,15 @@ private struct ChallengeCard: View {
         .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
         .frame(height: 190)
-        .background(isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"))
-        .clipShape(RoundedRectangle(cornerRadius: 26))
-        .overlay(
-            RoundedRectangle(cornerRadius: 26)
-                .stroke(
-                    isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear,
-                    lineWidth: 1
-                )
+        // ✅ Liquid Glass على كارد التحدي
+        .liquidGlass(
+            tint: isDark ? Color(hex: "#341D71").opacity(0.4) : Color(hex: "#341D71"),
+            cornerRadius: 26,
+            intensity: isDark ? 0.3 : 0.85
         )
         .shadow(
             color: .black.opacity(isDark ? 0 : 0.25),
-            radius: 4,
-            x: 0,
-            y: 4
+            radius: 4, x: 0, y: 4
         )
     }
 }

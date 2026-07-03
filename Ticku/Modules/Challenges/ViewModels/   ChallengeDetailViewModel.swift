@@ -27,6 +27,9 @@ final class ChallengeDetailViewModel: ObservableObject {
     @Published var challengeStartDate: Date? = nil
     @Published var challengeEndDate: Date
 
+    // ✅ حماية من استدعاء completeChallenge أكثر من مرة
+    private var isCompleting = false
+
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
     private var challengeListener: ListenerRegistration?
@@ -182,6 +185,13 @@ final class ChallengeDetailViewModel: ObservableObject {
             print("🔴 completeChallenge: challengeId EMPTY — aborting")
             return
         }
+        // ✅ لو أصلاً شغالة، ما نشغّلها مرة ثانية
+        guard !isCompleting else {
+            print("🟡 completeChallenge: already completing — skipping duplicate call")
+            return
+        }
+        isCompleting = true
+        defer { isCompleting = false }
         print("🟢 completeChallenge CALLED for challengeId: \(challengeId)")
         print("🟢 members count at completion time: \(members.count)")
         for m in members {

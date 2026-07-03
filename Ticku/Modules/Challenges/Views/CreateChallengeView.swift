@@ -75,8 +75,15 @@ struct CreateChallengeView: View {
                                     .clipShape(Capsule())
                                     .overlay(
                                         Capsule()
-                                            .stroke(typeStrokeColor(selected: vm.selectedType == type), lineWidth: 1)
+                                            .stroke(
+                                                typeStrokeColor(selected: vm.selectedType == type),
+                                                lineWidth: 1
+                                            )
                                     )
+                                    .liquidGlassButton(
+                                        tint: typeBackground(selected: vm.selectedType == type),
+                                        cornerRadius: 26
+                                    )                                    .shadow(color: vm.selectedType == type ? selectedPurple.opacity(0.4) : Color.black.opacity(isDark ? 0.3 : 0.08), radius: 6, x: 0, y: 3)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -100,9 +107,28 @@ struct CreateChallengeView: View {
                                             .clipShape(Capsule())
                                             .overlay(
                                                 Capsule()
-                                                    .stroke(durationStrokeColor(selected: vm.selectedDuration == option), lineWidth: 1)
+                                                    .stroke(
+                                                        durationStrokeColor(selected: vm.selectedDuration == option),
+                                                        lineWidth: 1
+                                                    )
                                             )
-                                    }
+                                            .liquidGlassButton(
+                                                tint: durationBackground(selected: vm.selectedDuration == option),
+                                                cornerRadius: 23
+                                            )
+                                        // ✅ Liquid Glass
+                                            .liquidGlassButton(
+                                                tint: durationBackground(selected: vm.selectedDuration == option),
+                                                cornerRadius: 23
+                                            )
+                                            .shadow(
+                                                color: vm.selectedDuration == option
+                                                    ? selectedPurple.opacity(0.4)
+                                                    : Color.black.opacity(isDark ? 0.3 : 0.08),
+                                                radius: 6,
+                                                x: 0,
+                                                y: 3
+                                            )         }
                                     .buttonStyle(.plain)
                                     .fixedSize()
                                 }
@@ -157,6 +183,12 @@ struct CreateChallengeView: View {
                         .frame(width: 250, height: 52)
                         .background(createButtonBackground)
                         .clipShape(Capsule())
+                        .liquidGlassButton(
+                            tint: createButtonBackground,
+                            cornerRadius: 26
+                        )
+                        // ✅ Liquid Glass
+                    
                     }
                     .disabled(!vm.isFormValid || vm.isLoading)
 
@@ -186,29 +218,17 @@ struct CreateChallengeView: View {
 
     private func localizedChallengeType(_ type: ChallengeType) -> String {
         let value = type.label.lowercased()
-
-        if value.contains("group") {
-            return NSLocalizedString("group", comment: "")
-        } else if value.contains("solo") {
-            return NSLocalizedString("solo", comment: "")
-        }
-
+        if value.contains("group") { return NSLocalizedString("group", comment: "") }
+        else if value.contains("solo") { return NSLocalizedString("solo", comment: "") }
         return type.label
     }
 
     private func localizedDuration(_ value: String) -> String {
         let key = value.lowercased()
-
-        if key.contains("today") {
-            return NSLocalizedString("today", comment: "")
-        } else if key.contains("3") || key.contains("three") {
-            return NSLocalizedString("three_days", comment: "")
-        } else if key.contains("7") || key.contains("seven") {
-            return NSLocalizedString("seven_days", comment: "")
-        } else if key.contains("14") || key.contains("fourteen") {
-            return NSLocalizedString("fourteen_days", comment: "")
-        }
-
+        if key.contains("today") { return NSLocalizedString("today", comment: "") }
+        else if key.contains("3") || key.contains("three") { return NSLocalizedString("three_days", comment: "") }
+        else if key.contains("7") || key.contains("seven") { return NSLocalizedString("seven_days", comment: "") }
+        else if key.contains("14") || key.contains("fourteen") { return NSLocalizedString("fourteen_days", comment: "") }
         return value
     }
 
@@ -216,15 +236,9 @@ struct CreateChallengeView: View {
     private var backgroundView: some View {
         if isDark {
             LinearGradient(
-                colors: [
-                    Color.black,
-                    Color.black,
-                    Color(hex: "#3E3C5E")
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+                colors: [Color.black, Color.black, Color(hex: "#3E3C5E")],
+                startPoint: .top, endPoint: .bottom
+            ).ignoresSafeArea()
         } else {
             Color.white.ignoresSafeArea()
         }
@@ -237,55 +251,32 @@ struct CreateChallengeView: View {
         return selectedPurple
     }
 
-    private var typeUnselectedTextColor: Color {
-        isDark ? .white : .black
-    }
-
-    private var durationUnselectedTextColor: Color {
-        isDark ? .white : Color(hex: "#341D71")
-    }
-
-    private func typeBackground(selected: Bool) -> Color {
-        selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white)
-    }
-
-    private func typeStrokeColor(selected: Bool) -> Color {
-        selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF"))
-    }
-
-    private func durationBackground(selected: Bool) -> Color {
-        selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white)
-    }
-
-    private func durationStrokeColor(selected: Bool) -> Color {
-        selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF"))
-    }
+    private var typeUnselectedTextColor: Color { isDark ? .white : .black }
+    private var durationUnselectedTextColor: Color { isDark ? .white : Color(hex: "#341D71") }
+    private func typeBackground(selected: Bool) -> Color { selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white) }
+    private func typeStrokeColor(selected: Bool) -> Color { selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF")) }
+    private func durationBackground(selected: Bool) -> Color { selected ? selectedPurple : (isDark ? Color(hex: "#2A2A2A") : Color.white) }
+    private func durationStrokeColor(selected: Bool) -> Color { selected ? .clear : (isDark ? Color(hex: "#3B3B3B") : Color(hex: "#C5BFBF")) }
 
     private var purpleTimePicker: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(NSLocalizedString("enter_time", comment: ""))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.white)
-                .padding(.top, 20)
-                .padding(.leading, 20)
-                .padding(.bottom, 12)
+                .padding(.top, 20).padding(.leading, 20).padding(.bottom, 12)
 
             HStack(spacing: 0) {
                 timeBox(text: $vm.hourText, max: 23, label: NSLocalizedString("hour", comment: ""))
-
-                Text(":")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 24)
-
+                Text(":").font(.system(size: 28, weight: .bold)).foregroundColor(.white).frame(width: 24)
                 timeBox(text: $vm.minuteText, max: 59, label: NSLocalizedString("minute", comment: ""))
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.horizontal, 20).padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity)
         .background(isDark ? selectedPurple.opacity(0.75) : Color(hex: "#341D71"))
         .clipShape(RoundedRectangle(cornerRadius: 24))
+        // ✅ Liquid Glass
+        .liquidGlass(tint: isDark ? selectedPurple.opacity(0.75) : Color(hex: "#341D71"), cornerRadius: 24)
     }
 
     @ViewBuilder
@@ -296,8 +287,7 @@ struct CreateChallengeView: View {
                 .foregroundColor(Color(hex: "#341D71"))
                 .multilineTextAlignment(.center)
                 .keyboardType(.numberPad)
-                .frame(maxWidth: .infinity)
-                .frame(height: 72)
+                .frame(maxWidth: .infinity).frame(height: 72)
                 .background(isDark ? Color(hex: "#E0D6FA") : Color(hex: "#D4CCE8"))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .onChange(of: text.wrappedValue) { _, val in
@@ -306,10 +296,7 @@ struct CreateChallengeView: View {
                     if let n = Int(f), n > max { f = String(max) }
                     if f != text.wrappedValue { text.wrappedValue = f }
                 }
-
-            Text(label)
-                .font(.system(size: 12))
-                .foregroundColor(.white)
+            Text(label).font(.system(size: 12)).foregroundColor(.white)
         }
         .frame(maxWidth: .infinity)
     }
@@ -318,39 +305,25 @@ struct CreateChallengeView: View {
         Text(text)
             .font(.system(size: 18, weight: .bold))
             .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71").opacity(0.65))
-            .padding(.horizontal, 23)
-            .padding(.bottom, 7)
+            .padding(.horizontal, 23).padding(.bottom, 7)
     }
 
     private func inputField(placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text)
             .font(.system(size: 14))
             .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-            .padding(.horizontal, 16)
-            .frame(height: 52)
+            .padding(.horizontal, 16).frame(height: 52)
             .background(inputFieldBackground(isEmpty: text.wrappedValue.isEmpty))
             .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isDark ? Color.white.opacity(0.15) : Color(hex: "#E2DDEF"), lineWidth: 1.5)
-            )
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(isDark ? Color.white.opacity(0.15) : Color(hex: "#E2DDEF"), lineWidth: 1.5))
+            // ✅ Liquid Glass
+            .liquidGlass(tint: inputFieldBackground(isEmpty: text.wrappedValue.isEmpty), cornerRadius: 14)
     }
 
     private func inputFieldBackground(isEmpty: Bool) -> Color {
-        if isDark {
-            return isEmpty ? Color(hex: "#2A2A2A") : Color(hex: "#303030")
-        }
-        return isEmpty ? Color(hex: "#F0EFF7") : Color.white
+        isDark ? (isEmpty ? Color(hex: "#2A2A2A") : Color(hex: "#303030")) : (isEmpty ? Color(hex: "#F0EFF7") : Color.white)
     }
 }
 
-#Preview("Light") {
-    CreateChallengeView()
-        .environmentObject(AuthViewModel())
-}
-
-#Preview("Dark") {
-    CreateChallengeView()
-        .environmentObject(AuthViewModel())
-        .preferredColorScheme(.dark)
-}
+#Preview("Light") { CreateChallengeView().environmentObject(AuthViewModel()) }
+#Preview("Dark") { CreateChallengeView().environmentObject(AuthViewModel()).preferredColorScheme(.dark) }

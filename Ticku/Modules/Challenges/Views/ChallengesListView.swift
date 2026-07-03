@@ -166,8 +166,11 @@ struct ChallengeCompleteView: View {
         }
         .padding(.horizontal, 18)
         .frame(width: 350, height: 80)
-        .background(isDark ? Color.black.opacity(0.25) : Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .liquidGlass(
+            tint: isDark ? Color.black.opacity(0.25) : Color.white,
+            cornerRadius: 15,
+            intensity: 1
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 15)
                 .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1)
@@ -188,8 +191,13 @@ struct ChallengeCompleteView: View {
     private func soloTaskRow(title: String, done: Bool) -> some View {
         HStack(spacing: 14) {
             RoundedRectangle(cornerRadius: 6)
-                .fill(done ? Color(hex: "#341D71") : Color(hex: "#C9C9C9"))
+                .fill(Color.clear)
                 .frame(width: 30, height: 30)
+                .liquidGlass(
+                    tint: done ? Color(hex: "#341D71") : Color(hex: "#C9C9C9"),
+                    cornerRadius: 6,
+                    intensity: 1
+                )
                 .overlay {
                     if done {
                         Image(systemName: "checkmark")
@@ -229,8 +237,11 @@ struct ChallengeCompleteView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 89)
-        .background(isDark ? Color.black.opacity(0.25) : Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .liquidGlass(
+            tint: isDark ? Color.black.opacity(0.25) : Color.white,
+            cornerRadius: 15,
+            intensity: 1
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 15)
                 .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2)
@@ -265,8 +276,11 @@ struct ChallengeCompleteView: View {
         }
         .padding(.horizontal, 18)
         .frame(width: 350, height: 80)
-        .background(isDark ? Color.black.opacity(0.25) : Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .liquidGlass(
+            tint: isDark ? Color.black.opacity(0.25) : Color.white,
+            cornerRadius: 15,
+            intensity: 1
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 15)
                 .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1)
@@ -287,8 +301,11 @@ struct ChallengeCompleteView: View {
                         .foregroundColor(isDark ? .white : Color(hex: "#341D71").opacity(0.55))
                 }
                 .frame(width: 350, height: 89)
-                .background(isDark ? Color.black.opacity(0.25) : Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
+                .liquidGlass(
+                    tint: isDark ? Color.black.opacity(0.25) : Color.white,
+                    cornerRadius: 15,
+                    intensity: 1
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 15)
                         .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2)
@@ -304,8 +321,11 @@ struct ChallengeCompleteView: View {
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
                 .frame(width: 166, height: 60)
-                .background(isDark ? Color(hex: "#341D71").opacity(0.57) : Color(hex: "#341D71").opacity(0.88))
-                .clipShape(Capsule())
+                .liquidGlass(
+                    tint: isDark ? Color(hex: "#341D71").opacity(0.57) : Color(hex: "#341D71").opacity(0.88),
+                    cornerRadius: 30,
+                    intensity: 1
+                )
                 .overlay(
                     Capsule()
                         .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 1)

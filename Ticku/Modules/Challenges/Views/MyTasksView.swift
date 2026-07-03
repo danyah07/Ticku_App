@@ -81,8 +81,13 @@ struct MyTasksView: View {
         HStack {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.backward")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
+                    .frame(width: 44, height: 44)
+                    .liquidGlassButton(
+                        tint: isDark ? .white.opacity(0.08) : .white,
+                        cornerRadius: 22
+                    )
             }
 
             Spacer()
@@ -150,8 +155,13 @@ struct MyTasksView: View {
     private var tasksContainer: some View {
         ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 18)
-                .fill(isDark ? Color(hex: "#15111F") : Color(hex: "#EDEDED"))
+                .fill(Color.clear)
                 .frame(width: 369, height: 520)
+                .liquidGlass(
+                    tint: isDark ? Color(hex: "#15111F") : Color(hex: "#EDEDED"),
+                    cornerRadius: 18,
+                    intensity: 1
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
                         .stroke(isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.30), lineWidth: 1)
@@ -246,8 +256,11 @@ struct MyTasksView: View {
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 166, height: 60)
-                        .background(Color(hex: "#4C3882"))
-                        .clipShape(Capsule())
+                        .liquidGlass(
+                            tint: Color(hex: "#4C3882"),
+                            cornerRadius: 30,
+                            intensity: 1
+                        )
                 }
 
                 Spacer()

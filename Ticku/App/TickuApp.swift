@@ -31,9 +31,14 @@ struct TickuApp: App {
     // ✅ يقرأ نفس المفتاح اللي يحفظه زر الدارك مود بصفحة Settings
     @AppStorage("isDarkMode") private var isDarkMode = false
 
+    // ✅ يقرأ اللغة المختارة من Settings (EN/AR)
+    @AppStorage("app_language") private var appLanguage = "en"
+
     init() {
+        // ✅ يطبّق اللغة المحفوظة فور تشغيل التطبيق
+        Bundle.applyStoredLanguage()
         try? Tips.configure([
-            .displayFrequency(.immediate),
+            .displayFrequency(.weekly),
             .datastoreLocation(.applicationDefault)
         ])
         NotificationManager.shared.requestPermission()
@@ -45,6 +50,10 @@ struct TickuApp: App {
                 .environmentObject(authVM)
                 // ✅ يطبّق الوضع على كل التطبيق فوراً لحظة الضغط على الزر
                 .preferredColorScheme(isDarkMode ? .dark : .light)
+                // ✅ يطبّق اللغة على كل التطبيق فوراً لحظة الضغط على EN/AR
+                .environment(\.locale, Locale(identifier: appLanguage))
+                // ✅ يبدّل اتجاه الـ layout تلقائياً (RTL للعربية، LTR للإنجليزية)
+                .environment(\.layoutDirection, appLanguage == "ar" ? .rightToLeft : .leftToRight)
         }
     }
 }

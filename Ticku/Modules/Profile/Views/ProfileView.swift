@@ -63,16 +63,12 @@ struct ProfileView: View {
             fixedHeader
         }
         .navigationBarHidden(true)
+        // ✅ task(id:) فقط — يعيد التحميل لو currentUserId تغيّر
+        // شلنا .onAppear لأنه كان يستدعي load() مرتين بنفس الوقت
+        // ويسبب تعارض يخلي البيانات تطلع مرة ولا مرة
         .task(id: authVM.currentUserId) {
             if let uid = authVM.currentUserId {
                 await vm.load(uid: uid)
-            }
-        }
-        .onAppear {
-            Task {
-                if let uid = authVM.currentUserId {
-                    await vm.load(uid: uid)
-                }
             }
         }
     }
@@ -81,10 +77,14 @@ struct ProfileView: View {
         HStack {
             Button(action: onBack) {
                 Image(systemName: "chevron.backward")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
+                    .frame(width: 46, height: 46)
+                    .liquidGlassButton(
+                        tint: isDark ? .white.opacity(0.08) : .white,
+                        cornerRadius: 23
+                    )
             }
-
             Spacer()
 
             Text(NSLocalizedString("profile", comment: ""))
@@ -95,8 +95,13 @@ struct ProfileView: View {
 
             Button(action: onSettings) {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 23, weight: .bold))
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : Color(hex: "#341D71"))
+                    .frame(width: 46, height: 46)
+                    .liquidGlassButton(
+                        tint: isDark ? .white.opacity(0.08) : .white,
+                        cornerRadius: 23
+                    )
             }
         }
         .padding(.horizontal, 21)
@@ -250,9 +255,7 @@ private struct ChallengeHistoryRow: View {
                 .foregroundColor(Color.ticku.doneGreen)
         } else if let rank = entry.rank {
             HStack(spacing: 4) {
-                Text(rankEmoji(rank))
-                    .font(.system(size: 14))
-
+                Text(rankEmoji(rank)).font(.system(size: 14))
                 Text(rankLabel(rank))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(rankColor(rank))
@@ -262,21 +265,11 @@ private struct ChallengeHistoryRow: View {
     }
 
     private func rankEmoji(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "🥇"
-        case 2: return "🥈"
-        case 3: return "🥉"
-        default: return "🏅"
-        }
+        switch rank { case 1: return "🥇"; case 2: return "🥈"; case 3: return "🥉"; default: return "🏅" }
     }
 
     private func rankLabel(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "1st"
-        case 2: return "2nd"
-        case 3: return "3rd"
-        default: return "\(rank)th"
-        }
+        switch rank { case 1: return "1st"; case 2: return "2nd"; case 3: return "3rd"; default: return "\(rank)th" }
     }
 
     private func rankColor(_ rank: Int) -> Color {
@@ -299,12 +292,9 @@ private extension Date {
 }
 
 #Preview("Light") {
-    ProfileView()
-        .environmentObject(AuthViewModel())
+    ProfileView().environmentObject(AuthViewModel())
 }
 
 #Preview("Dark") {
-    ProfileView()
-        .environmentObject(AuthViewModel())
-        .preferredColorScheme(.dark)
+    ProfileView().environmentObject(AuthViewModel()).preferredColorScheme(.dark)
 }

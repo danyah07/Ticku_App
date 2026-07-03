@@ -5,7 +5,6 @@
 //  Created by Danyah ALbarqawi on 10/06/2026.
 //
 
-
 import SwiftUI
 
 struct JoinChallengeView: View {
@@ -37,6 +36,8 @@ struct JoinChallengeView: View {
                     RoundedRectangle(cornerRadius: 50)
                         .stroke(isDark ? Color(hex: "#535353") : Color.clear, lineWidth: 1)
                 )
+                // ✅ Liquid Glass
+                .liquidGlass(tint: isDark ? Color(hex: "#8D8C8C").opacity(0.25) : Color(hex: "#DDDDDD").opacity(0.48), cornerRadius: 50)
                 .onChange(of: vm.inviteCode) { newValue in
                     vm.inviteCode = String(
                         newValue
@@ -71,6 +72,8 @@ struct JoinChallengeView: View {
                 .frame(width: 165, height: 52)
                 .background(joinButtonBackground)
                 .clipShape(Capsule())
+                // ✅ Liquid Glass
+                .liquidGlassButton(tint: joinButtonBackground, cornerRadius: 26)
             }
             .disabled(!vm.isCodeValid || vm.isLoading)
 

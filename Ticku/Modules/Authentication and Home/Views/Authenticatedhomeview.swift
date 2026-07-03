@@ -36,11 +36,12 @@ struct AuthenticatedHomeView: View {
 
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(NSLocalizedString("welcome", comment: ""))
+                            Text(NSLocalizedString("Hello 👋  ", comment: ""))
                                 .font(.system(size: 19, weight: .bold))
                                 .foregroundColor(isDark ? .white.opacity(0.45) : Color.black.opacity(0.39))
 
-                            Text(NSLocalizedString("get_started", comment: ""))
+                            // ✅ الاسم بدل "get_started" — يتحدث تلقائياً من HomeViewModel listener
+                            Text(vm.currentUser?.displayName ?? NSLocalizedString("get_started", comment: ""))
                                 .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(isDark ? .white : .black)
                         }

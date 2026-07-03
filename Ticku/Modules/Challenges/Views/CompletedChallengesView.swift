@@ -60,6 +60,11 @@ struct CompletedChallengesView: View {
                         RoundedRectangle(cornerRadius: 18)
                             .stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color(hex: "#E5E5EA"), lineWidth: 1)
                     )
+                    .liquidGlass(
+                        tint: isDark ? Color.white.opacity(0.04) : Color.white,
+                        cornerRadius: 18
+                    )
+                    
                     .padding(.horizontal, TickuSpacing.screenH)
                     .padding(.bottom, 32)
                 }

@@ -29,6 +29,7 @@ struct SignInView: View {
     var onBack: () -> Void = {}
 
     @State private var appleSignInCoordinator: AppleSignInCoordinator? = nil
+    @State private var showPrivacySheet = false
 
     var body: some View {
         ZStack {
@@ -65,7 +66,7 @@ struct SignInView: View {
 
                 Spacer()
 
-                VStack(spacing: 48) {
+                VStack(spacing: 22) {
                     Button(action: handleAppleSignInTap) {
                         HStack(spacing: 8) {
                             Image(systemName: "apple.logo")
@@ -91,10 +92,21 @@ struct SignInView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Text(NSLocalizedString("terms_privacy_note", comment: ""))
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(isDark ? .white.opacity(0.60) : Color.black.opacity(0.60))
-                        .multilineTextAlignment(.center)
+                    VStack(spacing: 8) {
+                        Text(NSLocalizedString("terms_privacy_note", comment: ""))
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(isDark ? .white.opacity(0.60) : Color.black.opacity(0.60))
+                            .multilineTextAlignment(.center)
+
+                        Button {
+                            showPrivacySheet = true
+                        } label: {
+                            Text("سياسة الخصوصية")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(isDark ? Color(hex: "#D8CCFF") : Color(hex: "#341D71"))
+                                .underline()
+                        }
+                    }
                 }
                 .padding(.bottom, 46)
             }
@@ -127,6 +139,9 @@ struct SignInView: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showPrivacySheet) {
+            PrivacyPolicySheet()
+        }
         .onChange(of: authVM.isAuthenticated) {
             if authVM.isAuthenticated {
                 onBack()
@@ -180,6 +195,99 @@ struct SignInView: View {
         controller.delegate = delegate
         controller.presentationContextProvider = delegate
         controller.performRequests()
+    }
+}
+
+private struct PrivacyPolicySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    private var isDark: Bool { colorScheme == .dark }
+
+    private let cardColor = Color(hex: "#9A86D0")
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("سياسة الخصوصية")
+                        .font(.system(size: 28, weight: .black))
+                        .foregroundColor(isDark ? .white : .black)
+                        .padding(.bottom, 4)
+
+                    Text("آخر تحديث: يوليو 2026")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(isDark ? .white.opacity(0.55) : .black.opacity(0.45))
+                        .padding(.bottom, 10)
+
+                    privacyCard(title: "مقدمة", text: """
+مرحبًا بك في Ticku.
+
+نحن نُقدّر خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة المعلومات التي يجمعها التطبيق، وكيفية استخدامها، والوسائل التي نتبعها لحمايتها عند استخدامك للتطبيق.
+""")
+
+                    privacyCard(title: "المعلومات التي نجمعها", text: """
+قد نقوم بجمع الاسم المعروض، البريد الإلكتروني عند تسجيل الدخول، الصورة الشخصية إذا قمت بإضافتها، معرف المستخدم، التحديات التي تنشئها أو تنضم إليها، المهام، ونسبة الإنجاز وعدد مرات الفوز.
+""")
+
+                    privacyCard(title: "معلومات لا نجمعها", text: """
+لا يجمع Ticku الهوية الوطنية، المعلومات البنكية، البيانات الصحية، جهات الاتصال، الموقع الجغرافي، تسجيلات الصوت، أو الصور الموجودة في جهازك دون اختيارك.
+""")
+
+                    privacyCard(title: "كيفية استخدام البيانات", text: """
+نستخدم البيانات لإنشاء الحساب، حفظ التحديات والمهام، مزامنة البيانات، عرض التقدم، حساب الإحصائيات، إرسال إشعارات مرتبطة بالتحديات، وتحسين أداء التطبيق وأمانه.
+""")
+
+                    privacyCard(title: "مشاركة البيانات", text: """
+قد تظهر بعض بياناتك للمستخدمين المشاركين معك في نفس التحدي، مثل الاسم، الصورة الشخصية، التقدم، والمهام المكتملة حسب آلية التحدي. لا نبيع بياناتك ولا نشاركها لأغراض إعلانية.
+""")
+
+                    privacyCard(title: "تخزين البيانات وأمانها", text: """
+يتم تخزين البيانات باستخدام خدمات سحابية موثوقة مثل Firebase، مع استخدام وسائل حماية مناسبة للحد من الوصول غير المصرح به أو الفقد أو التعديل.
+""")
+
+                    privacyCard(title: "حذف الحساب والبيانات", text: """
+يمكنك التوقف عن استخدام التطبيق في أي وقت. وعند توفر حذف الحساب، سيتم حذف البيانات المرتبطة بحسابك وفقًا لسياسة الاحتفاظ بالبيانات، ما لم يكن الاحتفاظ ببعض المعلومات مطلوبًا نظاميًا أو أمنيًا.
+""")
+
+                    privacyCard(title: "الالتزام بالأنظمة", text: """
+يلتزم Ticku باحترام الأنظمة واللوائح المتعلقة بحماية البيانات والخصوصية. ولا يتم الكشف عن أي معلومات إلا إذا كان ذلك مطلوبًا بموجب أمر قضائي أو طلب رسمي من جهة مختصة، وبالحد الأدنى اللازم فقط.
+""")
+
+                    privacyCard(title: "التواصل معنا", text: """
+إذا كانت لديك أي استفسارات حول سياسة الخصوصية أو بياناتك، يمكنك التواصل مع فريق Ticku من خلال وسائل التواصل المتوفرة داخل التطبيق أو صفحة التطبيق في App Store.
+""")
+                }
+                .padding(22)
+            }
+            .background(isDark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("تم") {
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Color(hex: "#9A86D0"))
+                }
+            }
+        }
+    }
+
+    private func privacyCard(title: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 18, weight: .black))
+                .foregroundColor(.white)
+
+            Text(text)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.white.opacity(0.88))
+                .lineSpacing(5)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(cardColor)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 }
 

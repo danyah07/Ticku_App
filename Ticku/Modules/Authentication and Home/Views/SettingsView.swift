@@ -128,9 +128,21 @@ struct SettingsView: View {
     }
 
     private var handleLabel: some View {
-        Text(vm.handle.isEmpty ? "@handle" : vm.handle)
-            .font(.system(size: 15, weight: .medium))
-            .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+        HStack(spacing: 6) {
+            Text("@")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+            TextField("handle", text: $vm.handle)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+                .multilineTextAlignment(.center)
+                .autocorrectionDisabled()
+                .autocapitalization(.none)
+                .fixedSize()
+            Image(systemName: "pencil")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isDark ? .white.opacity(0.55) : Color.black.opacity(0.45))
+        }
     }
 
     // MARK: - Settings Card

@@ -4,13 +4,13 @@
 //
 //  Created by Danyah ALbarqawi on 10/05/2026.
 //
-
 import SwiftUI
 
 struct ChallengeCompleteView: View {
 
     let players: [Player]
     let challengeRule: String
+    var tasks: [ChallengeTask] = []  // ✅ التاسكات الحقيقية للسولو
     var onDone: () -> Void = {}
 
     @Environment(\.colorScheme) private var colorScheme
@@ -41,13 +41,10 @@ struct ChallengeCompleteView: View {
             } else {
                 VStack(spacing: 29) {
                     Spacer().frame(height: 2)
-
                     badgeSection
                     playersSection
                     loserSection
-
                     Spacer(minLength: 28)
-
                     continueButton
                 }
                 .padding(.horizontal, 23)
@@ -61,15 +58,9 @@ struct ChallengeCompleteView: View {
     private var backgroundView: some View {
         if isDark {
             LinearGradient(
-                colors: [
-                    Color.black,
-                    Color(hex: "#120C24"),
-                    Color(hex: "#261A45")
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+                colors: [Color.black, Color(hex: "#120C24"), Color(hex: "#261A45")],
+                startPoint: .top, endPoint: .bottom
+            ).ignoresSafeArea()
         } else {
             Color.white.ignoresSafeArea()
         }
@@ -78,16 +69,15 @@ struct ChallengeCompleteView: View {
     private var soloResultView: some View {
         VStack(spacing: 29) {
             Spacer().frame(height: 2)
-
             soloBadgeSection
             soloProgressSection
 
-            if !isSoloComplete {
-                soloTasksList
+            // ✅ قائمة المهام الحقيقية — الي خلصها تشيك، الي ما خلصها لا
+            if let player = soloPlayer, player.totalTasks > 0 {
+                soloTasksList(player: player)
             }
 
             Spacer()
-
             soloMessageCard
             continueButton
         }
@@ -110,15 +100,12 @@ struct ChallengeCompleteView: View {
             VStack(alignment: .leading, spacing: -2) {
                 Text(NSLocalizedString("challenge", comment: ""))
                     .font(.system(size: 24, weight: .black))
-
                 Text(statusText)
                     .font(.system(size: 24, weight: .black))
                     .padding(.leading, statusText == NSLocalizedString("failed", comment: "") ? 95 : 56)
             }
             .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
-
             Spacer()
-
             Image(systemName: iconName)
                 .font(.system(size: 48, weight: .bold))
                 .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
@@ -127,7 +114,7 @@ struct ChallengeCompleteView: View {
         .frame(width: 343, height: 86)
         .background(badgeBackgroundView)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(color: .black.opacity(isDark ? 0.25 : 0.25), radius: 4, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
     }
 
     private var badgeBackgroundView: some View {
@@ -142,8 +129,7 @@ struct ChallengeCompleteView: View {
                 .init(color: Color(hex: "#E9E4F8"), location: 0.30),
                 .init(color: .white, location: 1)
             ],
-            startPoint: .top,
-            endPoint: .bottom
+            startPoint: .top, endPoint: .bottom
         )
     }
 
@@ -153,36 +139,34 @@ struct ChallengeCompleteView: View {
                 Text(NSLocalizedString("me", comment: ""))
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
-
                 Spacer()
-
                 Text("\(Int(soloProgress * 100))%")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
-
             progressBar(progress: soloProgress, color: Color(hex: "#341D71"))
         }
         .padding(.horizontal, 18)
         .frame(width: 350, height: 80)
-        .liquidGlass(
-            tint: isDark ? Color.black.opacity(0.25) : Color.white,
-            cornerRadius: 15,
-            intensity: 1
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1)
-        )
+        .liquidGlass(tint: isDark ? Color.black.opacity(0.25) : Color.white, cornerRadius: 15, intensity: 1)
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1))
     }
 
-    private var soloTasksList: some View {
+    // ✅ مهام حقيقية من الـ tasks — اسم كل تاسك الي كتبه اليوزر
+    private func soloTasksList(player: Player) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            soloTaskRow(title: NSLocalizedString("sample_task_morning_run", comment: ""), done: true)
-            soloTaskRow(title: NSLocalizedString("sample_task_read_pages", comment: ""), done: true)
-            soloTaskRow(title: NSLocalizedString("sample_task_no_junk_food", comment: ""), done: false)
-            soloTaskRow(title: NSLocalizedString("sample_task_meditate", comment: ""), done: false)
+            if tasks.isEmpty {
+                // لو ما في تاسكات ممررة، نعرض أرقام فقط
+                ForEach(0..<player.totalTasks, id: \.self) { index in
+                    soloTaskRow(title: "Task \(index + 1)", done: index < player.completedTasks)
+                }
+            } else {
+                // ✅ نعرض الأسماء الحقيقية — المكتملة تشيك، الباقي لا
+                ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
+                    soloTaskRow(title: task.title, done: task.isCompleted)
+                }
+            }
         }
         .padding(.top, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -195,8 +179,7 @@ struct ChallengeCompleteView: View {
                 .frame(width: 30, height: 30)
                 .liquidGlass(
                     tint: done ? Color(hex: "#341D71") : Color(hex: "#C9C9C9"),
-                    cornerRadius: 6,
-                    intensity: 1
+                    cornerRadius: 6, intensity: 1
                 )
                 .overlay {
                     if done {
@@ -205,7 +188,6 @@ struct ChallengeCompleteView: View {
                             .foregroundColor(.white)
                     }
                 }
-
             Text(title)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(isDark ? .white : .black)
@@ -217,19 +199,15 @@ struct ChallengeCompleteView: View {
     private var soloMessageCard: some View {
         VStack(spacing: 6) {
             if isSoloComplete {
+                // ✅ شلنا Streak — بس رسالة فوز بدون ذكر streak
                 Text(NSLocalizedString("you_win_all_tasks", comment: ""))
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(Color(hex: "#2ECC71"))
-
-                Text(NSLocalizedString("two_day_streak", comment: ""))
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
             } else {
                 Text("\(NSLocalizedString("you_lose", comment: "")) \(unfinishedTasksCount) \(NSLocalizedString("tasks_left_undone", comment: ""))")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(.red)
                     .environment(\.locale, Locale(identifier: "en_US"))
-
                 Text(challengeRule)
                     .font(.system(size: 24, weight: .black))
                     .foregroundColor(isDark ? .white : .gray)
@@ -237,16 +215,9 @@ struct ChallengeCompleteView: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 89)
-        .liquidGlass(
-            tint: isDark ? Color.black.opacity(0.25) : Color.white,
-            cornerRadius: 15,
-            intensity: 1
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2)
-        )
-        .shadow(color: .black.opacity(isDark ? 0.25 : 0.25), radius: 4, x: 0, y: 4)
+        .liquidGlass(tint: isDark ? Color.black.opacity(0.25) : Color.white, cornerRadius: 15, intensity: 1)
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2))
+        .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
     }
 
     private var playersSection: some View {
@@ -263,28 +234,18 @@ struct ChallengeCompleteView: View {
                 Text(player.isMe ? NSLocalizedString("you", comment: "") : player.name)
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
-
                 Spacer()
-
                 Text("\(Int(player.progress * 100))%")
                     .font(.system(size: 17, weight: .black))
                     .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
-
             progressBar(progress: player.progress, color: progressColor(for: rank))
         }
         .padding(.horizontal, 18)
         .frame(width: 350, height: 80)
-        .liquidGlass(
-            tint: isDark ? Color.black.opacity(0.25) : Color.white,
-            cornerRadius: 15,
-            intensity: 1
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1)
-        )
+        .liquidGlass(tint: isDark ? Color.black.opacity(0.25) : Color.white, cornerRadius: 15, intensity: 1)
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#A1A1A1"), lineWidth: 1))
     }
 
     private var loserSection: some View {
@@ -295,22 +256,14 @@ struct ChallengeCompleteView: View {
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(isDark ? Color(hex: "#8E8AC5") : Color(hex: "#341D71"))
                         .environment(\.locale, Locale(identifier: "en_US"))
-
                     Text(challengeRule)
                         .font(.system(size: 20, weight: .black))
                         .foregroundColor(isDark ? .white : Color(hex: "#341D71").opacity(0.55))
                 }
                 .frame(width: 350, height: 89)
-                .liquidGlass(
-                    tint: isDark ? Color.black.opacity(0.25) : Color.white,
-                    cornerRadius: 15,
-                    intensity: 1
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 15)
-                        .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2)
-                )
-                .shadow(color: .black.opacity(isDark ? 0.25 : 0.25), radius: 4, x: 0, y: 4)
+                .liquidGlass(tint: isDark ? Color.black.opacity(0.25) : Color.white, cornerRadius: 15, intensity: 1)
+                .overlay(RoundedRectangle(cornerRadius: 15).stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 2))
+                .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
             }
         }
     }
@@ -321,15 +274,8 @@ struct ChallengeCompleteView: View {
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
                 .frame(width: 166, height: 60)
-                .liquidGlass(
-                    tint: isDark ? Color(hex: "#341D71").opacity(0.57) : Color(hex: "#341D71").opacity(0.88),
-                    cornerRadius: 30,
-                    intensity: 1
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 1)
-                )
+                .liquidGlass(tint: isDark ? Color(hex: "#341D71").opacity(0.57) : Color(hex: "#341D71").opacity(0.88), cornerRadius: 30, intensity: 1)
+                .overlay(Capsule().stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.25) : Color(hex: "#CBCBCB"), lineWidth: 1))
         }
         .padding(.bottom, 10)
     }
@@ -337,13 +283,8 @@ struct ChallengeCompleteView: View {
     private func progressBar(progress: Double, color: Color) -> some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(isDark ? Color.white.opacity(0.85) : Color(hex: "#D9D9D9"))
-                    .frame(height: 12)
-
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(color)
-                    .frame(width: geo.size.width * progress, height: 12)
+                RoundedRectangle(cornerRadius: 6).fill(isDark ? Color.white.opacity(0.85) : Color(hex: "#D9D9D9")).frame(height: 12)
+                RoundedRectangle(cornerRadius: 6).fill(color).frame(width: geo.size.width * progress, height: 12)
             }
         }
         .frame(height: 12)
@@ -386,18 +327,14 @@ struct ChallengeCompleteView: View {
 
 #Preview("Solo Complete") {
     ChallengeCompleteView(
-        players: [
-            Player(name: "Danyah", rank: 1, isMe: true, completedTasks: 4, totalTasks: 4)
-        ],
+        players: [Player(name: "Danyah", rank: 1, isMe: true, completedTasks: 4, totalTasks: 4)],
         challengeRule: "100 push-ups"
     )
 }
 
 #Preview("Solo Failed") {
     ChallengeCompleteView(
-        players: [
-            Player(name: "Danyah", rank: 1, isMe: true, completedTasks: 2, totalTasks: 4)
-        ],
+        players: [Player(name: "Danyah", rank: 1, isMe: true, completedTasks: 2, totalTasks: 4)],
         challengeRule: "100 push-ups"
     )
 }

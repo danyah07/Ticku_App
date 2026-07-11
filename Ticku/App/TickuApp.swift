@@ -38,7 +38,7 @@ struct TickuApp: App {
         // ✅ يطبّق اللغة المحفوظة فور تشغيل التطبيق
         Bundle.applyStoredLanguage()
         try? Tips.configure([
-            .displayFrequency(.weekly),
+            .displayFrequency(.immediate),
             .datastoreLocation(.applicationDefault)
         ])
         NotificationManager.shared.requestPermission()

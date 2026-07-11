@@ -20,6 +20,7 @@ final class ChallengeDetailViewModel: ObservableObject {
     let challengeId: String
 
     @Published var members: [ChallengeMember] = []
+    @Published var myTasks: [ChallengeTask] = []  // ✅ تاسكات المستخدم الحالي — تُمرر لـ ChallengeCompleteView
     @Published var inviteCode: String = ""
     @Published var timeRemaining: TimeInterval = 0
     @Published var isLoading = false
@@ -51,6 +52,22 @@ final class ChallengeDetailViewModel: ObservableObject {
 
     func startListening(currentUserId: String) {
         guard !challengeId.isEmpty else { return }
+
+        // ✅ Listener للتاسكات الحقيقية للمستخدم الحالي
+        if !currentUserId.isEmpty {
+            db.collection("challenges").document(challengeId)
+                .collection("members").document(currentUserId)
+                .collection("tasks")
+                .order(by: "createdAt")
+                .addSnapshotListener { [weak self] snap, _ in
+                    guard let self, let snap else { return }
+                    Task { @MainActor in
+                        self.myTasks = snap.documents.compactMap {
+                            ChallengeTask(id: $0.documentID, data: $0.data())
+                        }
+                    }
+                }
+        }
 
         listener = db
             .collection("challenges").document(challengeId)

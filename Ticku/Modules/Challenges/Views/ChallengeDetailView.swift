@@ -67,7 +67,12 @@ struct ChallengeDetailView: View {
             ChallengeDetailsPage(challenge: vm.challenge).environmentObject(authVM)
         }
         .navigationDestination(isPresented: $showComplete) {
-            ChallengeCompleteView(players: playersList, challengeRule: vm.challenge.description, onDone: { onBack() })
+            ChallengeCompleteView(
+                players: playersList,
+                challengeRule: vm.challenge.description,
+                tasks: vm.myTasks,
+                onDone: { onBack() }
+            )
         }
         .onChange(of: vm.timerDisplay) {
             if vm.timerDisplay == "00:00:00" && vm.challengeStartDate != nil {

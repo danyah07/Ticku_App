@@ -25,15 +25,11 @@ struct CompletedChallengesView: View {
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
                     }
-
                     Spacer()
-
                     Text(NSLocalizedString("all_challenges", comment: ""))
                         .font(Font.ticku.sectionHeader)
                         .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
-
                     Spacer()
-
                     Color.clear.frame(width: 24)
                 }
                 .padding(.horizontal, TickuSpacing.screenH)
@@ -48,23 +44,14 @@ struct CompletedChallengesView: View {
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(challenges.enumerated()), id: \.element.id) { index, entry in
-                            if index > 0 {
-                                Divider().padding(.horizontal, 16)
-                            }
+                            if index > 0 { Divider().padding(.horizontal, 16) }
                             ChallengeHistoryRowFull(entry: entry)
                         }
                     }
                     .background(isDark ? Color.white.opacity(0.04) : Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color(hex: "#E5E5EA"), lineWidth: 1)
-                    )
-                    .liquidGlass(
-                        tint: isDark ? Color.white.opacity(0.04) : Color.white,
-                        cornerRadius: 18
-                    )
-                    
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(isDark ? Color(hex: "#B296EB").opacity(0.15) : Color(hex: "#E5E5EA"), lineWidth: 1))
+                    .liquidGlass(tint: isDark ? Color.white.opacity(0.04) : Color.white, cornerRadius: 18)
                     .padding(.horizontal, TickuSpacing.screenH)
                     .padding(.bottom, 32)
                 }
@@ -79,38 +66,45 @@ struct ChallengeHistoryRowFull: View {
     let entry: ChallengeHistoryEntry
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
+    private var isGaveUp: Bool { entry.challenge.status == "gave_up" }
 
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#3A3A3C"))
+                    .fill(isGaveUp ? Color(hex: "#8E8E93") : Color(hex: "#3A3A3C"))
                     .frame(width: 44, height: 44)
-
                 Text(entry.challenge.durationLabel)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(isGaveUp ? .white.opacity(0.6) : .white)
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.challenge.title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(isDark ? .white : Color.ticku.textPrimary)
+                    .foregroundColor(isGaveUp
+                        ? (isDark ? .white.opacity(0.4) : Color.ticku.textSecondary)
+                        : (isDark ? .white : Color.ticku.textPrimary))
+                    .strikethrough(isGaveUp, color: isDark ? .white.opacity(0.3) : Color.ticku.textSecondary)
 
                 Text(entry.challenge.startDate.monthYearShort)
                     .font(.system(size: 13))
-                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.ticku.textSecondary)
+                    .foregroundColor(isDark ? .white.opacity(0.3) : Color.ticku.textSecondary.opacity(0.6))
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             Spacer()
 
-            if let rank = entry.rank {
+            if isGaveUp {
+                // ✅ "Gave Up" بلون أحمر باهت
+                Text("Gave Up")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.red.opacity(0.7))
+                    .strikethrough(true, color: .red.opacity(0.7))
+            } else if let rank = entry.rank {
                 HStack(spacing: 4) {
-                    Text(rankEmoji(rank))
-                        .font(.system(size: 14))
-
+                    Text(rankEmoji(rank)).font(.system(size: 14))
                     Text(rankLabel(rank))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(rankColor(rank))
@@ -120,24 +114,19 @@ struct ChallengeHistoryRowFull: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
+        // ✅ خلفية رمادية باهتة للتحديات اللي استسلم منها
+        .background(isGaveUp
+            ? (isDark ? Color.white.opacity(0.02) : Color(hex: "#F0F0F0"))
+            : Color.clear)
+        .opacity(isGaveUp ? 0.75 : 1.0)
     }
 
     private func rankEmoji(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "🥇"
-        case 2: return "🥈"
-        case 3: return "🥉"
-        default: return "🏅"
-        }
+        switch rank { case 1: return "🥇"; case 2: return "🥈"; case 3: return "🥉"; default: return "🏅" }
     }
 
     private func rankLabel(_ rank: Int) -> String {
-        switch rank {
-        case 1: return "1st"
-        case 2: return "2nd"
-        case 3: return "3rd"
-        default: return "\(rank)th"
-        }
+        switch rank { case 1: return "1st"; case 2: return "2nd"; case 3: return "3rd"; default: return "\(rank)th" }
     }
 
     private func rankColor(_ rank: Int) -> Color {
@@ -159,11 +148,5 @@ private extension Date {
     }
 }
 
-#Preview("Light") {
-    CompletedChallengesView(challenges: [])
-}
-
-#Preview("Dark") {
-    CompletedChallengesView(challenges: [])
-        .preferredColorScheme(.dark)
-}
+#Preview("Light") { CompletedChallengesView(challenges: []) }
+#Preview("Dark") { CompletedChallengesView(challenges: []).preferredColorScheme(.dark) }

@@ -34,9 +34,14 @@ struct Challenge: Identifiable, Codable, Hashable {
     }
 
     var durationLabel: String {
-        let days  = Calendar.current.dateComponents([.day],  from: startDate, to: endDate).day  ?? 0
-        let hours = Calendar.current.dateComponents([.hour], from: startDate, to: endDate).hour ?? 0
-        return days >= 1 ? "\(days)d" : "\(hours)h"
+        let total = Calendar.current.dateComponents([.minute], from: startDate, to: endDate).minute ?? 0
+        let days    = total / (60 * 24)
+        let hours   = (total % (60 * 24)) / 60
+        let minutes = total % 60
+
+        if days >= 1    { return "\(days)d" }
+        if hours >= 1   { return "\(hours)h" }
+        return "\(minutes)m"
     }
 
     func hash(into hasher: inout Hasher) { hasher.combine(id) }

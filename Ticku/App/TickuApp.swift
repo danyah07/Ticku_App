@@ -35,10 +35,10 @@ struct TickuApp: App {
     @AppStorage("app_language") private var appLanguage = "en"
 
     init() {
-        // ✅ يطبّق اللغة المحفوظة فور تشغيل التطبيق
+        // ✅ يظهر كل tip مرة واحدة فقط طول عمر التطبيق
         Bundle.applyStoredLanguage()
         try? Tips.configure([
-            .displayFrequency(.immediate),
+            .displayFrequency(.daily),
             .datastoreLocation(.applicationDefault)
         ])
         NotificationManager.shared.requestPermission()
@@ -54,6 +54,8 @@ struct TickuApp: App {
                 .environment(\.locale, Locale(identifier: appLanguage))
                 // ✅ يبدّل اتجاه الـ layout تلقائياً (RTL للعربية، LTR للإنجليزية)
                 .environment(\.layoutDirection, appLanguage == "ar" ? .rightToLeft : .leftToRight)
+                // ✅ يجبر SwiftUI يعيد بناء كل الـ views لما تتغير اللغة — هذا هو الحل الحقيقي
+                .id(appLanguage)
         }
     }
 }

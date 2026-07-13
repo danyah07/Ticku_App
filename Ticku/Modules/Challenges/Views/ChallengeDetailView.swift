@@ -148,6 +148,13 @@ struct ChallengeDetailView: View {
     private func handleGiveUp() {
         let myName = vm.members.first(where: { $0.userId == authVM.currentUserId })?.displayName ?? NSLocalizedString("a_player", comment: "")
         NotificationManager.shared.sendPlayerLeft(playerName: myName, challengeName: vm.challenge.title)
+        // ✅ نضيف uid لـ gaveUpIds عشان يطلع بالبروفايل بخط أحمر
+        if let uid = authVM.currentUserId, !vm.challengeId.isEmpty {
+            db.collection("challenges").document(vm.challengeId).updateData([
+                "memberIds": FieldValue.arrayRemove([uid]),
+                "gaveUpIds": FieldValue.arrayUnion([uid])
+            ])
+        }
         onBack()
     }
 

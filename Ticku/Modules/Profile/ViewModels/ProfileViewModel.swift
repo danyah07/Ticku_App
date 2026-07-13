@@ -47,15 +47,17 @@ final class ProfileViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        // ✅ كل عملية مستقلة — لو وحدة فشلت ما توقف الباقي
         async let profileFetch   = fetchProfile(uid: uid)
         async let completedFetch = fetchCompletedChallenges(uid: uid)
+        async let gaveUpFetch    = fetchGaveUpChallenges(uid: uid)
 
-        let p = (try? await profileFetch) ?? UserProfile(uid: uid, displayName: "Ticku User")
+        let p         = (try? await profileFetch)   ?? UserProfile(uid: uid, displayName: "Ticku User")
         let completed = (try? await completedFetch) ?? []
+        let gaveUp    = (try? await gaveUpFetch)    ?? []
 
         profile    = p
-        challenges = completed
+        // ✅ ندمج المكتملة + المستسلم منها، نرتبهم بـ endDate
+        challenges = (completed + gaveUp).sorted { $0.challenge.endDate > $1.challenge.endDate }
     }
 
     // MARK: - Private
@@ -130,6 +132,32 @@ final class ProfileViewModel: ObservableObject {
 
             let rank = data["rank_\(uid)"] as? Int
             return ChallengeHistoryEntry(challenge: challenge, rank: rank)
+        }
+    }
+
+    // ✅ التحديات اللي المستخدم استسلم منها (uid موجود بـ gaveUpIds)
+    private func fetchGaveUpChallenges(uid: String) async throws -> [ChallengeHistoryEntry] {
+        let snap = try await db
+            .collection("challenges")
+            .whereField("gaveUpIds", arrayContains: uid)
+            .order(by: "endDate", descending: true)
+            .getDocuments()
+
+        return snap.documents.compactMap { doc -> ChallengeHistoryEntry? in
+            let data = doc.data()
+            var challenge = Challenge()
+            challenge.id = doc.documentID
+            challenge.title = data["title"] as? String ?? ""
+            challenge.description = data["description"] as? String ?? ""
+            challenge.createdBy = data["createdBy"] as? String ?? ""
+            challenge.status = "gave_up"
+            challenge.memberCount = data["memberCount"] as? Int ?? 0
+            challenge.memberIds = data["memberIds"] as? [String] ?? []
+            challenge.challengeType = data["challengeType"] as? String ?? "group"
+            if let ts = data["startDate"] as? Timestamp { challenge.startDate = ts.dateValue() }
+            if let ts = data["endDate"] as? Timestamp { challenge.endDate = ts.dateValue() }
+            if let ts = data["createdAt"] as? Timestamp { challenge.createdAt = ts.dateValue() }
+            return ChallengeHistoryEntry(challenge: challenge, rank: nil)
         }
     }
 }

@@ -182,11 +182,21 @@ final class ChallengeDetailViewModel: ObservableObject {
         }
 
         let now = Date()
+        
+        // ✅ نحسب المدة الأصلية للتحدي (الفرق بين createdAt و endDate القديم)
+        // ونضيف نفس المدة من لحظة START
+        let originalDuration = challenge.endDate.timeIntervalSince(challenge.createdAt)
+        let newEndDate = now.addingTimeInterval(originalDuration)
+        
         try? await db
             .collection("challenges")
             .document(challengeId)
-            .updateData(["startDate": Timestamp(date: now)])
+            .updateData([
+                "startDate": Timestamp(date: now),
+                "endDate": Timestamp(date: newEndDate)
+            ])
         self.challengeStartDate = now
+        self.challengeEndDate = newEndDate
 
         // إشعارات قرب انتهاء الوقت
         let remaining = challengeEndDate.timeIntervalSince(now)

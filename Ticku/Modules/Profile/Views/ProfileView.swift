@@ -35,13 +35,13 @@ struct ProfileView: View {
                             .font(.system(size: 27, weight: .black, design: .rounded))
                             .foregroundColor(isDark ? .white : .black)
 
-//                        Text("×\(vm.profile?.currentStreak ?? 0)")
-//                            .font(.system(size: 15, weight: .semibold))
-//                            .foregroundColor(isDark ? .white : .black)
-//                            .environment(\.locale, Locale(identifier: "en_US"))
+                        Text("×\(vm.profile?.currentStreak ?? 0)")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(isDark ? .white : .black)
+                            .environment(\.locale, Locale(identifier: "en_US"))
 
-//                        Text("")
-//                            .font(.system(size: 15))
+                        Text("🔥")
+                            .font(.system(size: 15))
                     }
 
                     Text(handleText)
@@ -190,7 +190,7 @@ struct ProfileView: View {
                     .frame(maxWidth: .infinity)
             } else {
                 VStack(spacing: 0) {
-                    ForEach(Array(vm.challenges.prefix(3).enumerated()), id: \.element.id) { index, entry in
+                    ForEach(Array(vm.challenges.prefix(5).enumerated()), id: \.element.id) { index, entry in
                         if index > 0 {
                             Divider()
                                 .padding(.horizontal, 16)
@@ -214,28 +214,31 @@ private struct ChallengeHistoryRow: View {
     let entry: ChallengeHistoryEntry
     @Environment(\.colorScheme) private var colorScheme
     private var isDark: Bool { colorScheme == .dark }
+    private var isGaveUp: Bool { entry.challenge.status == "gave_up" }
 
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: "#3A3A3C"))
+                    .fill(isGaveUp ? Color(hex: "#8E8E93") : Color(hex: "#3A3A3C"))
                     .frame(width: 44, height: 44)
-
                 Text(entry.challenge.durationLabel)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(isGaveUp ? .white.opacity(0.6) : .white)
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.challenge.title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(isDark ? .white : .black)
+                    .foregroundColor(isGaveUp
+                        ? (isDark ? .white.opacity(0.4) : Color.black.opacity(0.35))
+                        : (isDark ? .white : .black))
+                    .strikethrough(isGaveUp, color: isDark ? .white.opacity(0.3) : Color.black.opacity(0.3))
 
                 Text(entry.challenge.startDate.monthYear)
                     .font(.system(size: 13))
-                    .foregroundColor(isDark ? .white.opacity(0.5) : Color.black.opacity(0.35))
+                    .foregroundColor(isDark ? .white.opacity(0.3) : Color.black.opacity(0.25))
                     .environment(\.locale, Locale(identifier: "en_US"))
             }
 
@@ -245,6 +248,10 @@ private struct ChallengeHistoryRow: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
+        .background(isGaveUp
+            ? (isDark ? Color.white.opacity(0.02) : Color(hex: "#F0F0F0"))
+            : Color.clear)
+        .opacity(isGaveUp ? 0.75 : 1.0)
     }
 
     @ViewBuilder
@@ -253,6 +260,11 @@ private struct ChallengeHistoryRow: View {
             Text(NSLocalizedString("active", comment: ""))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color.ticku.doneGreen)
+        } else if entry.challenge.status == "gave_up" {
+            Text("Gave Up")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(.red.opacity(0.7))
+                .strikethrough(true, color: .red.opacity(0.7))
         } else if let rank = entry.rank {
             HStack(spacing: 4) {
                 Text(rankEmoji(rank)).font(.system(size: 14))

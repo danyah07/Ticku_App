@@ -13,6 +13,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct AllChallengesView: View {
 
@@ -42,7 +43,18 @@ struct AllChallengesView: View {
                                     challenge: challenge,
                                     isDark: isDark,
                                     onViewRoom: { onViewRoom(challenge) },
-                                    onMyTasks: { onMyTasks(challenge) }
+                                    onMyTasks: { onMyTasks(challenge) },
+                                    onGiveUp: {
+                                        // ✅ يحذف من memberIds ويضيف لـ gaveUpIds عشان يطلع بالبروفايل
+                                        guard let uid = authVM.currentUserId,
+                                              let cid = challenge.id else { return }
+                                        let db = Firestore.firestore()
+                                        db.collection("challenges").document(cid).updateData([
+                                            "memberIds": FieldValue.arrayRemove([uid]),
+                                            "gaveUpIds": FieldValue.arrayUnion([uid])
+                                        ])
+                                        Task { await vm.loadHome(for: uid) }
+                                    }
                                 )
                             }
                         }
@@ -71,15 +83,11 @@ struct AllChallengesView: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(isDark ? .white : .black)
             }
-
             Spacer()
-
             Text(NSLocalizedString("active_challenges", comment: ""))
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(isDark ? .white : Color.black.opacity(0.65))
-
             Spacer()
-
             Color.clear.frame(width: 24)
         }
         .padding(.horizontal, 23)
@@ -98,6 +106,10 @@ private struct ChallengeCard: View {
     let isDark: Bool
     var onViewRoom: () -> Void
     var onMyTasks: () -> Void
+    var onGiveUp: () -> Void = {}
+
+    @State private var showMenu = false
+    @State private var showGiveUpAlert = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -119,10 +131,26 @@ private struct ChallengeCard: View {
 
                 Spacer()
 
-                Image(systemName: "ellipsis")
-                    .rotationEffect(.degrees(90))
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                // ✅ الثلاث نقاط — تفتح قائمة فيها Give Up
+                Button(action: { showMenu = true }) {
+                    Image(systemName: "ellipsis")
+                        .rotationEffect(.degrees(90))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(8)
+                }
+                .confirmationDialog("", isPresented: $showMenu) {
+                    Button(NSLocalizedString("give_up", comment: ""), role: .destructive) {
+                        showGiveUpAlert = true
+                    }
+                    Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
+                }
+                .alert(NSLocalizedString("give_up_question", comment: ""), isPresented: $showGiveUpAlert) {
+                    Button(NSLocalizedString("give_up", comment: ""), role: .destructive) { onGiveUp() }
+                    Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
+                } message: {
+                    Text(NSLocalizedString("give_up_message", comment: ""))
+                }
             }
 
             HStack(spacing: -8) {
@@ -130,14 +158,8 @@ private struct ChallengeCard: View {
                     Circle()
                         .fill(Color(hex: "#F2F2F7"))
                         .frame(width: 32, height: 32)
-                        .overlay(
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color(hex: "#341D71"))
-                        )
-                        .overlay(
-                            Circle().stroke(Color(hex: "#341D71"), lineWidth: 2)
-                        )
+                        .overlay(Image(systemName: "person.fill").font(.system(size: 14, weight: .bold)).foregroundColor(Color(hex: "#341D71")))
+                        .overlay(Circle().stroke(Color(hex: "#341D71"), lineWidth: 2))
                 }
             }
 
@@ -151,11 +173,7 @@ private struct ChallengeCard: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 57)
                 }
-                .liquidGlassButton(
-                    tint: .white,
-                    cornerRadius: 28,
-                    intensity: 0.10
-                )
+                .liquidGlassButton(tint: .white, cornerRadius: 28, intensity: 0.10)
 
                 Button(action: onMyTasks) {
                     Text(NSLocalizedString("my_tasks", comment: ""))
@@ -176,27 +194,14 @@ private struct ChallengeCard: View {
         .frame(height: 190)
         .background(isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"))
         .clipShape(RoundedRectangle(cornerRadius: 26))
-        .overlay(
-            RoundedRectangle(cornerRadius: 26)
-                .stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1)
-        )
-        .liquidGlass(
-            tint: isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"),
-            cornerRadius: 26,
-            intensity: isDark ? 0.18 : 0.35
-        )
-        .shadow(
-            color: .black.opacity(isDark ? 0 : 0.25),
-            radius: 4,
-            x: 0,
-            y: 4
-        )
+        .overlay(RoundedRectangle(cornerRadius: 26).stroke(isDark ? Color(hex: "#8E8AC5").opacity(0.35) : Color.clear, lineWidth: 1))
+        .liquidGlass(tint: isDark ? Color(hex: "#341D71").opacity(0.20) : Color(hex: "#341D71"), cornerRadius: 26, intensity: isDark ? 0.18 : 0.35)
+        .shadow(color: .black.opacity(isDark ? 0 : 0.25), radius: 4, x: 0, y: 4)
     }
 }
 
 #Preview("Light") {
     NavigationStack {
-        AllChallengesView(vm: HomeViewModel())
-            .environmentObject(AuthViewModel())
+        AllChallengesView(vm: HomeViewModel()).environmentObject(AuthViewModel())
     }
 }

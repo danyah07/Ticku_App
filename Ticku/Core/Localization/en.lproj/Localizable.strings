@@ -184,3 +184,40 @@
 
 
 "enter_time_tip" = "Choose how long this challenge lasts.";
+
+
+"privacy_policy" = "Privacy Policy";
+"privacy_last_updated" = "Last updated: July 2026";
+"close" = "Close";
+
+"privacy_intro_title" = "Introduction";
+"privacy_intro_text" = "Welcome to Ticku.\n\nWe value your privacy and are committed to protecting your personal information. This Privacy Policy explains what information the app collects, how it is used, and the measures we take to protect your information while using Ticku.\n\nBy using the app, you agree to this Privacy Policy.";
+
+"privacy_collect_title" = "1. Information We Collect";
+"privacy_collect_text" = "To provide the app's services properly, we may collect the following information:\n\n• Your display name.\n• Your email address when signing in with Apple.\n• Your profile picture if you choose to add one.\n• The unique user identifier associated with your account.\n• Challenges that you create or join.\n• Tasks that you add or complete.\n• Challenge statistics, such as your progress and number of wins.\n\nThe app does not collect information such as government identification numbers, banking information, health information, contacts, location data, or audio recordings.";
+
+"privacy_use_title" = "2. How We Use Your Information";
+"privacy_use_text" = "The information we collect is used only to operate the app and improve your experience. This includes:\n\n• Creating and managing your account.\n• Saving and synchronizing your data across your devices.\n• Displaying your name to participants in the same challenge.\n• Calculating your progress, wins, and related statistics.\n• Sending notifications related to challenges.\n• Improving the app's performance, stability, and security.\n\nWe do not sell your personal information, and we do not use it for advertising or marketing purposes.";
+
+"privacy_share_title" = "3. Information Sharing";
+"privacy_share_text" = "Some information may be visible to users participating in the same challenge, including:\n\n• Your display name.\n• Your progress within the challenge.\n• Statistics related to the challenge.\n\nYour profile picture and private account information are not shared with challenge participants. We do not share your information with third parties for commercial or marketing purposes.";
+
+"privacy_security_title" = "4. Data Protection and Storage";
+"privacy_security_text" = "User information is stored using trusted cloud services, with appropriate safeguards to help protect the security and privacy of the data.\n\nThe security measures we use include:\n\n• Secure authentication.\n• Protecting communication between the app and cloud services.\n• Restricting access to user information.\n• Using trusted services and infrastructure to store data.\n• Applying appropriate measures to reduce unauthorized access, loss, alteration, or misuse.\n\nWe continuously work to improve our security measures and protect the confidentiality of user information.";
+
+"privacy_delete_title" = "5. Account and Data Deletion";
+"privacy_delete_text" = "You may stop using the app at any time.\n\nWhen you use the account deletion feature, the personal information associated with your account is deleted according to the data deletion process available within the app.";
+
+"privacy_rights_title" = "6. Your Rights";
+"privacy_rights_text" = "You can manage your account information within the app, including:\n\n• Viewing your personal information.\n• Editing your account information.\n• Changing your name or profile information.\n• Deleting your account and associated data using the available deletion feature.";
+
+"privacy_changes_title" = "7. Changes to This Privacy Policy";
+"privacy_changes_text" = "We may update this Privacy Policy from time to time as the app develops or new features are added.\n\nThe updated version will be made available within the app whenever an important change is made.";
+
+"privacy_contact_title" = "8. Contact Us";
+"privacy_contact_text" = "If you have any questions or comments about this Privacy Policy or how your information is handled, you may contact the Ticku team via email at ticku.contact@gmail.com ";
+
+"delete_account" = "Delete Account";
+"delete" = "Delete";
+"delete_account_message" = "Are you sure you want to delete your account? Your account data will be deleted, and this action cannot be undone.";
+"cancel" = "Cancel";

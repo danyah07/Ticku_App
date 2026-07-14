@@ -24,7 +24,10 @@ import UIKit
 struct SignInView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.colorScheme) private var colorScheme
-    private var isDark: Bool { colorScheme == .dark }
+
+    private var isDark: Bool {
+        colorScheme == .dark
+    }
 
     var onBack: () -> Void = {}
 
@@ -36,7 +39,6 @@ struct SignInView: View {
             backgroundView
 
             VStack(spacing: 0) {
-
                 HStack {
                     Button(action: onBack) {
                         Image(systemName: "chevron.backward")
@@ -58,7 +60,11 @@ struct SignInView: View {
 
                     Text(NSLocalizedString("ready_for_today_challenge", comment: ""))
                         .font(.system(size: 21, weight: .bold))
-                        .foregroundColor(isDark ? .white.opacity(0.56) : Color(hex: "#3A3A3A"))
+                        .foregroundColor(
+                            isDark
+                            ? .white.opacity(0.56)
+                            : Color(hex: "#3A3A3A")
+                        )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 36)
@@ -76,12 +82,18 @@ struct SignInView: View {
                                 .font(.system(size: 18, weight: .bold))
                         }
                         .foregroundColor(isDark ? .white : .black)
-                        .frame(width: 330, height: 55)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 55)
                         .background(isDark ? Color.black : Color.white)
                         .clipShape(Capsule())
                         .overlay(
                             Capsule()
-                                .stroke(isDark ? Color(hex: "#2A2525") : Color(hex: "#D3D1D1"), lineWidth: 1)
+                                .stroke(
+                                    isDark
+                                    ? Color(hex: "#2A2525")
+                                    : Color(hex: "#D3D1D1"),
+                                    lineWidth: 1
+                                )
                         )
                         .shadow(
                             color: Color.black.opacity(isDark ? 0.25 : 0.20),
@@ -91,19 +103,29 @@ struct SignInView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .padding(.horizontal, 32)
 
                     VStack(spacing: 8) {
                         Text(NSLocalizedString("terms_privacy_note", comment: ""))
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(isDark ? .white.opacity(0.60) : Color.black.opacity(0.60))
+                            .foregroundColor(
+                                isDark
+                                ? .white.opacity(0.60)
+                                : Color.black.opacity(0.60)
+                            )
                             .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
 
                         Button {
                             showPrivacySheet = true
                         } label: {
-                            Text("سياسة الخصوصية")
+                            Text(NSLocalizedString("privacy_policy", comment: ""))
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(isDark ? Color(hex: "#D8CCFF") : Color(hex: "#341D71"))
+                                .foregroundColor(
+                                    isDark
+                                    ? Color(hex: "#D8CCFF")
+                                    : Color(hex: "#341D71")
+                                )
                                 .underline()
                         }
                     }
@@ -183,7 +205,9 @@ struct SignInView: View {
         request.requestedScopes = [.fullName, .email]
         request.nonce = hashedNonce
 
-        let controller = ASAuthorizationController(authorizationRequests: [request])
+        let controller = ASAuthorizationController(
+            authorizationRequests: [request]
+        )
 
         let delegate = AppleSignInCoordinator { result in
             Task {
@@ -198,104 +222,214 @@ struct SignInView: View {
     }
 }
 
-private struct PrivacyPolicySheet: View {
+// MARK: - Privacy Policy
+
+struct PrivacyPolicySheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    private var isDark: Bool { colorScheme == .dark }
 
-    private let cardColor = Color(hex: "#9A86D0")
+    @AppStorage("app_language") private var appLanguage = "en"
+
+    private var isDark: Bool {
+        colorScheme == .dark
+    }
+
+    private var isArabic: Bool {
+        appLanguage.lowercased() == "ar"
+    }
+
+    private var currentLayoutDirection: LayoutDirection {
+        isArabic ? .rightToLeft : .leftToRight
+    }
+
+    private var sheetBackground: Color {
+        isDark ? Color.black : Color.white
+    }
+
+    private var mainTitleColor: Color {
+        isDark ? .white : .black
+    }
+
+    private var dateColor: Color {
+        isDark
+        ? Color.white.opacity(0.55)
+        : Color.black.opacity(0.45)
+    }
+
+    private var sectionTitleColor: Color {
+        isDark
+        ? Color(hex: "#C8B8FF")
+        : Color(hex: "#341D71")
+    }
+
+    private var bodyTextColor: Color {
+        isDark
+        ? Color.white.opacity(0.82)
+        : Color.black.opacity(0.78)
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("سياسة الخصوصية")
-                        .font(.system(size: 28, weight: .black))
-                        .foregroundColor(isDark ? .white : .black)
-                        .padding(.bottom, 4)
+                VStack(alignment: .leading, spacing: 26) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(NSLocalizedString("privacy_policy", comment: ""))
+                            .font(.system(size: 28, weight: .black))
+                            .foregroundColor(mainTitleColor)
+                            .multilineTextAlignment(.leading)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading
+                            )
 
-                    Text("آخر تحديث: يوليو 2026")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(isDark ? .white.opacity(0.55) : .black.opacity(0.45))
-                        .padding(.bottom, 10)
+                        Text(NSLocalizedString("privacy_last_updated", comment: ""))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(dateColor)
+                            .multilineTextAlignment(.leading)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading
+                            )
+                    }
 
-                    privacyCard(title: "مقدمة", text: """
-مرحبًا بك في Ticku.
+                    privacySection(
+                        titleKey: "privacy_intro_title",
+                        textKey: "privacy_intro_text"
+                    )
 
-نحن نُقدّر خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة المعلومات التي يجمعها التطبيق، وكيفية استخدامها، والوسائل التي نتبعها لحمايتها عند استخدامك للتطبيق.
-""")
+                    privacySection(
+                        titleKey: "privacy_collect_title",
+                        textKey: "privacy_collect_text"
+                    )
 
-                    privacyCard(title: "المعلومات التي نجمعها", text: """
-قد نقوم بجمع الاسم المعروض، البريد الإلكتروني عند تسجيل الدخول، الصورة الشخصية إذا قمت بإضافتها، معرف المستخدم، التحديات التي تنشئها أو تنضم إليها، المهام، ونسبة الإنجاز وعدد مرات الفوز.
-""")
+                    privacySection(
+                        titleKey: "privacy_use_title",
+                        textKey: "privacy_use_text"
+                    )
 
-                    privacyCard(title: "معلومات لا نجمعها", text: """
-لا يجمع Ticku الهوية الوطنية، المعلومات البنكية، البيانات الصحية، جهات الاتصال، الموقع الجغرافي، تسجيلات الصوت، أو الصور الموجودة في جهازك دون اختيارك.
-""")
+                    privacySection(
+                        titleKey: "privacy_share_title",
+                        textKey: "privacy_share_text"
+                    )
 
-                    privacyCard(title: "كيفية استخدام البيانات", text: """
-نستخدم البيانات لإنشاء الحساب، حفظ التحديات والمهام، مزامنة البيانات، عرض التقدم، حساب الإحصائيات، إرسال إشعارات مرتبطة بالتحديات، وتحسين أداء التطبيق وأمانه.
-""")
+                    privacySection(
+                        titleKey: "privacy_security_title",
+                        textKey: "privacy_security_text"
+                    )
 
-                    privacyCard(title: "مشاركة البيانات", text: """
-قد تظهر بعض بياناتك للمستخدمين المشاركين معك في نفس التحدي، مثل الاسم، الصورة الشخصية، التقدم، والمهام المكتملة حسب آلية التحدي. لا نبيع بياناتك ولا نشاركها لأغراض إعلانية.
-""")
+                    privacySection(
+                        titleKey: "privacy_delete_title",
+                        textKey: "privacy_delete_text"
+                    )
 
-                    privacyCard(title: "تخزين البيانات وأمانها", text: """
-يتم تخزين البيانات باستخدام خدمات سحابية موثوقة مثل Firebase، مع استخدام وسائل حماية مناسبة للحد من الوصول غير المصرح به أو الفقد أو التعديل.
-""")
+                    privacySection(
+                        titleKey: "privacy_rights_title",
+                        textKey: "privacy_rights_text"
+                    )
 
-                    privacyCard(title: "حذف الحساب والبيانات", text: """
-يمكنك التوقف عن استخدام التطبيق في أي وقت. وعند توفر حذف الحساب، سيتم حذف البيانات المرتبطة بحسابك وفقًا لسياسة الاحتفاظ بالبيانات، ما لم يكن الاحتفاظ ببعض المعلومات مطلوبًا نظاميًا أو أمنيًا.
-""")
+                    privacySection(
+                        titleKey: "privacy_changes_title",
+                        textKey: "privacy_changes_text"
+                    )
 
-                    privacyCard(title: "الالتزام بالأنظمة", text: """
-يلتزم Ticku باحترام الأنظمة واللوائح المتعلقة بحماية البيانات والخصوصية. ولا يتم الكشف عن أي معلومات إلا إذا كان ذلك مطلوبًا بموجب أمر قضائي أو طلب رسمي من جهة مختصة، وبالحد الأدنى اللازم فقط.
-""")
-
-                    privacyCard(title: "التواصل معنا", text: """
-إذا كانت لديك أي استفسارات حول سياسة الخصوصية أو بياناتك، يمكنك التواصل مع فريق Ticku من خلال وسائل التواصل المتوفرة داخل التطبيق أو صفحة التطبيق في App Store.
-""")
+                    privacySection(
+                        titleKey: "privacy_contact_title",
+                        textKey: "privacy_contact_text"
+                    )
                 }
-                .padding(22)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                .padding(.bottom, 50)
             }
-            .background(isDark ? Color.black.ignoresSafeArea() : Color.white.ignoresSafeArea())
+            .background(sheetBackground.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("تم") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Color(hex: "#9A86D0"))
+                            .frame(width: 36, height: 36)
+                            .background(
+                                Circle()
+                                    .fill(
+                                        isDark
+                                        ? Color.white.opacity(0.10)
+                                        : Color.black.opacity(0.06)
+                                    )
+                            )
                     }
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color(hex: "#9A86D0"))
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        NSLocalizedString("close", comment: "")
+                    )
                 }
             }
+            .toolbarBackground(
+                sheetBackground,
+                for: .navigationBar
+            )
+            .toolbarBackground(
+                .visible,
+                for: .navigationBar
+            )
         }
+        .environment(
+            \.layoutDirection,
+            currentLayoutDirection
+        )
     }
 
-    private func privacyCard(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 18, weight: .black))
-                .foregroundColor(.white)
+    private func privacySection(
+        titleKey: String,
+        textKey: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(NSLocalizedString(titleKey, comment: ""))
+                .font(.system(size: 19, weight: .black))
+                .foregroundColor(sectionTitleColor)
+                .multilineTextAlignment(.leading)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
 
-            Text(text)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white.opacity(0.88))
-                .lineSpacing(5)
+            Text(NSLocalizedString(textKey, comment: ""))
+                .font(.system(size: 15, weight: .regular))
+                .foregroundColor(bodyTextColor)
+                .multilineTextAlignment(.leading)
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(cardColor)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+        )
     }
 }
 
-private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+// MARK: - Apple Sign In Coordinator
+
+private final class AppleSignInCoordinator:
+    NSObject,
+    ASAuthorizationControllerDelegate,
+    ASAuthorizationControllerPresentationContextProviding {
 
     private let onComplete: (Result<ASAuthorization, Error>) -> Void
 
-    init(onComplete: @escaping (Result<ASAuthorization, Error>) -> Void) {
+    init(
+        onComplete: @escaping (Result<ASAuthorization, Error>) -> Void
+    ) {
         self.onComplete = onComplete
     }
 
@@ -313,10 +447,14 @@ private final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerD
         onComplete(.failure(error))
     }
 
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    func presentationAnchor(
+        for controller: ASAuthorizationController
+    ) -> ASPresentationAnchor {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first ?? ASPresentationAnchor()
+            .first?
+            .windows
+            .first ?? ASPresentationAnchor()
     }
 }
 
